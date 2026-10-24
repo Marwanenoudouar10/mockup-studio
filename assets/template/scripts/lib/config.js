@@ -67,9 +67,19 @@ function normStore(s) {
   return st;
 }
 
+// true | false | { src, opacity } -> false | { src, opacity }. Any other object is a variant map
+// ({ playstore: false, default: true }: per store or platform), each value normalized the same way.
+export function normWatermark(wm, b = {}) {
+  if (wm === false || wm === null) return false;
+  if (isPlain(wm) && Object.keys(wm).length && !('src' in wm) && !('opacity' in wm)) {
+    return Object.fromEntries(Object.entries(wm).map(([k, v]) => [k, normWatermark(v, b)]));
+  }
+  const o = isPlain(wm) ? wm : {};
+  return { src: o.src || b.mark || b.logo, opacity: o.opacity || null };
+}
+
 function normBrand(b = {}) {
   const fonts = b.fonts || {};
-  const wm = b.watermark === undefined ? true : b.watermark;
   return {
     name: b.name || 'App',
     domain: b.domain || null, // the brand's own site: browser tabs on it show the brand icon as favicon
@@ -81,7 +91,7 @@ function normBrand(b = {}) {
       extra: (fonts.extra || []).map((f) => fontSpec(f, [400, 600, 700])),
     },
     mark: b.mark || null,
-    watermark: wm === false ? false : { src: (wm && wm.src) || b.mark || b.logo, opacity: (wm && wm.opacity) || null },
+    watermark: normWatermark(b.watermark === undefined ? true : b.watermark, b),
     field: b.field || 'gradient',
     grain: b.grain !== false,
     ornament: b.ornament || 'brush',
@@ -118,6 +128,8 @@ export function normalize(raw = {}) {
     // background: what the App Store icon is flattened onto (an icon with transparent parts)
     icon: { src: 'brand/icon.svg', background: brand.colors.primary, ...(raw.icon || {}) },
     sheet: { height: 1100, wideWidth: 1040, width: 3840, quality: 94, gap: 44, padding: 96, background: '#E9E8EC', title: true, ...(raw.sheet || {}) },
+    // mock screens: theme = the default theme of `npm run screens` ('dark' for an all-dark app)
+    screens: { theme: null, ...(raw.screens || {}) },
   };
 }
 
@@ -203,9 +215,20 @@ export function featureTarget(cfg, locale) {
   const keys = keySet(cfg);
   const stage = resolveStage(f.stage || [], ctx, keys, cfg.overrides, 1, FEATURE);
   const r = texts(resolve({ ...f, stage: undefined }, ctx, keys), ctx);
+  const brand = resolve(cfg.brand, ctx, keys);
+  // feature.watermark (true / false / { src, opacity }) overrides brand.watermark for the graphic only
+  if (f.watermark !== undefined) brand.watermark = normWatermark(f.watermark, cfg.brand);
   return {
     ctx, locale: loc, dir: isRtl(loc) ? 'rtl' : 'ltr', platform,
     device: f.device || PLATFORMS[platform].device,
-    brand: resolve(cfg.brand, ctx, keys), feature: { ...r, stage },
+    brand, feature: { ...r, stage },
   };
+}
+
+// The brand as one store sees it (variants such as field: { appstore: 'x', default: 'y' } resolved): for pages
+// that draw a store image outside a render, such as the brand board's thumbnail.
+export function brandFor(cfg, { store, platform = 'ios', locale } = {}) {
+  const st = store || (cfg.stores.find((s) => s.space === 'portrait') || cfg.stores[0]).id;
+  const ctx = { store: st, platform, space: 'portrait', locale: locale || cfg.defaultLocale, defaultLocale: cfg.defaultLocale };
+  return resolve(cfg.brand, ctx, keySet(cfg));
 }

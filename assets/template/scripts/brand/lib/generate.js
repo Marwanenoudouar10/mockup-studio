@@ -5,6 +5,9 @@
 //   night     a near-black field lit by the seed (premium; suits dark screens)
 //   paper     warm paper with soft colour light, the seed darkened into an ink accent (editorial)
 // The mood sets chroma, paper warmth and the hue harmony that gives each option its accent.
+// look 'dark' swaps the three directions for three DARK ones (night, graphite, deep) for a dark-first brief;
+// accent '#hex' pins the accent (a client's real accent, or a chosen electric lime) instead of deriving it.
+// Every option also carries dark app surfaces (ui.bgDark, surfaceDark, raisedDark) for dark mock screens.
 // Pure ESM (no Node imports).
 import { toOklch, oklch, contrast, mix, level, rot, turn, normHex } from './color.js';
 
@@ -22,6 +25,9 @@ export const MOODS = {
     accents: [acc('triad', { rot: 120 }), acc('triad', { rot: -120 }), acc('analogous', { rot: 60 })] },
   serious: { chroma: 0.6, accentL: 0.8, accentC: 0.09, paperC: 0.006, lift: -0.06,
     accents: [acc('gold', { hue: 85 }), acc('complement', { rot: 180, c: 0.06 }), acc('tonal', { rot: 25 })] },
+  // a vivid, light accent that glows on a dark field (fintech, pro tools, music)
+  electric: { chroma: 1.1, accentL: 0.9, accentC: 0.21, paperC: 0.008,
+    accents: [acc('lime', { hue: 128 }), acc('mint', { hue: 165 }), acc('complement', { rot: 180 })] },
 };
 
 const STEPS = { 50: 0.975, 100: 0.945, 200: 0.89, 300: 0.81, 400: 0.72, 500: 0.63, 600: 0.54, 700: 0.45, 800: 0.36, 900: 0.27 };
@@ -66,6 +72,19 @@ const DIRECTIONS = [
   },
 ];
 
+const nightPrimary = (s, m, h = s.h) => oklch(Math.min(h > 75 && h < 120 ? 0.84 : 0.66, Math.max(0.52, s.l + (m.lift || 0))), s.c * m.chroma * 1.05, h);
+
+// look 'dark': three dark directions, each lit by the seed, with the second glow kept near the seed's hue
+// (a +28 degree secondary turns every blue seed violet)
+const DARK = [
+  { key: 'night', label: 'Night', field: 'dark', why: 'A near-black field lit by your colour. Premium, and made for dark-mode screens.',
+    build: (s, m) => ({ primary: nightPrimary(s, m), secondary: oklch(0.46, s.c * m.chroma, rot(s.h, 12)), deep: oklch(0.2, s.c * 0.45, deepen(s.h, 10)) }) },
+  { key: 'graphite', label: 'Graphite', field: 'dark', why: 'Neutral graphite, your colour only as light. The quietest dark option.',
+    build: (s, m) => ({ primary: nightPrimary(s, m), secondary: oklch(0.4, s.c * 0.55 * m.chroma, s.h), deep: oklch(0.19, 0.012, s.h) }) },
+  { key: 'deep', label: 'Deep', field: 'dark', why: 'A deeper, cooler night that leans to the next hue. Rich, still calm.',
+    build: (s, m) => ({ primary: nightPrimary(s, m, rot(s.h, -14)), secondary: oklch(0.42, s.c * m.chroma, rot(s.h, -8)), deep: oklch(0.18, s.c * 0.5, rot(s.h, -24)) }) },
+];
+
 // What sits behind the headline for each field preset (engine/styles/field.css), approximately.
 function fieldTone(c, field) {
   const night = mix(c.deep, '#07070B', 0.55);
@@ -87,6 +106,10 @@ export function checks(c, ui, field) {
     ['Body text on paper', c.ink, c.paper, 4.5],
     ['Badge text on accent', c.ink, c.accent, 4.5],
   ];
+  // a dark field usually means a dark app: check the accent and the text where the app shows them
+  if (field === 'dark' && ui.surfaceDark) {
+    rows.push(['Accent on dark app surface', c.accent, ui.surfaceDark, 4.5], ['Text on dark app surface', '#FFFFFF', ui.surfaceDark, 4.5]);
+  }
   return rows.map(([label, fg, bg, need]) => {
     const ratio = Math.round(contrast(fg, bg) * 100) / 100;
     return { label, fg, bg, need, ratio, level: level(ratio), pass: ratio >= need };
@@ -114,22 +137,28 @@ function fitAccent(colors, field, m, a, s) {
 
 function uiOf(colors, ramp, m, paperH) {
   const tint = [colors.primary, ramp[500], ramp[600], ramp[700], ramp[800]].find((x) => contrast('#FFFFFF', x) >= 4.5) || ramp[800];
-  return { tint, tint2: ramp[300], onTint: '#FFFFFF', bg: oklch(0.962, m.paperC, paperH) };
+  const d = toOklch(colors.deep);
+  const dc = Math.min(0.05, d.c * 0.7);
+  return { tint, tint2: ramp[300], onTint: '#FFFFFF', bg: oklch(0.962, m.paperC, paperH),
+    bgDark: oklch(0.15, dc, d.h), surfaceDark: oklch(0.21, dc, d.h), raisedDark: oklch(0.27, dc, d.h) };
 }
 
-export function generate(seedHex, { mood = 'balanced', count = 3 } = {}) {
+export function generate(seedHex, { mood = 'balanced', count = 3, look = null, accent = null } = {}) {
   const m = MOODS[mood];
   if (!m) throw new Error(`unknown mood "${mood}" (use ${Object.keys(MOODS).join(', ')})`);
+  if (look && look !== 'dark') throw new Error(`unknown look "${look}" (use dark, or leave it out for drenched, night, paper)`);
+  const dirs = look === 'dark' ? DARK : DIRECTIONS;
+  const pinned = accent ? normHex(accent) : null;
   const seed = normHex(seedHex);
   const s = toOklch(seed);
   const paperH = m.paperH ?? s.h;
   const paper = oklch(0.975, m.paperC, paperH);
   const ink = oklch(0.2, Math.min(0.04, s.c * 0.25), s.h);
-  return DIRECTIONS.slice(0, Math.max(1, Math.min(3, count))).map((d, i) => {
-    const a = m.accents[i];
+  return dirs.slice(0, Math.max(1, Math.min(3, count))).map((d, i) => {
+    const a = pinned ? acc('your accent', {}) : m.accents[i];
     const colors = { ...d.build(s, m, seed, paper), accent: null, ink, paper };
     colors.onField = d.field === 'gradient' && contrast('#FFFFFF', colors.primary) < 3 ? ink : '#FFFFFF';
-    colors.accent = fitAccent(colors, d.field, m, a, s);
+    colors.accent = pinned || fitAccent(colors, d.field, m, a, s);
     const p = toOklch(colors.primary);
     const ramp = scale(p.c, p.h);
     const ui = uiOf(colors, ramp, m, paperH);

@@ -14,6 +14,7 @@ import { addWatermarks } from './watermark.js';
 import { buildElements } from '../elements/index.js';
 import { applyOrnament } from '../ornaments/index.js';
 import { plain } from '../core/boot.js';
+import { normWatermark } from '../../scripts/lib/config.js';
 
 export const WIDE_H = 1200;
 
@@ -31,7 +32,7 @@ export async function composeWide(t, p, { icon } = {}) {
   const cv = makeCanvas({ W, H, designW: DW, field: p.field || t.brand.field, grain: t.brand.grain });
   cv.el.classList.add('wide');
   await loadFonts(t.brand, `${plain(p.headline)} ${p.sub || ''}`);
-  await addWatermarks(cv, t.brand, { wide: true });
+  await addWatermarks(cv, t.brand, { wide: true, perSlice: [p.watermark === undefined ? undefined : normWatermark(p.watermark, t.brand)] });
 
   const mode = p.mode || (L.mode !== 'auto' ? L.mode : W / H >= L.sideRatio ? 'side' : 'stack');
   const ornament = p.ornament || t.brand.ornament;

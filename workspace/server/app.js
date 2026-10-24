@@ -2,7 +2,7 @@
 //   GET  /                      the workspace UI (ui/index.html), /ui/... its files
 //   GET  /p/<slug>/...          a registered project's root (its own engine pages, raw/, brand/, node_modules fonts);
 //                               /p/<slug>/raw/index.json lists raw/ so the engine finds screens without 404 probes
-//   GET  /api/projects          [{ slug, folder }]
+//   GET  /api/projects          [{ slug, folder }] (searches remembered folders of projects again first)
 //   GET  /api/project/<slug>    { screens, layout, notes, board } (what the browser cannot list itself)
 //   GET  /api/events            Server-Sent Events: { slug, kinds, files } when a project's files change
 //   POST /api/layout            { slug, entries, adds }  -> layout.json (see server/store.js)
@@ -64,6 +64,11 @@ export function createApp(registry, { log = console.log } = {}) {
 
   async function api(req, res, url) {
     if (req.method === 'GET' && url.pathname === '/api/projects') {
+      // projects created in a remembered folder since the start (or the last page load)
+      if (registry.rescan && registry.rescan().length) {
+        registry.save();
+        watchAll();
+      }
       return sendJson(res, 200, registry.live().map((p) => ({ slug: p.slug, folder: path.basename(p.root) })));
     }
     const m = /^\/api\/project\/([\w-]+)$/.exec(url.pathname);

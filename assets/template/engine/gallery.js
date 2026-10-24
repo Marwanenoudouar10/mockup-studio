@@ -1,7 +1,8 @@
 // Gallery: every image of one store in a row (portrait) or a grid of up to 3 per row (landscape).
 // Final mode (npm run sheet) prefers the hi-res portfolio files (final/portfolio/<locale>/<store>/) when they
-// exist, and reports window.__dpr: the pixel ratio that makes the sheet sheet.width (3840) wide without ever
-// drawing an image larger than its own pixels.
+// exist and are not older than the upload images (sheet.js passes hires=0 otherwise), and reports window.__dpr:
+// the pixel ratio that makes the sheet sheet.width (3840) wide without ever drawing an image larger than its
+// own pixels (below 1 when the row is wider than sheet.width at sheet.height: sheet.width is a real maximum).
 import { STORES } from '../scripts/lib/stores.js';
 import { pad2, panelsFor } from '../scripts/lib/config.js';
 import { q, loadConfig, ready, fail, el, esc, setPageSize } from './core/boot.js';
@@ -96,7 +97,8 @@ async function main() {
     const n = Array.from({ length: 10 }, (_, i) => pad2(i + 1));
     const hires = n.map((x) => at(`${out}/portfolio/${locale}/${st.id}/${x}.png`));
     const upload = n.map((x) => at(`${out}/${locale}/${st.id}/${x}.png`));
-    const [okH, okU] = await Promise.all([Promise.all(hires.map(head)), Promise.all(upload.map(head))]);
+    const useHires = q.get('hires') !== '0';
+    const [okH, okU] = await Promise.all([Promise.all(hires.map((u) => (useHires ? head(u) : false))), Promise.all(upload.map(head))]);
     const found = n.map((_, i) => (okH[i] ? hires[i] : okU[i] ? upload[i] : null)).filter(Boolean);
     if (!found.length) row.appendChild(el('div', 'empty', `No images in ${esc(out)}/${esc(locale)}/${esc(st.id)}/ yet: run npm run render.`));
     for (const url of found) {
@@ -117,7 +119,7 @@ async function main() {
   window.__size = size;
   // sharpest pixel ratio that never upscales a source image, capped at sheet.width
   const limits = [...document.querySelectorAll('.shot img')].map((i) => i.naturalWidth / i.getBoundingClientRect().width);
-  window.__dpr = Math.max(1, Math.min(S.width / size.w, ...limits.filter((x) => x > 0)));
+  window.__dpr = Math.max(0.25, Math.min(S.width / size.w, ...limits.filter((x) => x > 0)));
   // the scale of the files shown (1 = upload size, 2 = portfolio --scale 2): sheet.js works out the export it needs
   const first = document.querySelector('.shot img');
   window.__srcScale = first && first.naturalWidth ? first.naturalWidth / W : 1;

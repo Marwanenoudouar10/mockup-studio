@@ -4,6 +4,9 @@
      2. semantic     --bg --surface --surface-2 --fill --text --text-2 --text-3 --line --tint-soft ...
                      (ios.css and android.css map them to each platform's system palette, light and dark)
      3. derived      color-mix() from --tint, so one brand colour themes both platforms
+   Dark-theme hooks (unset = Apple / M3 defaults): --app-bg-dark --app-surface-dark --app-raised-dark
+   --app-glass-dark --app-segment-dark (iOS), --app-bg-android-dark --app-surface-android-dark (Android),
+   --switch-on (both; default iOS green, Android tint). references/mock-screens.md has a branded-dark recipe.
    kit.js puts the platform and theme on <html>: class="ios|android [dark]". */
 :root {
   --tint: #007AFF;

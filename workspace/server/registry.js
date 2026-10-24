@@ -1,7 +1,9 @@
 // The projects Store Studio shows, remembered in a per-user workspace.json (server/index.js: defaultState):
 // it holds local paths, so it never lives in the skill folder.
 // A project is a folder with a studio.config.js. A path given on the command line is either a project or a
-// folder of projects (searched two levels deep, so a repo with assets/template/ is found too).
+// folder of projects (searched two levels deep, so a repo with assets/template/ is found too). A folder of
+// projects is remembered too and searched again whenever the page loads its project list, so a project
+// created in it after Studio started shows up on the next page reload (no restart).
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -32,9 +34,11 @@ export class Registry {
   constructor(file) {
     this.file = file;
     this.projects = []; // [{ slug, root }]
+    this.folders = []; // folders of projects, searched again by rescan()
     try {
       const data = JSON.parse(fs.readFileSync(file, 'utf8'));
       for (const p of data.projects || []) if (p && p.root) this.projects.push({ slug: p.slug, root: p.root });
+      for (const f of data.folders || []) if (typeof f === 'string') this.folders.push(f);
     } catch {
       // first run: no workspace.json yet
     }
@@ -60,6 +64,18 @@ export class Registry {
     return added;
   }
 
+  // remember a folder of projects (not a project itself) so new projects in it are found later
+  addFolder(dir) {
+    const abs = path.resolve(dir);
+    if (isProject(abs) || this.folders.includes(abs)) return;
+    if (fs.existsSync(abs) && fs.statSync(abs).isDirectory()) this.folders.push(abs);
+  }
+
+  // search the remembered folders again -> the projects added
+  rescan() {
+    return this.add(this.folders.flatMap((f) => discover(f)));
+  }
+
   forget(slug) {
     const before = this.projects.length;
     this.projects = this.projects.filter((p) => p.slug !== slug);
@@ -77,6 +93,6 @@ export class Registry {
 
   save() {
     fs.mkdirSync(path.dirname(this.file), { recursive: true });
-    fs.writeFileSync(this.file, `${JSON.stringify({ projects: this.projects }, null, 2)}\n`);
+    fs.writeFileSync(this.file, `${JSON.stringify({ projects: this.projects, folders: this.folders }, null, 2)}\n`);
   }
 }

@@ -1,6 +1,9 @@
 // The giant faint logo behind everything. One per image; in a panorama the placement
 // alternates (bottom-left, then upper-right) so the strip does not stamp the same mark.
 // A wide wordmark is drawn ~2300 units wide; a square-ish symbol ~1250, whole, in a corner.
+// brand.watermark may vary per store ({ playstore: false, default: true }); a panel's own `watermark`
+// (false, true or { src, opacity }) wins for its image (perSlice), and feature.watermark for the feature graphic.
+// On a dark field with strong glows the cropped giant mark can read as dirt: read the images (design.md).
 import { graphic } from '../core/assets.js';
 
 function aspect(node) {
@@ -11,10 +14,10 @@ function aspect(node) {
   return img && img.naturalWidth ? img.naturalHeight / img.naturalWidth : 0.3;
 }
 
-export async function addWatermarks(cv, brand, { feature = false, wide = false } = {}) {
-  const wm = brand.watermark;
-  if (!wm || !wm.src) return;
+export async function addWatermarks(cv, brand, { feature = false, wide = false, perSlice = [] } = {}) {
   for (let i = 0; i < cv.slices; i++) {
+    const wm = perSlice[i] === undefined ? brand.watermark : perSlice[i];
+    if (!wm || !wm.src) continue;
     const node = await graphic(wm.src, 'watermark');
     if (wm.opacity != null) node.style.opacity = String(wm.opacity);
     const square = aspect(node) > 0.5;

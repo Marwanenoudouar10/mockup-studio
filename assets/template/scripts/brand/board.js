@@ -1,4 +1,5 @@
 // npm run brand -- board [--screen today --box tasks | --crop x,y,w,h] [--phone home] [--platform ios]
+//                        [--label "Brand board"] [--specimen field|paper] [--theme dark] [--sample screens/_sample.html]
 // The brand board for approval, BEFORE any mock screen or store image: the logo on paper and on the field,
 // the app icon, the palette with its contrast, the type pair, a UI card and a store-image thumbnail,
 // all from brand/tokens.json + brand/logo.svg, mark.svg, icon.svg (the files the engine will use).
@@ -8,6 +9,14 @@
 //              <name>.boxes.json, default: the first box) or --crop x,y,w,h in capture pixels (no boxes yet)
 //   --phone    the capture in the thumbnail's phone (default: another capture of that platform; with none,
 //              the phone shows --screen and nothing is lifted)
+//   --label    the eyebrow (default "Brand board · for approval"; "Brand board" once approved, for a portfolio)
+//   --specimen field: the type tile on the brand field with the accent word in the accent (default for a dark
+//              field, where the store images set it that way); paper: on paper with the word in the primary
+//   --theme    the sample screen's theme (default: the config's screens.theme); --sample: another sample page
+//              (copy screens/kit/sample.html to screens/_sample.html and give it the app's own content; keep
+//              its data-box="card" and the ?hide script), so a finance brand is not judged on habit-app copy
+//   Mode B once real mock screens exist: --screen home --box <card> shows the real app on the board, so the
+//              board and the delivered set never show two different apps.
 // Before `apply --logo` the boards set the name as text (scripts/brand/lib/brief.js logoReady).
 // -> final/brand/brand-board.png, plus the brand kit PNGs on transparent: logo.png (ink),
 //    logo-white.png and mark.png (for the client's other uses: web, socials, documents)
@@ -66,11 +75,16 @@ export async function run(flags, { cfg, raw, tokens, rel }) {
     let shot = val(flags.screen) ? realScreen(flags) : null;
     if (!shot) {
       const t = tokens ? raw.brand.tokens : null;
-      await shootSample(session, `${dir}/sample.png`, { tokens: t });
-      await shootSample(session, `${dir}/sample-phone.png`, { tokens: t, hide: 'card' });
+      const theme = val(flags.theme) || (cfg.screens && cfg.screens.theme) || null;
+      const page = val(flags.sample) || undefined;
+      if (page && !fs.existsSync(path.join(ROOT, page))) throw new Error(`--sample ${page}: no such page`);
+      await shootSample(session, `${dir}/sample.png`, { tokens: t, theme, page });
+      await shootSample(session, `${dir}/sample-phone.png`, { tokens: t, hide: 'card', theme, page });
       shot = { screen: `${dir}/sample.png`, box: 'card', crop: null, phone: `${dir}/sample-phone.png` };
     }
-    writeJson(`${dir}/board.json`, { sample: sampleCopy(brief, cfg, tokens), audience: brief.audience || '', ...shot, source: (tokens && tokens.source) || {} });
+    const extra = { label: val(flags.label) || null, specimen: val(flags.specimen) || null };
+    if (extra.specimen && !['field', 'paper'].includes(extra.specimen)) throw new Error(`--specimen ${extra.specimen}: use field or paper`);
+    writeJson(`${dir}/board.json`, { sample: sampleCopy(brief, cfg, tokens), audience: brief.audience || '', ...shot, ...extra, source: (tokens && tokens.source) || {} });
     await shootBoard(session, rel, 'board', { data: `${dir}/board.json` }, 'final/brand/brand-board.png');
     const c = cfg.brand.colors;
     if (!logoReady(cfg, tokens, brief.name || cfg.brand.name)) console.log('  note: no logo chosen yet (npm run brand -- apply --logo <id>): the board sets the name as text');

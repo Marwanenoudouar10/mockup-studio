@@ -38,11 +38,13 @@ export async function start(argv, { log = console.log } = {}) {
   }
   if (!Number.isInteger(args.port) || args.port < 0 || args.port > 65535) throw new Error(`--port ${args.port}: not a port`);
   const registry = new Registry(args.state);
-  if (args.reset) registry.projects = [];
+  if (args.reset) { registry.projects = []; registry.folders = []; }
   if (args.forget && !registry.forget(args.forget)) log(`  note: no project "${args.forget}" to forget`);
   for (const p of args.paths) {
-    const found = discover(path.resolve(process.env.INIT_CWD || process.cwd(), p));
-    if (!found.length) log(`  warn: no studio.config.js in ${p} (or two levels below it)`);
+    const abs = path.resolve(process.env.INIT_CWD || process.cwd(), p);
+    const found = discover(abs);
+    registry.addFolder(abs); // a folder of projects: new projects in it appear on the next page reload
+    if (!found.length) log(`  note: no studio.config.js in ${p} yet (or two levels below it): projects made there later show up when you reload the page`);
     registry.add(found);
   }
   registry.save();

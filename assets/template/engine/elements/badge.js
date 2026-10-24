@@ -1,6 +1,9 @@
 // badge: a small chip, e.g. "Works offline".
 // { type:'badge', text:'Works offline' | {en,de}, icon?:'check'|'lock'|...|'brand/x.svg',
-//   x (centre), y (top), r, z, size:40 (font size, stage units), style:'glass'|'solid'|'accent'|'dark' }
+//   x (centre), y (top), r, z, size:40 (font size, stage units), style:'glass'|'solid'|'accent'|'dark',
+//   iconColor?: 'var(--accent)' (default: primary on solid, accent on dark) }
+// Place a badge in open field (under the stage, beside the headline), never on live UI: glass blurs the UI
+// under it into a smudge, and a chip over a phone's tab bar or list rows hides what the image proves.
 import { el, esc } from '../core/boot.js';
 import { ICONS } from './icons.js';
 import { at } from '../core/root.js';
@@ -9,6 +12,7 @@ export function badge(e, ctx) {
   const { fr } = ctx;
   const node = el('div', `badge ${e.style || 'solid'}`);
   node.style.fontSize = `${(e.size || 40) * fr.f}px`;
+  if (e.iconColor) node.style.setProperty('--badge-icon', e.iconColor);
   let icon = '';
   if (e.icon && ICONS[e.icon]) {
     icon = `<span class="badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"

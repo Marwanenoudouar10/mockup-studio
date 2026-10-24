@@ -72,14 +72,20 @@ async function main() {
     const ey = lift.values.y + 10 / (z * lift.s * lift.map.uy);
     ok(Math.abs(o.x - ex) <= 1.5 && Math.abs(o.y - ey) <= 1.5, `layout.json appstore.1.${lift.id} = x ${o.x}, y ${o.y} (config ${lift.values.x}, ${lift.values.y})`);
     ok(o.of === 'lift:insights:streak', `the override carries its fingerprint (${o.of})`);
-    const r1 = await rectInFrame(page, lift.key, lift.id);
-    ok(r1.left > r0.left && r1.top > r0.top, `the lift moved inside the frame (${r0.left},${r0.top} -> ${r1.left},${r1.top})`);
-    const moved = await find(page, 'appstore', 1, { box: 'streak' });
-    ok(String((await sel(page)).id) === String(lift.id), 'the lift stays selected');
-
     // the server writes layout.json before it answers, and the page records the move for undo only when
     // the answer arrives (then it shows the "Saved position" toast): wait for that, or Ctrl+Z can come too early
     await until(() => page.evaluate(() => document.getElementById('toast').textContent.startsWith('Saved position')), 'the move recorded for undo');
+    // the frame applies the drag's last step a moment after the pointer: read the lift once it stops moving
+    let last = null;
+    const r1 = await until(async () => {
+      const r = await rectInFrame(page, lift.key, lift.id);
+      const still = r && last && r.left === last.left && r.top === last.top;
+      last = r;
+      return still && r;
+    }, 'the frame after the drag');
+    ok(r1.left > r0.left && r1.top > r0.top, `the lift moved inside the frame (${r0.left},${r0.top} -> ${r1.left},${r1.top})`);
+    const moved = await find(page, 'appstore', 1, { box: 'streak' });
+    ok(String((await sel(page)).id) === String(lift.id), 'the lift stays selected');
     await key(page, ['Control', 'z']);
     await until(() => !lastOf(T.read('layout.json'), lift.id), 'undo');
     const ru = await until(async () => { const r = await rectInFrame(page, lift.key, lift.id); return r && r.left === r0.left && r; }, 'the frame after undo');

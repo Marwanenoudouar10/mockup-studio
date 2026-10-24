@@ -44,9 +44,15 @@ Audience, Category, Competitors to stand apart from, Must keep, Avoid, Mode. One
 - **Night:** a near-black field lit by the seed. Premium, focused.
 - **Paper:** warm paper with a soft mesh, the seed darkened into ink. Calm, editorial.
 
-Moods tune the chroma and the accent: `balanced` (default), `calm`, `bold`, `warm`, `fresh`, `serious`.
-Each option has the engine's colours (`primary`, `secondary`, `deep`, `accent`, `ink`, `paper`,
-`onField`), a tint ramp, neutrals and UI tokens for the mock screens.
+Moods tune the chroma and the accent: `balanced` (default), `calm`, `bold`, `warm`, `fresh`, `serious`,
+`electric` (a vivid light accent such as lime or mint, for dark fields). Each option has the engine's
+colours (`primary`, `secondary`, `deep`, `accent`, `ink`, `paper`, `onField`), a tint ramp, neutrals and
+UI tokens for the mock screens, dark app surfaces included (`ui.bgDark`, `surfaceDark`, `raisedDark`: the
+kit uses them in dark mode instead of Apple and M3 greys).
+- **A dark brief:** `--look dark` gives three dark directions (Night, Graphite, Deep) instead of one dark
+  option out of three. Add `--theme dark` so the sample screens are dark too.
+- **A fixed accent:** `--accent "#C6F432"` pins it (the client's real accent in Mode A, or the brief's).
+  Read its checks: a pinned accent is not nudged to reach 3:1.
 
 **Contrast checks** (WCAG ratios, printed on the board, a failing check in red):
 
@@ -59,6 +65,7 @@ Each option has the engine's colours (`primary`, `secondary`, `deep`, `accent`, 
 | Tint text on paper | 4.5:1 | links and tinted labels in the app |
 | Body text on paper | 4.5:1 | app body text |
 | Badge text on accent | 4.5:1 | accent badges |
+| Accent / text on dark app surface | 4.5:1 | dark field options only: where a dark app shows them |
 
 The accent is nudged lighter or darker until it reads on the field. A light seed (yellow, mint) gets dark
 text on the field (`onField`). The colour behind the headline is estimated per field preset, so treat
@@ -116,7 +123,12 @@ project's `brand/README.md`; `npm run brand -- logos` checks the wordmark width 
 **The icon** is derived from the chosen symbol by `apply --logo <id>` (`--icon-style gradient | solid |
 night | paper`, `--icon-scale 0.56`). It must work as a full-bleed square that each store masks: keep what
 matters in the centre two thirds, no text, no screenshot, no fake notification dot, no black background
-(Apple). Sizes and formats: `store-specs.md`; a hand-drawn icon: `brand/README.md`.
+(Apple). Sizes and formats: `store-specs.md`; a hand-drawn icon: `brand/README.md`. Icon checklist:
+- the tile matches the screenshots' field (a dark set gets `--icon-style night`, not a bright gradient a
+  reviewer calls "a common fintech icon");
+- the glyph fills about 0.6 of the tile (`--icon-scale 0.6`); 0.5 looks lost on a home screen;
+- every gap between shapes is 4%+ of the tile, so it survives at 60 px;
+- read it at 60 and 120 px on a dark and a light wallpaper before showing it.
 
 Mode A with an existing logo: ask the client for SVG (trace a PNG only as a last resort), save it as
 `logo-options/client.svg` + `client.mark.svg`, then `npm run brand -- apply --logo client` (skip the
@@ -128,7 +140,13 @@ field, the app icon (square, rounded, circle, small), the palette with its contr
 pair, a UI card, and a store-image thumbnail made by the real engine. It also exports the brand kit:
 `final/brand/logo.png`, `logo-white.png`, `mark.png` (transparent).
 - Mode B: the UI card comes from the kit's sample screen dressed in the tokens; the thumbnail's phone shows
-  that screen without the card it lifts out (never the same card twice on one image).
+  that screen without the card it lifts out (never the same card twice on one image). The sample is a
+  generic habit app: for another category, copy `screens/kit/sample.html` to `screens/_sample.html`, give
+  it the app's own content and pass `--sample screens/_sample.html`. A dark app: `--theme dark`.
+- **Once the real screens exist, re-render the board from them** (`board --screen home --box <card>
+  --phone <other>`): a board whose sample shows another accent or other screens than the delivered set
+  reads as a second brand. For a portfolio, `--label "Brand board"` drops "for approval". On a dark
+  field the type specimen sits on the field with the accent word in the accent (`--specimen field|paper`).
 - Mode A: show a client capture: `npm run brand -- board --screen today --crop 60,480,1200,700 --platform ios`
   (capture pixels; `--box name` once `raw/ios/today.boxes.json` names it). The thumbnail's phone shows
   another capture (`--phone home`, default: the first other one), so the lifted card is not also in it.

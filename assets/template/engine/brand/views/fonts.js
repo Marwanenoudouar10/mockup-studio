@@ -4,7 +4,7 @@
 import { el, esc, page, face, label } from '../ui.js';
 import { miniPanel } from '../thumb.js';
 
-const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>abcdefghijklmnopqrstuvwxyz<br>0123456789 &amp; ? ! @ € %';
+const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>abcdefghijklmnopqrstuvwxyz<br>0123456789 &amp; ? ! @ $ € £ %';
 
 const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
 const licence = (l) => (!l ? '' : /OFL/.test(l) ? ` · ${l}, free for commercial use` : ` · ${l}`);

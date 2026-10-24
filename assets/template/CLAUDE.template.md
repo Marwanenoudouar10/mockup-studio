@@ -31,6 +31,7 @@ npm run capture -- --url https://example.com --mobile --tablet # a live site -> 
 npm run render -- --store appstore --panel 2 --out out/qa/p2   # iterate on one image (N = config panel number)
 npm run render -- --store playstore --panel 2 --out out/qa/p2  # ... and check it on the 9:16 canvas
 npm run render -- --locale es --out out/qa/es                  # check a translation
+npm run render -- --store appstore --strip                     # a panorama as one picture: out/qa/strip/
 npm run export                                                 # everything + validate + overview sheets
 npm run export -- --scale 2                                    # + hi-res portfolio copies, 4K sheets
 npm run validate -- --strict                                   # must exit 0 before delivery
@@ -55,7 +56,8 @@ npm run bake -- --dry && npm run bake                          # fold layout.jso
 
 **Looking and checking**
 7. LOOK at every image you produce (Read the PNG) before calling it done: every store size, every locale,
-   the feature graphic, both icons, the overview sheets. A render that was not looked at is not done.
+   the feature graphic, both icons, the overview sheets (a panorama: the uncut strip too). A render that
+   was not looked at is not done. Validate passing means legal files, not a good set.
 8. Render both canvases: the tall iPhone (`appstore`) and the 9:16 Play (`playstore`).
 9. A magenta placeholder or a `warn:` line in the output is a bug: fix it before exporting.
 10. `npm run validate` must exit 0 before anything is delivered. Read every warning: store content
@@ -63,18 +65,24 @@ npm run bake -- --dry && npm run bake                          # fold layout.jso
     bad crops, screens or copy not translated, sharpness, stale folders, missing renders.
 
 **Design**
-11. One benefit per image, in the headline's words; image 1 sells the whole app. Headline 3 lines and
-    about 6 words at most, sub 2 lines at most, one `<em>` accent word.
+11. One benefit per image, in the headline's words, proved by its own card (never the same proof on two
+    images); image 1 sells the whole app. Headline 3 lines and about 6 words at most, sub 2 lines at
+    most, one `<em>` accent word.
 12. Real UI at reading size: lift the card that proves the headline (box or crop) instead of shrinking a
-    whole phone until nothing is legible. Prefer named boxes over crop numbers.
+    whole phone until nothing is legible. Prefer named boxes over crop numbers. Cards stay straight (a
+    fan, or one accent card per image, tilts on purpose); no card or badge covers the proof; badges sit
+    in open field (solid or dark, never glass over UI); at most three layers overlap on image 1.
 13. Nothing important within 40 design units of the image edges unless it bleeds on purpose (`bleed: true`
     on that lift or badge). Feature graphic copy and logo stay inside x 154-872, y 76-424. Never the same
-    card twice on one image. A panorama store next to normal ones needs a per-store stage.
+    card twice on one image. A panorama store next to normal ones needs a per-store stage; its seams
+    are edges too: no sliver of a screen across one (`bridge: true` only when a real share crosses).
 14. Store rules: no "#1", "best", awards, prices, "free", calls to action or emoji; no Android on App Store
     images and no iPhone or App Store on Play images; most images show the real app.
 
 **Screens**
-15. One demo persona, one "today", numbers that add up, the same on iOS and Android; clean status bars.
+15. One demo persona, one "today", numbers that add up (re-do every sum and date sum), the same on iOS
+    and Android; clean status bars; no row sliced by Android's opaque nav bar; frameless windows start
+    below the status bar (tile `from: '<box>'`).
 16. Mock screens (Mode B): `screens/<name>.html` once for both platforms with the kit; UI strings in
     `screens/strings.json`; keep lifted cards clear of the tab bar and FAB (`npm run screens` warns);
     leave the island / punch-hole area empty; after every edit run `npm run screens` and read the captures.
@@ -83,7 +91,9 @@ npm run bake -- --dry && npm run bake                          # fold layout.jso
 18. Websites (Mode A): `npm run capture` with `--hide` for cookie banners and chat widgets; never commit
     cookies/headers files; demo accounts only, never a client's real customer data.
 19. Sharpness: a `... is upscaled 1.6x` line is a defect. Capture larger (`npm run screens -- --scale 2`,
-    `capture --scale 2`) or draw the element smaller. Hi-res copies only from `--scale` into `final/portfolio/`.
+    `capture --scale 2`) or draw the element smaller. Hi-res copies only from `--scale` into `final/portfolio/`;
+    once they exist, end EVERY change with `npm run export -- --scale 2` (it renders 1x and 2x; a plain
+    export leaves stale copies, which the sheets skip and validate flags), then re-read the sheets.
 
 **Store Studio and files**
 20. The person may move, rotate, resize or add elements in Store Studio; those land in `layout.json` and

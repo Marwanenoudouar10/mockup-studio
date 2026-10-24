@@ -6,6 +6,8 @@
 // -> raw/<platform>/<name>.png + raw/<platform>/<name>.boxes.json (every data-box="name", in capture pixels)
 //
 //   npm run screens -- [--platform ios,android,web] [--screen home,entry] [--locale es | all] [--theme dark] [--scale 2]
+//   --theme forces every page. Without it, the config's screens.theme is the default ('dark' for an all-dark app,
+//   so a plain run never re-captures it in light), and a page's own <html data-theme> wins over that default.
 //   --platform web also captures each web page at the sizes its kit-sizes asks for (raw/ipad/, raw/ios/ ...),
 //   so `--platform web --screen journal` refreshes a whole responsive trio.
 //
@@ -14,7 +16,10 @@
 // exports, so no screen is ever drawn larger than its pixels (the render log warns when one is).
 // Locales: the default locale goes to raw/<platform>/; every other config locale that screens/strings.json
 // translates goes to raw/<platform>/<locale>/. --locale picks some ('all' = every config locale).
-// Warns when a box is cut off by the screen edge or covered by system chrome (tab bar, FAB, toolbar).
+// Warns when a box is cut off by the screen edge or covered by system chrome (tab bar, FAB, toolbar, home
+// indicator, or any element marked data-chrome: a pinned CTA, a banner, a custom bottom bar).
+// Box radius: the element's own corner radius, else (an M3 connected list rounds its rows, not the list) the
+// first child's top corner; data-box-radius="24" (CSS px) sets it by hand.
 // A box in a grid or flex row is measured at its content height (align-self: start), not the height the row
 // stretched it to, so a lifted dashboard card has no blank bottom; data-box-fit="cell" keeps the stretched cell.
 import fs from 'node:fs';
@@ -106,7 +111,13 @@ export function boxesOf(page, dpr) {
   return page.evaluate((k) => {
     const out = {};
     const warnings = [];
-    const chrome = [...document.querySelectorAll('.tabbar, .fab, .toolbar, .indicator')].map((n) => [n, n.getBoundingClientRect()]);
+    const chrome = [...document.querySelectorAll('.tabbar, .fab, .toolbar, .indicator, [data-chrome]')].map((n) => [n, n.getBoundingClientRect()]);
+    const radiusOf = (n) => {
+      if (n.dataset.boxRadius !== undefined) return parseFloat(n.dataset.boxRadius) || 0;
+      const own = parseFloat(getComputedStyle(n).borderTopLeftRadius) || 0;
+      const first = n.firstElementChild;
+      return own || (first ? parseFloat(getComputedStyle(first).borderTopLeftRadius) || 0 : 0);
+    };
     const overlap = (a, b) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
     // a grid item or flex-row item stretched by its row: its content height (the card as it would stand alone)
     const fitHeight = (n, r) => {
@@ -126,13 +137,15 @@ export function boxesOf(page, dpr) {
       const r = n.getBoundingClientRect();
       const name = n.dataset.box;
       if (out[name]) warnings.push(`box "${name}" is used twice; the last one wins`);
-      const rad = parseFloat(getComputedStyle(n).borderTopLeftRadius) || 0;
+      const rad = radiusOf(n);
       const h = fitHeight(n, r);
       out[name] = { x: Math.round(r.left * k), y: Math.round(r.top * k), w: Math.round(r.width * k), h: Math.round(h * k), r: Math.round(rad * k) };
       if (r.width < 1 || r.height < 1) warnings.push(`box "${name}" has no size`);
       else if (r.left < -0.5 || r.top < -0.5 || r.right > innerWidth + 0.5 || r.bottom > innerHeight + 0.5) warnings.push(`box "${name}" runs off the screen`);
       for (const [c, cr] of chrome) {
-        if (!n.contains(c) && overlap(r, cr) > 4) warnings.push(`box "${name}" is covered by .${c.classList[0]}`);
+        if (!n.contains(c) && !c.contains(n) && overlap(r, cr) > 4) {
+          warnings.push(`box "${name}" is covered by ${c.classList[0] ? `.${c.classList[0]}` : `<${c.tagName.toLowerCase()} data-chrome>`}`);
+        }
       }
     }
     return { boxes: out, warnings };
@@ -147,7 +160,11 @@ export async function runScreens(session, cfg, flags = {}) {
   const scale = flags.scale === undefined || flags.scale === true ? 1 : Number(flags.scale);
   if (!(scale >= 1 && scale <= 4)) throw new Error(`--scale ${flags.scale}: use 1 to 4`);
   const locales = localesFor(cfg, flags);
-  const theme = flags.theme && flags.theme !== true ? `&theme=${encodeURIComponent(flags.theme)}` : '';
+  // --theme forces every page; screens.theme is only the default (a page's own <html data-theme> wins over it)
+  const forced = flags.theme && flags.theme !== true ? String(flags.theme) : null;
+  const fallback = !forced && cfg.screens && cfg.screens.theme ? String(cfg.screens.theme) : null;
+  const theme = forced ? `&theme=${encodeURIComponent(forced)}` : fallback ? `&themeDefault=${encodeURIComponent(fallback)}` : '';
+  if (forced || fallback) console.log(`  theme ${forced || `${fallback} (screens.theme in the config)`}`);
   let n = 0;
   for (const plat of plats) {
     const spec = PLATFORMS[plat];

@@ -1,8 +1,8 @@
 // Renders for the brand step, on the same session as the store renders (one Chrome, one page, in order):
 //   shootBoard   engine/brand/brand.html?view=... -> a board PNG (2x, opaque, 24-bit)
-//   shootSample  screens/kit/sample.html with a token file -> a sample app screen + its boxes, so the
-//                boards show the brand on real kit UI before any app screen exists (hide: 'card' drops that
-//                box, for a phone that sits beside the lifted card)
+//   shootSample  screens/kit/sample.html (or `page`, e.g. a category sample in screens/) with a token file
+//                -> a sample app screen + its boxes, so the boards show the brand on real kit UI before any app
+//                screen exists (hide: 'card' drops that box, for a phone beside the lifted card; theme: 'dark')
 //   shootAsset   one SVG (logo, mark) on a transparent background -> RGBA PNG for the client's brand kit
 import fs from 'node:fs';
 import path from 'node:path';
@@ -28,11 +28,11 @@ export async function shootBoard(session, cfgRel, view, query, outRel, { dpr = 2
   printFile(write(outRel, png), png, Date.now() - t0, session.drain());
 }
 
-export async function shootSample(session, outRel, { tokens, platform = 'ios', dpr = 2, hide = null } = {}) {
+export async function shootSample(session, outRel, { tokens, platform = 'ios', dpr = 2, hide = null, theme = null, page = 'screens/kit/sample.html' } = {}) {
   const [w, h] = PLATFORMS[platform].css;
-  const q = new URLSearchParams({ platform, tokens: tokens ? `/${tokens}` : 'none', ...(hide ? { hide } : {}) }).toString();
+  const q = new URLSearchParams({ platform, tokens: tokens ? `/${tokens}` : 'none', ...(hide ? { hide } : {}), ...(theme ? { theme } : {}) }).toString();
   const t0 = Date.now();
-  const [b] = await capture(session, `screens/kit/sample.html?${q}`, { width: w, height: h, dpr, readyMode: 'auto' });
+  const [b] = await capture(session, `${page}?${q}`, { width: w, height: h, dpr, readyMode: 'auto' });
   const png = flattenPng(b);
   const file = write(outRel, png);
   const { boxes, warnings } = await boxesOf(session.page, dpr);

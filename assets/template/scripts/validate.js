@@ -22,7 +22,7 @@ import { jpegInfo } from './lib/jpeg.js';
 import { readQuality } from './lib/report.js';
 import { policyFindings } from './lib/policy.js';
 import { textFindings } from './lib/locales.js';
-import { staleOutputs } from './lib/stale.js';
+import { staleOutputs, staleHires } from './lib/stale.js';
 import { parseArgs, list, loadConfig, outDir, rel, kb, isMain, fail } from './lib/cli.js';
 
 const IMG = /\.(png|jpe?g)$/i;
@@ -132,7 +132,12 @@ export function runValidate(cfg, flags = {}) {
     rows.push(`  portfolio (hi-res, not for upload): ${rel(pdir)}/`);
     for (const locale of fs.readdirSync(pdir).sort()) {
       const ldir = path.join(pdir, locale);
-      if (!stale.has(ldir) && fs.statSync(ldir).isDirectory()) folder(ldir, { portfolio: true });
+      if (stale.has(ldir) || !fs.statSync(ldir).isDirectory()) continue;
+      folder(ldir, { portfolio: true });
+      for (const sid of fs.readdirSync(ldir).filter((d) => fs.statSync(path.join(ldir, d)).isDirectory())) {
+        const old = staleHires(out, locale, sid);
+        if (old.length) warn(rel(path.join(ldir, sid)), `${old.length} hi-res cop${old.length > 1 ? 'ies are' : 'y is'} older than the upload images (${old.join(', ')}): run npm run export -- --scale 2, or delete ${rel(pdir)}/`);
+      }
     }
   }
   const icons = path.join(out, 'icons');

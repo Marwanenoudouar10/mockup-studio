@@ -2,10 +2,14 @@
 
 <!-- Use this when there is NO app build: a pre-launch idea, a description without designs, or a
      portfolio concept. It is the brief for the mock screens (screens/<name>.html, built with the kit,
-     captured by `npm run screens`). Write it AFTER the brand board is approved.
+     captured by `npm run screens`). Two passes: at Step 0 record the intake description (name,
+     one-liner, audience, platforms, locales); AFTER the brand board is approved write the persona,
+     the screens and the story map.
      Rules: 5-8 key screens; realistic, consistent content for ONE demo persona (same name, same dates,
-     numbers that add up); for each screen, the element a store image will lift out at reading size
-     becomes a data-box name. Invented names only: no real people, brands or customer data.
+     numbers that add up: re-do every sum, date sums too: $40 every Monday from Nov 2 is $800 by
+     Mar 15 and $880 by Mar 29); for each screen, the element a store image will lift out at reading size
+     becomes a data-box name. Each store image gets its OWN proof card: never the same card or ring as
+     the proof of two images. Invented names only: no real people, brands or customer data.
      The values below are the demo ("Brimpage", an invented journaling app): replace them. -->
 
 - **App name:** Brimpage

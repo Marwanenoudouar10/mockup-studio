@@ -140,6 +140,35 @@ looks wrong. Add the project's own lessons to the "Project notes" of its `CLAUDE
   failed with "timed out waiting for undo".
 - **Rule:** wait for the signal the user sees (the "Saved position" toast), not for a side effect.
   Compare redrawn positions with 1 px of tolerance: a redo redraws from the stored (rounded) numbers.
+  Read a dragged element only once it stops moving (two equal reads): the frame paints the drag's last
+  step after the pointer, so an early read failed the redo check on a busy machine.
+
+## A set that passed every check, then a review
+These come from a dark finance concept set: every size exact, validate 0 problems, and still a list of
+"must fix" items from a critique. The checklist that catches them is in `design.md` ("The set checklist").
+
+**Green checks, stale pictures**
+- **Mistake:** a 1x export after a `--scale 2` one left the overview sheets showing the OLD hi-res copies
+  (a removed card, an old date); a cover tile whose `src` did not exist yet rendered as an empty band.
+  Validate passed both.
+- **Rule:** sheets skip hi-res copies older than the upload images and validate warns about them; a
+  missing image is an issue. After any change with hi-res copies around: `export -- --scale 2` (1x and 2x).
+
+**Seams are edges**
+- **Mistake:** bridging phones left "pending" and "and transac" on the next image, and a card stopped
+  23 units short of a seam; the edge check looked at the outer edges only.
+- **Rule:** the render checks seams too (slivers, cards near a seam); judge the strip with `--strip`.
+
+**Small numbers, big doubts**
+- **Mistake:** "Ready by Mar 15" for $860 at $40 a week (22 weeks: Mar 29); every card tilted 1-4
+  degrees; the same goal ring proved four images.
+- **Rule:** re-do the sums and the date sums; straight cards; one proof per image.
+
+**Two brands in one delivery**
+- **Mistake:** the brand board's sample used a blue accent and generic habit screens, the store images
+  a lime accent and finance screens; the icon was a bright gradient next to near-black screenshots.
+- **Rule:** re-render the board from the real captures (`--screen --box`), set the specimen on the field,
+  make the icon from the field the screenshots use.
 
 ## Symptom -> cause -> fix
 | symptom | likely cause | fix |
@@ -169,3 +198,15 @@ looks wrong. Add the project's own lessons to the "Project notes" of its `CLAUDE
 | `lift ... crop has no "android" key` | an iOS pixel crop reused on Android | add `crop.android`, or name a box |
 | Chrome not found | no Chrome, Chromium or Edge installed | install Chrome, or `CHROME_PATH=/path/to/chrome` |
 | Mac slow during renders | parallel renders or many agents | one command at a time; close other heavy apps |
+| the overview sheet shows an older layout | hi-res copies from an earlier `--scale 2` | `npm run export -- --scale 2` (sheets now skip stale copies, validate warns) |
+| `image not found: ...` | a tile `src` that does not exist (yet) | fix the path; for a cover from rendered images, export once more |
+| `... shows a 130-unit sliver of its screen on image 5` | a bridging device mostly on one side of a seam | bezel only across, or a real share of the screen; `bridge: true` if meant |
+| `... is 23 units from the seam at x 2640` | a panorama card placed from `w`, but sizes scale by `f` | move its centre `(w x 1.08) / 2 + 40` from the seam |
+| a hi-res panorama has a flat colour band | `mask` / `filter` / `opacity` on a full-strip layer at 2x | per-slice backgrounds in `brand/theme.css` (`layouts.md`, thread) |
+| a line chart of big values is flat (older kit) | its y axis started at 0 | update the kit, or `data-min` / `data-max` |
+| the iOS navbar turned into a coloured band | app CSS styles a kit class (`.bar`) | rename the app class (reserved names: `mock-screens.md`) |
+| dark-app captures came back light | a plain `npm run screens` | `screens: { theme: 'dark' }` in the config, or `data-theme` on each page |
+| text cut in half at the bottom of an Android image | the opaque nav bar over a row | end the content above it, or align a row edge with it |
+| the watermark reads as dirty rings | a cropped giant mark on a glowing dark field | `brand.watermark` per store, a panel's `watermark: false` |
+| the board's field tile is white | (older engine) a per-store `brand.field` object | update the engine; it resolves the field per store now |
+| a lifted Android list has square corners | (older kit) the list's own radius is 0 | update; or `data-box-radius` / `radius: { android: 72 }` |

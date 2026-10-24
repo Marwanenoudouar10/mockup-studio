@@ -79,8 +79,9 @@ uses), not a target's image number: og shows one image, e.g. panel 6, so `--stor
 says which panels a target shows when N is not one of them);
 `--config other.js` without `--out` writes to `out/qa/<name>/`, never into `final/`;
 `--scale 2|3` (render, feature, export: the hi-res portfolio copies); `--strict` (validate, export: warnings fail);
-`--png` (sheet); screens: `--platform ios,web` (web also captures each page's kit-sizes) `--screen home`
-`--locale de|all` `--theme dark` `--scale 2`; capture: see "Websites" below; preview: `--port 5178`.
+`--png` (sheet); `--strip` (render: a panorama's uncut strip to `out/qa/strip/`); screens: `--platform
+ios,web` (web also captures each page's kit-sizes) `--screen home` `--locale de|all` `--theme dark`
+(default: `screens: { theme }` in the config) `--scale 2`; capture: see "Websites" below; preview: `--port 5178`.
 
 ## Targets
 Phone stores (portrait layout):
@@ -125,11 +126,14 @@ The stage is 1320 x 1900 design units hung under the copy and scaled to the room
 { type: 'lift',  screen: 'home', crop: { ios: [60, 726, 1200, 532], android: [40, 538, 1000, 423] }, w: 820, x: 540, y: 1010 }
 { type: 'lift',  screen: 'home', box: 'mood', w: 680, x: 1100, y: 1150, bleed: true }        // cut by the edge on purpose
 { type: 'tile',  screen: 'insights', w: 840, h: 1240, x: 490, y: 0, r: -3, radius: 70, pos: 'top', fade: false }
+{ type: 'tile',  screen: 'insights', w: 840, h: 1100, x: 490, y: 0, from: 'streak' }    // window from a box (or cropTop: px)
 { type: 'tile',  src: 'brand/photo.jpg', w: 1000, h: 1400, x: 560, y: 0, fit: 'cover', shadow: false }
 { type: 'badge', text: { en: 'Works offline', de: 'Funktioniert offline' }, icon: 'offline', x: 330, y: 1340, style: 'solid' }
 ```
 Badge icons: check lock star heart bolt cloud shield flame bell clock sparkle leaf offline (or an image path).
-Badge styles: solid, glass, accent, dark.
+Badge styles: solid, glass, accent, dark; `iconColor` (or `--badge-icon` in `brand/theme.css`) recolours the icon.
+A panel may set `watermark: false`; `bridge: true` marks a panorama seam crossing as intended; a tile
+`src` that does not load draws the magenta placeholder and an issue.
 A pixel `crop` belongs to one capture: give every platform its own key (a missing key or a crop outside the
 capture draws the magenta placeholder and an issue). Lifts, badges and the copy keep 40 design units from
 the edges; `bleed: true` on a lift or badge says the cut is on purpose. Devices and tiles may bleed.
@@ -168,7 +172,8 @@ The colours (primary, secondary, deep, accent, ink, paper, onField) drive every 
 `gradient` (default), `solid`, `light`, `dark`, `mesh`, or your own `.canvas.field-<name>` in
 `brand/theme.css`. `brand.fonts` takes fontsource family names (`npm i @fontsource/<name>` or
 `@fontsource-variable/<name>`); `extra` adds fallbacks for other scripts. `ornament`: brush,
-highlight, none. `watermark`: the giant faint mark (true, false or `{ src, opacity }`).
+highlight, none. `watermark`: the giant faint mark (true, false or `{ src, opacity }`, or per store:
+`{ playstore: false, default: true }`; `feature.watermark` decides for the feature graphic alone).
 Preview any token file on the live panels: `/engine/panel.html?panel=1&tokens=out/brand/palette/option-2.tokens.json`.
 
 ## Panorama
@@ -178,6 +183,8 @@ so a device can bridge two images. See `examples/panorama.config.js`.
 When only some stores are panoramas, the same panels serve both: give each panel a per-store stage,
 `stage: { playstore: [ ...x from (n-1) x 1320 to n x 1320... ], default: [ ...x from 0 to 1320... ] }`.
 Without it every device piles onto image 1; the render warns `panorama image 2 shows no screen`.
+Seams are checked like edges (cards 40 units away, no sliver of a screen on the next image); `render
+--strip` writes the uncut strip. The canvas has the class `panorama` and `--slices` for strip styles.
 
 ## Store Studio: preview and drag (layout.json)
 The skill ships a local workspace app, Store Studio (`~/.claude/skills/store-screenshots/workspace/`),
@@ -285,5 +292,6 @@ reflows at 1100 and 640 px), ready for a responsive trio.
 The method is in the skill's `references/design.md` ("Sharpness"). The switches: `npm run export --
 --scale 2|3` (hi-res copies in `final/portfolio/<locale>/<target>/`, never uploaded), `npm run screens --
 --scale 2` / `npm run capture -- --scale 2` (larger captures, when a render warns `... is upscaled 1.6x`),
-`sheet.width` (3840) and `sheet.quality` (94) for the overview sheets, `--png` for a lossless sheet, and
-the `playstore-4k` target (2160x3840; upload it OR `playstore`).
+`sheet.width` (3840, a maximum) and `sheet.quality` (94) for the overview sheets, `--png` for a lossless
+sheet, and the `playstore-4k` target (2160x3840; upload it OR `playstore`). Sheets skip hi-res copies older
+than the upload images (validate warns): re-run `export -- --scale 2` after every change.

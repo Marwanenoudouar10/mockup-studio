@@ -14,7 +14,8 @@ within about a second when they change.
 cd ~/.claude/skills/store-screenshots/workspace
 npm install                                   # no dependencies: node:http, fs.watch and server-sent events
 npm start -- ~/store-projects/my-app           # one project (a folder with studio.config.js)
-npm start -- ~/store-projects                 # or a folder of projects (searched two levels deep)
+npm start -- ~/store-projects                 # or a folder of projects (searched two levels deep; a project
+                                              # made there later shows up when the page is reloaded)
 npm start                                     # the projects from last time
 ```
 - It prints the URL (default `http://127.0.0.1:4400/`; `--port 4410` for another, a free one if busy) and

@@ -4,12 +4,31 @@
 // Types and their attributes:
 //   bars   data-values data-labels? data-colors? (one colour or one per bar) data-hl? (index, the rest fade) data-note? (bubble on hl)
 //          data-min? / data-max? (value range; a min above 0 makes small differences visible)
+//          data-colors splits on top-level commas only, so color-mix(...) and var(--x, #fff) work; with one colour
+//          per bar the bars keep their own colours (no fade), --bar-fade still tunes the fade otherwise
 //   line   data-values data-labels? data-color? data-compare? (2nd series, dashed) data-dots? data-grid?
+//          data-min? / data-max? (y range; default = the data's own range, so big values never look flat)
+//          data-label-at? ("0,7,14,25": the data index under each label; default = spread evenly). The first
+//          and last labels are anchored inside the plot (start / end), never centred on its edges.
 //   spark  data-values data-color?                       (tiny line, no axes)
 //   ring   data-values (0..1, one per ring, outer first) data-colors? data-stroke?   children = centre label
 //   donut  data-values (any numbers: shares) data-colors? data-stroke?              children = centre label
-const nums = (s) => String(s || '').split(',').map((v) => Number(v.trim())).filter((v) => !Number.isNaN(v));
-const strs = (s) => (s ? String(s).split(',').map((v) => v.trim()) : []);
+// '' or '3,,4' must not turn into zeros: an empty piece is dropped before Number() (Number('') is 0)
+const nums = (s) => String(s || '').split(',').map((v) => v.trim()).filter(Boolean).map(Number).filter((v) => !Number.isNaN(v));
+// split on commas outside brackets: "color-mix(in srgb, #fff 20%, transparent), var(--a, #000)" is two values
+function strs(s) {
+  if (!s) return [];
+  const out = [];
+  let depth = 0;
+  let cur = '';
+  for (const ch of String(s)) {
+    if (ch === '(') depth++;
+    else if (ch === ')') depth = Math.max(0, depth - 1);
+    if (ch === ',' && !depth) { out.push(cur.trim()); cur = ''; } else cur += ch;
+  }
+  out.push(cur.trim());
+  return out;
+}
 const f1 = (n) => Number(n.toFixed(1));
 let uid = 0;
 
@@ -30,6 +49,7 @@ function bars(n, w, h, kit) {
   const labels = strs(kit.t(n.dataset.labels || ''));
   const note = n.dataset.note ? kit.t(n.dataset.note) : '';
   const colors = strs(n.dataset.colors);
+  const own = colors.length > 1 && colors.length >= v.length; // one colour per bar: the colours carry the highlight
   const hl = n.dataset.hl !== undefined ? Number(n.dataset.hl) : -1;
   const max = Number(n.dataset.max) || Math.max(...v) || 1;
   const min = Number(n.dataset.min) || 0;
@@ -44,7 +64,7 @@ function bars(n, w, h, kit) {
     const x = slot * i + (slot - bw) / 2;
     const y = h - lh - bh;
     const fill = colors[i] || colors[0] || 'var(--tint)';
-    const fade = hl >= 0 && i !== hl ? ';opacity:var(--bar-fade, .34)' : '';
+    const fade = hl >= 0 && i !== hl && !own ? ';opacity:var(--bar-fade, .34)' : '';
     out += `<rect x="${f1(x)}" y="${f1(y)}" width="${f1(bw)}" height="${f1(bh)}" rx="${f1(bw / 2)}" style="fill:${fill}${fade}"/>`;
     if (labels[i]) out += `<text x="${f1(x + bw / 2)}" y="${h - 4}" text-anchor="middle" font-size="${fs}" style="fill:${i === hl ? 'var(--text)' : 'var(--text-2)'}" font-weight="${i === hl ? 600 : 400}">${labels[i]}</text>`;
     if (i === hl && note) {
@@ -87,8 +107,12 @@ function line(n, w, h, kit, spark = false) {
     for (const [x, y] of dots) out += `<circle cx="${f1(x)}" cy="${f1(y)}" r="5.5" style="fill:${color};stroke:var(--surface)" stroke-width="3"/>`;
   }
   const fs = kit.family === 'android' ? 12 : 12.5;
+  const at = nums(n.dataset.labelAt);
   labels.forEach((t, i) => {
-    out += `<text x="${f1(X(i, labels.length))}" y="${h - 4}" text-anchor="middle" font-size="${fs}" style="fill:var(--text-2)">${t}</text>`;
+    const x = at.length === labels.length ? X(Math.min(at[i], v.length - 1), v.length) : X(i, labels.length);
+    const anchor = labels.length > 1 && i === 0 ? 'start' : labels.length > 1 && i === labels.length - 1 ? 'end' : 'middle';
+    const ax = anchor === 'start' ? Math.max(0, x - pad) : anchor === 'end' ? Math.min(w, x + pad) : x;
+    out += `<text x="${f1(ax)}" y="${h - 4}" text-anchor="${anchor}" font-size="${fs}" style="fill:var(--text-2)">${t}</text>`;
   });
   return out;
 }

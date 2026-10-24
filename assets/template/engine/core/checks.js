@@ -2,12 +2,18 @@
 // (core/issues.js): printed in the render log and listed by `npm run validate`.
 //   edges   lifts, badges and the copy keep EDGE (40) design units from the image edges (SKILL rule 14);
 //           an element with bleed: true is cut on purpose. Devices and tiles may bleed (fans, big phones).
-//           A panorama strip is checked against its outer edges only: its seams are meant to be crossed.
+//           A panorama strip is checked against its outer edges here, and against its seams in seams.js.
 //   doubles a lift whose card is also visible in a phone, tablet or tile of the same image.
 //   ui      per image (each slice of a panorama): does it show the app? A screen drawn over 2% or more of
 //           the image counts. render-report.json keeps it, so the store rule "real UI on most images" is
 //           checked on the pixels, not the config.
+//   images  an image that failed to load (a tile's src, a badge icon, a logo file): an issue, and a tile shows
+//           the magenta placeholder instead of an empty band (a missing file must never pass validate).
+//   seams   (panorama) a lift, badge or copy block that stops within EDGE of a seam without crossing it, and
+//           a device or tile that crosses a seam with only a sliver (under a quarter of its width, more than
+//           its bezel) on one side: that sliver is clipped text on the next image (bridge: true = on purpose).
 import { issue } from './issues.js';
+import { seamCheck } from './seams.js';
 
 const EDGE = 40;
 const UI_SHARE = 0.02;
@@ -82,11 +88,32 @@ function uiPerImage(cv, c, H) {
   return out;
 }
 
+// <img> load errors do not bubble: catch them on the way down, from the first element on (an SVG without an
+// intrinsic size also has naturalWidth 0, so the error event, not the size, says a file is missing)
+document.addEventListener('error', (ev) => {
+  if (ev.target && ev.target.tagName === 'IMG') ev.target.dataset.failed = '1';
+}, true);
+
+// run after waitImages(): every image has loaded or failed by then
+function brokenImages(cv, c) {
+  for (const img of cv.el.querySelectorAll('img[data-failed="1"]')) {
+    const src = img.getAttribute('src') || '';
+    const holder = img.closest('.tile');
+    const a = rectOf(holder || img, cv, c);
+    const slice = Math.max(0, Math.min(cv.slices - 1, Math.floor((a.l + a.r) / 2 / cv.designW)));
+    issue(`image not found: ${src} (${holder ? what(holder) : 'an image'}): check the path, or render what it shows first`,
+      cv.slices > 1 ? { slice } : {});
+    if (holder) holder.innerHTML = `<div class="missing">missing image<br>${src.split('/').pop().replace(/[<>&"]/g, '')}</div>`;
+  }
+}
+
 export function layoutCheck(cv) {
   const c = cv.el.getBoundingClientRect();
   const W = cv.designW * cv.slices;
   const H = cv.DH;
+  brokenImages(cv, c);
   edges(cv, c, W, H);
+  if (cv.slices > 1) seamCheck(cv, c, { rectOf, what, EDGE });
   doubles(cv, c);
   const ui = uiPerImage(cv, c, H);
   if (cv.slices > 1) {

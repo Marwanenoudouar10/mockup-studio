@@ -4,12 +4,15 @@
 // Sharp when zoomed: shot at the pixel ratio that makes the sheet sheet.width (3840) px wide, capped so no
 // image is drawn larger than its pixels (render --scale 2 first for 4K landscape sheets: the gallery prefers
 // final/portfolio/). JPEG quality sheet.quality (94); --png also writes a lossless overview-<store>.png.
+// Hi-res copies OLDER than their upload images (a 1x export after a --scale 2 one) are skipped with a note,
+// so a sheet never shows a layout that is no longer in final/<locale>/ (validate warns about them too).
 import fs from 'node:fs';
 import path from 'node:path';
 import { parseArgs, loadConfig, outDir, rel, isMain, fail } from './lib/cli.js';
 import { openSession, capture } from './lib/session.js';
 import { pick, printFile } from './render.js';
 import { jpegInfo } from './lib/jpeg.js';
+import { staleHires } from './lib/stale.js';
 
 export async function runSheet(session, cfg, cfgRel, flags = {}) {
   const { stores, locales } = pick(cfg, flags);
@@ -20,8 +23,10 @@ export async function runSheet(session, cfg, cfgRel, flags = {}) {
       const dir = path.join(out, locale, st.id);
       if (!fs.existsSync(dir) || !fs.readdirSync(dir).some((f) => /^\d+\.(png|jpe?g)$/i.test(f))) continue;
       const t0 = Date.now();
+      const old = staleHires(out, locale, st.id);
+      if (old.length) console.log(`  note: ${rel(path.join(out, 'portfolio', locale, st.id))}/ is older than the upload images (${old.join(', ')}): the sheet uses the upload images; run npm run export -- --scale 2`);
       const url = `engine/gallery.html?config=${encodeURIComponent(cfgRel)}&store=${st.id}&locale=${locale}`
-        + `&mode=final&out=${encodeURIComponent(rel(out))}`;
+        + `&mode=final&out=${encodeURIComponent(rel(out))}${old.length ? '&hires=0' : ''}`;
       const [b] = await capture(session, url, {
         width: 1600, height: 1000, type: 'jpeg', quality: Math.max(92, cfg.sheet.quality), sizeFrom: '__size', dprFrom: '__dpr',
       });

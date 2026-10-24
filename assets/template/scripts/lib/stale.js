@@ -6,6 +6,8 @@
 //                                           or no panel for it); playstore stays while `feature` is set
 //   <out>/<locale>/overview-<target>.jpg    the sheet of such a target
 // The same inside <out>/portfolio/. Folders that are not locale or target names are left alone.
+// staleHires: portfolio copies older than their upload image (a 1x export after a --scale 2 one): the
+// sheets skip them and validate warns, so an old layout never reaches a sheet or a portfolio.
 import fs from 'node:fs';
 import path from 'node:path';
 import { STORES } from './stores.js';
@@ -54,4 +56,18 @@ export function pruneStale(cfg, out) {
     console.log(`  removed ${rel(f.file)} (${f.why})`);
   }
   return found.length;
+}
+
+const IMG = /^\d+\.(png|jpe?g)$/i;
+
+// -> [file names] of portfolio copies that are older than (or have no) upload image, for one store
+export function staleHires(out, locale, id) {
+  const up = path.join(out, locale, id);
+  const hi = path.join(out, 'portfolio', locale, id);
+  if (!fs.existsSync(hi)) return [];
+  const mtime = (f) => (fs.existsSync(f) ? fs.statSync(f).mtimeMs : null);
+  return fs.readdirSync(hi).filter((f) => IMG.test(f)).filter((f) => {
+    const u = mtime(path.join(up, f));
+    return u === null || mtime(path.join(hi, f)) < u - 1000;
+  });
 }

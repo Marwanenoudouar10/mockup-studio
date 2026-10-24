@@ -58,6 +58,7 @@
   --text-3: #938F99;
   --line: #49454F;
   --outline: #938F99;
+  --surface: var(--app-surface-android-dark, var(--app-surface-android, var(--md-container)));
   --bar-fade: .55;
 }
 
@@ -158,7 +159,7 @@
 
 .android .switch { width: 52px; height: 32px; border-radius: 16px; background: var(--md-highest); box-shadow: inset 0 0 0 2px var(--outline); }
 .android .switch::after { top: 8px; left: 8px; width: 16px; height: 16px; border-radius: 50%; background: var(--outline); }
-.android .switch.on { background: var(--tint); box-shadow: none; }
+.android .switch.on { background: var(--switch-on, var(--tint)); box-shadow: none; }
 .android .switch.on::after { top: 4px; left: 24px; width: 24px; height: 24px; background: #fff; }
 .android .switch.on i[data-icon] { position: absolute; top: 8px; left: 28px; z-index: 1; width: 16px; height: 16px; color: var(--tint); }
 

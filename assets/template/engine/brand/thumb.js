@@ -11,9 +11,10 @@ import { buildElements } from '../elements/index.js';
 import { applyOrnament } from '../ornaments/index.js';
 import { applyColors } from '../core/theme.js';
 import { waitImages } from '../core/assets.js';
+import { brandFor } from '../../scripts/lib/config.js';
 
 export async function miniPanel(slot, { W, H, cfg, colors, field, vars = {}, panel, stage = [] }) {
-  const brand = cfg.brand;
+  const brand = brandFor(cfg); // per-store / per-platform variants resolved (field, watermark ...)
   const cv = makeCanvas({ W, H, field: field || brand.field, grain: brand.grain });
   slot.appendChild(cv.el);
   applyColors(colors || brand.colors, cv.el);

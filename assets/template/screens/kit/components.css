@@ -105,6 +105,8 @@
 .pill.good { background: color-mix(in srgb, var(--green) 16%, transparent); color: color-mix(in oklab, var(--green) 70%, #000); }
 .pill.bad { background: color-mix(in srgb, var(--red) 14%, transparent); color: color-mix(in oklab, var(--red) 80%, #000); }
 .pill.glass { background: rgb(255 255 255 / .28); color: #fff; backdrop-filter: blur(12px); }
+.dark .pill.good { background: color-mix(in srgb, var(--green) 22%, transparent); color: color-mix(in oklab, var(--green) 80%, #fff); }
+.dark .pill.bad { background: color-mix(in srgb, var(--red) 20%, transparent); color: color-mix(in oklab, var(--red) 78%, #fff); }
 
 /* progress */
 .progress { height: 8px; border-radius: 4px; background: var(--fill); overflow: hidden; }

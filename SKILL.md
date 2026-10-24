@@ -70,8 +70,9 @@ Store + Google Play; English; 5 images; existing brand in Mode A, new brand in M
 short and benefit-led; `~/store-projects/<app-slug>` with the standard delivery.
 
 Then show a one-screen summary (project, mode, targets, languages, images, brand, look, tone, folder,
-next step) and start Step 1. The answers go into `briefs/brand-brief.md` (+ `briefs/app-spec.md` in Mode
-B), `briefs/copy.md` (tone) and `studio.config.js` (`locales`, `stores`, one panel per image).
+next step) and start Step 1. The answers go into `briefs/brand-brief.md` (+ the description in
+`briefs/app-spec.md` in Mode B), `briefs/copy.md` (tone) and `studio.config.js` (`locales`, `stores`, one
+panel per image).
 
 ## Set up the project
 ```bash
@@ -114,6 +115,8 @@ npm run brand -- logos                                      # after drawing bran
 npm run brand -- apply --logo a                             # logo.svg, mark.svg, icon.svg
 npm run brand -- board                                      # final/brand/brand-board.png
 ```
+A dark brief: `palette --look dark --mood electric --theme dark` (three dark options); a client's or the
+brief's accent: `--accent "#hex"`; a dark-only app also sets `screens: { theme: 'dark' }` in the config.
 Show each board and let the person choose. Done when the person approves `final/brand/brand-board.png`.
 **Mode A starts with the captures:** collect the client's screenshots (or capture the app, Step 2) into
 `raw/<platform>/` FIRST: they are the brand's source. Seed the palette from a flat control in them (a
@@ -124,7 +127,7 @@ show the board on a real capture: `board --screen today --crop x,y,w,h` (or `--b
 **Step 2: Screens.** The demo's screens are gone since setup (`screens/kit/` stays).
 - Mode A: plan in `briefs/capture-plan.md`, capture at the largest device with a clean status bar and
   demo data, name the cards to lift in `<name>.boxes.json` (`references/capture.md`).
-- Mode B: write `briefs/app-spec.md` (5-8 screens, one persona, a story map), build `screens/<name>.html`
+- Mode B: finish `briefs/app-spec.md` (5-8 screens, one persona, a story map), build `screens/<name>.html`
   with the kit, mark liftable cards with `data-box`, then `npm run screens` (`references/mock-screens.md`).
 - Websites: `npm run capture -- --url ...`, or `screens/web/<name>.html` (`references/web.md`).
 Done when every capture is read and clean, on every platform and language (every language but the
@@ -139,17 +142,22 @@ before layout work when copy approval is part of the job.
 **Step 4: Layout per panel** (`references/layouts.md`). One `panels[]` entry per image in
 `studio.config.js`: copy plus a stage from a proven recipe (hero orbit, macro lift, window, fan, duo...).
 Iterate one image at a time: `npm run render -- --store appstore --panel 2 --out out/qa/p2` (N is the
-config's panel number, its position in `panels`; a wide target's image 01 may be panel 6).
+config's panel number, its position in `panels`; a wide target's image 01 may be panel 6). A panorama:
+add `--strip` and read `out/qa/strip/<locale>-<store>.png`, the set as one picture.
 
 **Step 5: Render.** `npm run export`: every store and language, the feature graphic, icons, validation,
 overview sheets, with one Chrome. Hi-res portfolio copies: `npm run screens -- --scale 2` (or captures
-from a larger device), then `npm run export -- --scale 2`.
+from a larger device), then `npm run export -- --scale 2`; once they exist, every change ends with that
+export again (sheets skip stale copies and validate warns). Re-render the brand board from the real
+captures (`board --screen <name> --box <card>`), so board and set show one brand.
 
 **Step 6: Look and fix.** Read EVERY image: each store size, each language, the feature graphic, both
 icons, the sheets. Ask the five questions at the end of `references/design.md`. Fix, re-render that
 panel, read it again. Every `warn:` line in the render log is a defect: a card within 40 units of an
-edge or cut by it (`bleed: true` when the cut is on purpose), the same card twice on an image, a crop
-outside its capture, a screen or a line not translated, an empty panorama image, a soft screen.
+edge or a panorama seam, or cut by it (`bleed: true` when the cut is on purpose), a sliver of a screen
+across a seam, the same card twice on an image, a crop outside its capture, a missing image, a screen
+or a line not translated, an empty panorama image, a soft screen. Then go through "The set checklist"
+in `references/design.md`: validate checks the files, the checklist checks the set.
 
 **Step 7: Validate.** `npm run validate` must exit 0 (`--strict` before delivery: every warning fails).
 Read every warning (store content, real UI measured on the renders, the render issues above, untranslated
@@ -178,16 +186,21 @@ person is happy, so the moves move into `studio.config.js`.
 3. Colours and fonts change only through `npm run brand -- apply`; never hard-code them.
 4. Store sizes come from the target ids; never resize an image after rendering.
 5. Upload the iPhone 6.3" set (required) and the 6.9" set; Play gets 4+ images to be eligible for promotion.
-6. One benefit per image; headline 3 lines and about 6 words at most; one accent word.
+6. One benefit per image, proved by its own card (never the same proof on two images); headline 3 lines
+   and about 6 words at most; one accent word.
 7. The first three images do most of the work: the hero and the two strongest features, all real UI.
+   The hero's corners stay clear: three layers at most, badges in open field, never glass on live UI.
 8. Most of every set shows the real app (Apple: more than half; Play: the first three).
 9. Never: rankings, awards, prices, "free", calls to action, emoji, or another store's names and devices.
-10. Lift the card that proves the headline at reading size; never shrink a whole phone to fit more.
+10. Lift the card that proves the headline at reading size; never shrink a whole phone to fit more, never
+    cover the proof, and keep cards straight (tilt a fan, or one accent card, on purpose).
 11. Prefer named boxes (`data-box`, `.boxes.json`) over crop numbers.
-12. One demo persona, one "today", the same data and the same clean status bar on every screen.
+12. One demo persona, one "today", the same data and the same clean status bar on every screen; re-do
+    every sum and every date sum in the mock data.
 13. Capture at the largest device; a `... is upscaled` warning is a defect.
-14. Keep text and key UI 40 design units inside the edges (render checks lifts, badges and copy; `bleed:
-    true` marks a cut on purpose), and the feature graphic copy and logo in x 154-872, y 76-424.
+14. Keep text and key UI 40 design units inside the edges and the panorama seams (render checks lifts,
+    badges, copy and screen slivers; `bleed: true` / `bridge: true` mark a cut on purpose), and the
+    feature graphic copy, logo and cards in x 154-872, y 76-424.
 15. Render both canvases (tall iPhone and 9:16 Play) before calling a layout done.
 16. Every language is localized, screens included (render and validate flag a missing translation or a
     borrowed screen); read every RTL image.

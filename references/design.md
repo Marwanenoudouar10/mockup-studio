@@ -36,7 +36,10 @@ serves that second.
   (`w` in stage units >= 0.5 x the card's width in capture pixels). Its body text then stays about 20 px
   or taller on the 1320 px image. The hero's orbit cards can be smaller: they support, the phone leads.
 - Never shrink a whole phone to fit more. Fewer, bigger elements read better.
-- Never the same card twice on one image, and never a card that covers the part of the phone it belongs to.
+- Never the same card twice on one image (the render warns), and never a card that covers the part of
+  the phone it belongs to or the proof (amounts, progress) the headline promises.
+- **One proof, one image.** A card or screen that proves image 4 is not also the hero's lift, a fan's
+  side phone and the feature graphic's card: repeats make the app look like it has fewer features.
 
 ## Contrast and colour
 - Headline on the field: 3:1 at least, 4.5:1 for the sub line (the palette board checks it).
@@ -67,8 +70,7 @@ before calling a layout done. Use variants for the few values that differ: `y: {
 - A device or tile cut by the edge is fine when it is on purpose (a fan, a big straight phone). A card cut
   on purpose says so with `bleed: true`. A cut headline, a cut button label or a card cut by accident is
   a defect.
-- Never the same card twice: the render warns when a lifted card is also visible in a phone, tablet or
-  tile of the same image.
+- In a panorama, every seam is an image edge too (`layouts.md`, "Seams"); the render checks both.
 - In the feature graphic, keep the logo, name and slogan inside x 154-872, y 76-424 (`policy.md`); the
   check measures the logo too, which drops its optical overhang there.
 
@@ -94,6 +96,10 @@ before calling a layout done. Use variants for the few values that differ: `y: {
 
 ## Light, dark and the device frames
 - One theme per set, matching what most users see. A dark-mode image is a feature image of its own.
+- **The watermark on a dark field:** the giant mark is cropped by the canvas edge, and over strong glows
+  the field left between its arcs reads as "murky rings and wedges", not a motif. Read it at 25%; turn it
+  off where it does not read (`brand.watermark: { playstore: false, default: true }`, a panel's
+  `watermark: false`, `feature.watermark: true` to keep it only on the feature graphic).
 - The frames draw a Dynamic Island (iPhone) and a punch-hole camera (Android). Screens must leave those
   areas empty; captures that already show them need `island: false` / `camera: false`.
 
@@ -127,3 +133,19 @@ Before calling an image done, read it at full size and at 25%:
 3. Can you read the lifted card at 25%?
 4. Is anything cut, covered, doubled, misspelled or untranslated?
 5. Does it look like the other images of the set?
+
+## The set checklist (what a reviewer found on a set that passed every check)
+Validate passing means the files are legal, not that the set is good. Before delivery, check:
+- **Hero corner:** no more than three layers overlap anywhere on image 1; no glass badge on live UI.
+- **Rotation:** cards straight; a fan and at most one accent card per image tilt (`layouts.md`).
+- **Proof:** every image's proof card is visible, uncovered and not repeated elsewhere in the set.
+- **Arithmetic:** donut slices add up to the total, budgets left add up, "ready by" dates match the
+  weekly amount times the weeks. A sharp client checks a finance set.
+- **Platform edges:** no row sliced in half by Android's opaque nav bar; no frameless window that
+  starts with a status bar.
+- **Rhythm:** no dead band of 250+ units over or under the stage; cards as big as the room allows.
+- **Panorama:** read the uncut strip (`render --strip`); no text slivers across seams; the thread is a
+  hero element or absent.
+- **One brand everywhere:** the brand board, the cover and the icon use the delivered accent and the
+  delivered screens (re-render the board from the real captures; `brand.md`).
+- **The cover:** shows what its sub line claims (both stores, or say which), and the strip flush.

@@ -1,6 +1,8 @@
 // Icon set for mock screens: 24 x 24 grid. iOS draws SF-Symbols-like strokes (1.8), Android
 // Material-like strokes (2.0); selected tabs use the filled form. Add your own: ICONS.name = 'path d'
 // or { s: 'stroke d', f: 'filled d', fs: 'strokes drawn with the filled form', ios: {...}, android: {...} }.
+// A project adds icons from its own module (screens/js/icons.js: import { ICONS } from '../kit/icons.js';
+// ICONS.piggy = '...';), loaded right after kit.js: <script type="module" src="js/icons.js"></script>.
 export const ICONS = {
   home: { s: 'M4 10.6L12 4l8 6.6V19a1.5 1.5 0 0 1-1.5 1.5H15V15h-6v5.5H5.5A1.5 1.5 0 0 1 4 19z',
     f: 'M11.1 3.3a1.4 1.4 0 0 1 1.8 0l7.6 6.3c.3.3.5.7.5 1.1V19a2 2 0 0 1-2 2h-3.5a.5.5 0 0 1-.5-.5v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5a.5.5 0 0 1-.5.5H5a2 2 0 0 1-2-2v-8.3c0-.4.2-.8.5-1.1z' },
@@ -81,6 +83,17 @@ export const ICONS = {
   plane: { f: 'M21 15.5v-1.8l-7.5-4.7V4.3a1.5 1.5 0 0 0-3 0V9L3 13.7v1.8l7.5-2.3v4.6l-2 1.5V21l3.5-1 3.5 1v-1.7l-2-1.5v-4.6z' },
   wallet: 'M4.5 6.5h14a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18V6.5zM4 7l11-3v2.5M15.5 13h1.5',
   gear: { s: gear(), f: gear(true) },
+  // money and security (finance, banking, subscriptions)
+  bank: 'M3.5 9.5L12 4.5l8.5 5M5.5 10.5v6.5M9.8 10.5v6.5M14.2 10.5v6.5M18.5 10.5v6.5M3.5 20h17',
+  cart: 'M3 4.5h2.2l2.1 10.3a1.5 1.5 0 0 0 1.5 1.2h8.3a1.5 1.5 0 0 0 1.5-1.1L20.5 8H6.2M9.5 20.2a.9.9 0 1 1 0-1.8a.9.9 0 0 1 0 1.8zM17 20.2a.9.9 0 1 1 0-1.8a.9.9 0 0 1 0 1.8z',
+  bus: 'M6.5 3.5h11a2 2 0 0 1 2 2V17a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 17V5.5a2 2 0 0 1 2-2zM4.5 11.5h15M8 15h.01M16 15h.01M7 18.5v2M17 18.5v2',
+  receipt: 'M6 3.5h12v17l-2-1.4-2 1.4-2-1.4-2 1.4-2-1.4-2 1.4zM9 8h6M9 11.5h6M9 15h3.5',
+  repeat: 'M17 3.5l3 3-3 3M4 11.5v-1a4 4 0 0 1 4-4h12M7 20.5l-3-3 3-3M20 12.5v1a4 4 0 0 1-4 4H4',
+  shield: { s: 'M12 3.5l7 2.8v5.2c0 4.4-3 7.8-7 9-4-1.2-7-4.6-7-9V6.3z', f: 'same' },
+  faceid: 'M4 8.5V6a2 2 0 0 1 2-2h2.5M15.5 4H18a2 2 0 0 1 2 2v2.5M20 15.5V18a2 2 0 0 1-2 2h-2.5M8.5 20H6a2 2 0 0 1-2-2v-2.5M9 9.5v1.5M15 9.5v1.5M12 9.5v4h-1M9.5 16a3.6 3.6 0 0 0 5 0',
+  fingerprint: 'M5.5 9.5a7 7 0 0 1 13 0M7.4 19a9.5 9.5 0 0 1-1.4-5.5a6 6 0 0 1 12 0v.5M12 13.5c0 3 .8 5.2 2.2 7M9.2 17.6a10 10 0 0 1-.7-4.1a3.5 3.5 0 0 1 7 0c0 1.5.2 2.8.6 4M17.8 18.2a14 14 0 0 1-.3-2.5',
+  target: 'M12 3.5a8.5 8.5 0 1 1 0 17a8.5 8.5 0 0 1 0-17zM12 7.5a4.5 4.5 0 1 1 0 9a4.5 4.5 0 0 1 0-9zM12 11.2a.8.8 0 1 1 0 1.6a.8.8 0 0 1 0-1.6z',
+  coffee: 'M4.5 9h11v5.5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5zM15.5 10.5h1.5a2.5 2.5 0 0 1 0 5h-1.6M8 3.5v2.5M11.5 3.5v2.5',
 };
 
 function gear(solid = false) {

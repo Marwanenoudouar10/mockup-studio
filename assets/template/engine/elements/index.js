@@ -35,6 +35,7 @@ export async function buildElements(stage, ctx) {
     const node = make({ ...(ctx.mirror ? ctx.mirror(e) : e), type }, full);
     if (node && e.id != null) node.dataset.el = e.id;
     if (node && e.$panel != null) node.dataset.panel = e.$panel;
+    if (node && e.bridge) node.dataset.bridge = '1'; // a panorama seam crossing on purpose (core/seams.js)
     return node;
   };
   await load(stage);

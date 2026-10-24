@@ -26,7 +26,8 @@ const platform = q.get('platform') || html.dataset.platform || 'ios';
 // iPad screens use the iOS look; web and mac pages use the desktop look at any viewport size
 const family = platform === 'android' ? 'android' : platform === 'web' || platform === 'mac' ? 'web' : 'ios';
 const size = q.get('size') || html.dataset.size || (family === 'web' ? 'desktop' : platform);
-const theme = q.get('theme') || html.dataset.theme || 'light';
+// ?theme forces; <html data-theme> next; ?themeDefault (the config's screens.theme) only fills a gap
+const theme = q.get('theme') || html.dataset.theme || q.get('themeDefault') || 'light';
 const locale = q.get('locale') || html.getAttribute('lang') || 'en';
 
 html.classList.add(family, platform);

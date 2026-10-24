@@ -21,8 +21,8 @@ layouts are still changed by Claude in the project files, and the board refreshe
 ```bash
 cd workspace
 npm install                                   # no dependencies: node:http, fs.watch and server-sent events
-npm start -- ~/clients                        # a folder of projects (searched two levels deep)
-npm start -- ~/clients/acme ~/clients/fenna   # or project folders (each has a studio.config.js)
+npm start -- ~/clients                        # a folder of projects (searched two levels deep, again on each page load)
+npm start -- ~/clients/acme ~/clients/nova    # or project folders (each has a studio.config.js)
 npm start                                     # the projects from last time (workspace.json)
 ```
 It prints the URL (default `http://127.0.0.1:4400/`, `--port 4410` for another, a free one if busy) and

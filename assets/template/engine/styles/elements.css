@@ -55,18 +55,21 @@
   box-shadow: 0 24px 60px color-mix(in srgb, var(--shadow) calc(38% * var(--shadow-k)), transparent),
     0 6px 14px color-mix(in srgb, var(--shadow) calc(20% * var(--shadow-k)), transparent);
 }
-.badge.solid .badge-icon { color: var(--primary); }
+.badge.solid .badge-icon { color: var(--badge-icon, var(--primary)); }
 .badge.accent {
   color: var(--ink);
   background: var(--accent);
   box-shadow: 0 24px 60px color-mix(in srgb, var(--shadow) calc(36% * var(--shadow-k)), transparent);
 }
+/* a hairline edge, so an ink badge on a dark field still reads as a chip, not a hole */
 .badge.dark {
   color: #ffffff;
   background: var(--ink);
-  box-shadow: 0 24px 60px color-mix(in srgb, var(--shadow) calc(36% * var(--shadow-k)), transparent);
+  box-shadow: inset 0 0 0 2px rgb(255 255 255 / .14),
+    0 24px 60px color-mix(in srgb, var(--shadow) calc(36% * var(--shadow-k)), transparent);
 }
-.badge.dark .badge-icon { color: var(--accent); }
+.badge.dark .badge-icon { color: var(--badge-icon, var(--accent)); }
+.badge.glass .badge-icon, .badge.accent .badge-icon { color: var(--badge-icon, currentColor); }
 
 /* a missing screen is never a silent blank */
 .missing {

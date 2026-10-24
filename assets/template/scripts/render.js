@@ -1,10 +1,12 @@
 // Renders the store images: final/<locale>/<store>/01.png ... (24-bit RGB, no alpha).
-//   node scripts/render.js [--store appstore,og] [--locale en] [--panel 2] [--out final] [--config file] [--scale 2|3]
+//   node scripts/render.js [--store appstore,og] [--locale en] [--panel 2] [--out final] [--config file] [--scale 2|3] [--strip]
 // Each target renders its own panels (same space, `only` filter) numbered 01, 02 ... in config order.
 // --panel N is the CONFIG panel number (its position in `panels`, as in layout.json), not the image number of
 //   a target: on og, whose one image is panel 4, use --panel 4 (a note says so when N is not on the target).
 // Another --config without --out writes to out/qa/<config name>/, never into final/.
-// Panorama stores render ONE strip per locale and clip it into the images.
+// Panorama stores render ONE strip per locale and clip it into the images. --strip also writes the uncut strip
+//   to out/qa/strip/<locale>-<store>.png, to judge the panorama as one composition (bridges, the field, the
+//   thread across the seams); the overview sheet adds gaps, the product page shows each image alone.
 // --scale N: the hi-res PORTFOLIO export, every image at N x its store size (deviceScaleFactor N) into
 //   final/portfolio/<locale>/<store>/ (never mixed with the upload folders).
 // Every page runs the sharpness and layout checks; findings go to the log and to <out>/render-report.json
@@ -14,7 +16,7 @@ import path from 'node:path';
 import { pad2, panelsFor } from './lib/config.js';
 import { pngInfo, flattenPng } from './lib/png.js';
 import { jpegInfo } from './lib/jpeg.js';
-import { parseArgs, list, loadConfig, outDir, rel, kb, isMain, fail } from './lib/cli.js';
+import { ROOT, parseArgs, list, loadConfig, outDir, rel, kb, isMain, fail } from './lib/cli.js';
 import { openSession, capture } from './lib/session.js';
 import { recordQuality } from './lib/report.js';
 import { textFindings } from './lib/locales.js';
@@ -111,14 +113,22 @@ export async function runRender(session, cfg, cfgRel, flags = {}) {
         fs.writeFileSync(file, png);
         printFile(file, png, ms, warn);
         const ui = info && info.ui ? !!info.ui[slice] : null;
-        report[rel(file)] = { scale, upscale: (info && info.upscale) || [], ui, issues: issuesFor(info, slice) };
+        report[rel(file)] = { scale, f: info && info.f, upscale: (info && info.upscale) || [], ui, issues: issuesFor(info, slice) };
         count++;
       };
       if (st.panorama) {
         const t0 = Date.now();
         const all = panelsFor(cfg, st);
         const clips = ps.map((p) => ({ x: (p.n - 1) * W, y: 0, width: W, height: H }));
+        if (flags.strip) clips.push({ x: 0, y: 0, width: W * all.length, height: H });
         const bufs = await capture(session, `${base}&strip=1`, { width: W * all.length, height: H, clips, dpr: scale });
+        if (flags.strip) {
+          const file = path.join(ROOT, 'out', 'qa', 'strip', `${locale}-${st.id}.png`);
+          fs.mkdirSync(path.dirname(file), { recursive: true });
+          const png = flattenPng(bufs.pop());
+          fs.writeFileSync(file, png);
+          printFile(file, png, 0);
+        }
         const info = await session.info();
         const warn = session.drain();
         bufs.forEach((b, i) => save(b, ps[i], i === 0 ? Date.now() - t0 : 0, i === 0 ? warn : [], info, ps[i].n - 1));

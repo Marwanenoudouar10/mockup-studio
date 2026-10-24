@@ -12,6 +12,21 @@ left. Wide stage: 1600 x 1200. `x` = centre, `y` = top edge, `w` = width (a devi
 by `box` name or `crop`), `tile` (a frameless screen or an image as a window), `badge` (a short chip),
 and on wide targets `browser`, `laptop`, `monitor`, `tablet` (`web.md`).
 
+**Composition rules** (from a reviewed portfolio set; the render checks the measurable ones):
+- **Rotate on purpose or not at all.** Data cards, windows and stacks stay straight (`r: 0`). Tilt a fan
+  (6-9 degrees) and at most ONE accent card per image (3-5). A 1-2 degree tilt reads as an accident, and
+  three cards at three angles wobble.
+- **Badges sit in open field** (the band under the stage, beside the headline), `solid` or `dark`, never
+  `glass` over live UI (it blurs the rows into a smudge) and never over a tab bar or a row it half hides.
+- **At most three layers** overlap at any point of image 1 (field, phone, one card). A cluttered corner
+  of the hero is what search results show.
+- **A card never covers the proof:** the amounts, the progress, the label the headline promises. Park
+  a lift over the phone's quiet zone (the tab bar, the list end) or beside it.
+- **Fill the canvas:** the stage ends about 150 units above the bottom edge; a 250+ unit dead band
+  between the sub line and the stage, or under it, means: raise the stage, enlarge the cards 8-10%.
+- **Windows start below the status bar:** a frameless tile showing 9:41 and a battery is "a phone with
+  its bezel missing". Use `from: '<box at the top>'` (or `cropTop: <capture px>`) on the tile.
+
 ## 1. Hero orbit (image 1)
 ```
 +------------------+   the main screen straight, 2-3 proof cards
@@ -27,8 +42,9 @@ and on wide targets `browser`, `laptop`, `monitor`, `tablet` (`web.md`).
 { logo: true, headline: 'Your day, <em>one&nbsp;page</em> at a time', stage: [
   { type: 'phone', screen: 'home', w: 760, x: 660, y: 40, z: 20 },
   { type: 'lift', screen: 'insights', box: 'streak', w: 520, x: 960, y: { playstore: 200, default: 330 }, r: 4, z: 31 },
-  { type: 'lift', screen: 'insights', box: 'lifts', w: 560, x: 930, y: 1250, r: 3, z: 33 },
-  { type: 'badge', text: 'Private by default', icon: 'lock', x: 400, y: 1130, r: -4, z: 40 } ] }
+  { type: 'lift', screen: 'insights', box: 'lifts', w: 560, x: 930, y: 1250, z: 33 },
+  // the badge rides the phone's left edge: read the image, it must hide no row (else move it under the copy)
+  { type: 'badge', text: 'Private by default', icon: 'lock', x: 400, y: 1130, z: 40 } ] }
 ```
 
 ## 2. Macro lift (a feature at reading size)
@@ -61,6 +77,7 @@ and on wide targets `browser`, `laptop`, `monitor`, `tablet` (`web.md`).
 ```
 ```js
 { headline: 'See what <em>lifts</em> your mood', stage: [
+  // from: 'streak' would start the window at that card, under the status bar and the nav title
   { type: 'tile', screen: 'insights', w: 840, h: 1240, x: 490, y: 0, r: -3, z: 5, radius: 70, pos: 'top' },
   { type: 'phone', screen: 'entry', w: 600, x: 1010, y: 460, r: 7, z: 20 },
   { type: 'lift', screen: 'home', box: 'mood', w: 680, x: 460, y: 1150, r: -3, z: 30 } ] }
@@ -167,9 +184,9 @@ Frameless on Play only, phones elsewhere: `stage: { playstore: [ ...this... ], d
 
 ## 10. Card stack (no device)
 ```
-+------------------+   three lifted cards, big and slightly
-| The cards that   |   rotated. Every element is real UI, so it
-| matter           |   still counts as "the app in use".
++------------------+   three lifted cards, big and straight
+| The cards that   |   (one may tilt as the accent). Every element
+| matter           |   is real UI: it counts as "the app in use".
 | [=============]  |
 |  [============]  |
 | [=============]  |
@@ -177,9 +194,9 @@ Frameless on Play only, phones elsewhere: `stage: { playstore: [ ...this... ], d
 ```
 ```js
 { headline: 'The cards that <em>matter</em>', stage: [
-  { type: 'lift', screen: 'home', box: 'prompt', w: 1060, x: 660, y: 60, r: -3, z: 10 },
-  { type: 'lift', screen: 'insights', box: 'streak', w: 980, x: 700, y: 640, r: 2, z: 20 },
-  { type: 'lift', screen: 'insights', box: 'lifts', w: 1000, x: 640, y: 1150, r: -2, z: 30 } ] }
+  { type: 'lift', screen: 'home', box: 'prompt', w: 1060, x: 660, y: 60, z: 10 },
+  { type: 'lift', screen: 'insights', box: 'streak', w: 980, x: 700, y: 640, r: 3, z: 20 },
+  { type: 'lift', screen: 'insights', box: 'lifts', w: 1000, x: 640, y: 1150, z: 30 } ] }
 ```
 
 ## 11. Panorama bridge
@@ -208,6 +225,28 @@ stage: {
 ```js
 { type: 'phone', screen: 'entry', w: 640, x: 1320, y: 420, r: 8, z: 15 }   // bridges images 1 and 2
 ```
+**Seams.** On the product page each image is seen ALONE, with gaps between them, so every seam is an
+image edge for anything that does not clearly bridge it:
+- A bridging device puts its bezel only, or a real share of its screen (a chart, a ring, a tab bar),
+  across. A sliver of text on the next image ("pending", "and transac") reads as junk: the render warns
+  `... shows a 130-unit sliver of its screen on image 5` (`bridge: true` = on purpose).
+- Cards, badges and copy keep 40 units from every seam (the render warns), or cross it by a real share.
+- Sizes scale by the stage factor (1.08 on the tall iPhone, printed as `f` in `render-report.json`)
+  while `x` does not: a card placed `w / 2 + 40` from a seam really ends `0.04 w` closer. A device's
+  frame adds about 4% of `w` per side outside the screen, and a rotation widens it again.
+- Judge the strip as ONE picture: `npm run render -- --store appstore --strip` writes the uncut strip
+  to `out/qa/strip/`; the overview sheet adds gaps.
+
+**A continuous thread** (a line, a wave, a ribbon across all images) is a hero element or nothing: 6-8
+px, in open field between the copy and the stage, a node at each seam. A faint line hidden behind cards
+shows only as stubs at the image edges, which read as artifacts. Draw it as per-slice backgrounds (one
+SVG per image) in `brand/theme.css`: no `mask`, `filter` or CSS `opacity` on a full-strip layer, which
+Chrome drops at `--scale 2` (a 16,000 px strip came out as one flat tile while every check passed).
+
+**The field across a strip.** The presets (`field.css`) are measured on the whole strip: six images get
+two glows. A panorama canvas has the class `panorama` and `--slices` / `--slice-w`, so a theme can
+repeat one glow per image: `.canvas.field-x.panorama { background-size: calc(100% / var(--slices)) 100%; }`.
+A per-store field (`brand.field: { appstore: 'x-strip', default: 'x' }`) keeps single images unchanged.
 
 ## Feature graphic (1024 x 500, plain pixel coordinates)
 Copy on the left inside the safe zone (x 154-534 by default), devices in the right third.
@@ -220,6 +259,8 @@ stage: [ { type: 'phone', screen: 'entry', w: 196, x: 668, y: 120, r: -8, z: 10 
 stage: [ { type: 'phone', screen: 'home', w: 230, x: 700, y: 50, r: -6, z: 10 },
          { type: 'lift', screen: 'insights', box: 'streak', w: 250, x: 800, y: 300, r: 4, z: 20 } ]
 ```
+Keep every card's right edge at x 872 or less (Google may crop beyond it), and show a card the
+screenshots do not already repeat.
 
 ## Wide recipes (web, social, desktop)
 Wide panels say `space: 'landscape'` and which targets show them (`only`). Copy goes beside the stage
@@ -252,12 +293,21 @@ stage: [ { type: 'laptop', screen: 'journal', url: 'brimpage.example/journal', w
 **W4. Monitor** (Mac App Store, web hero): `{ type: 'monitor', screen: 'dashboard', w: 1340, x: 760, y: 60, z: 10 }`
 plus a lift of one KPI card (`examples/web.config.js`).
 
+**W5. Portfolio cover from the finished set** (`portfolio`, the Upwork / Dribbble thumbnail): a tile
+whose `src` is a rendered image, e.g. the uncut strip copied to `brand/cover-strip.png`, or
+`final/en/appstore/01.png`. Rules: `export` renders targets in `stores` order, so list `portfolio` after
+the store it shows, and run export twice on a fresh project (the first pass has nothing to show; a
+missing `src` is an issue, and validate fails it); show the strip flush (no gaps: it is one panorama)
+with a hairline edge and a soft shadow on a backdrop that contrasts with the field; the sub line claims
+only what the cover shows ("App Store panorama for ...", not "App Store and Google Play" with no Play
+image).
+
 ## Tuning a recipe
 - Render one image while you tune: `npm run render -- --store appstore --panel 2 --out out/qa/p2`, then
   the same for `playstore`. Read both. `--panel` is the config's panel number (its position in `panels`).
 - Cards, badges and the copy keep 40 units from the edges; the render warns otherwise. A card cut on
   purpose says so: `bleed: true`. Never lift a card that the phone on the same image already shows.
 - Higher `z` draws on top. Lifts 30+, badges 40, phones 10-20, tiles 5.
-- Small rotations (3-9 degrees) look designed; more looks like an accident.
+- Rotations: see "Composition rules" at the top (straight cards; a fan 6-9; one accent card 3-5).
 - A card's `y` that works on the tall iPhone canvas can hide UI on 9:16: give it a per-store value.
 - Moving things by hand is faster in Store Studio (`workspace.md`); `npm run bake` writes the moves back.

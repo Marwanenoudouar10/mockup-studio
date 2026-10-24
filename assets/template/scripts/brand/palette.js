@@ -1,5 +1,9 @@
-// npm run brand -- palette [--seed "#6C5CE7"] [--mood warm] [--options 3]
+// npm run brand -- palette [--seed "#6C5CE7"] [--mood warm] [--options 3] [--look dark] [--accent "#C6F432"] [--theme dark]
 // Seed: --seed, else the brief's "Seed colour", else the current primary. Mood: --mood, else the brief's.
+// --look dark: three dark directions (night, graphite, deep) instead of drenched, night, paper (a dark brief).
+// --accent: pin the accent colour (a client's real accent; an electric lime) instead of deriving it.
+// --theme dark: the sample screens in dark mode, on the option's dark app surfaces (a dark-first app);
+//   default: the config's screens.theme.
 // -> out/brand/palette/palettes.json        every option: colours, ramp, neutrals, UI tokens, checks
 //    out/brand/palette/option-N.tokens.json  each option as a token file (previews: ?tokens=...)
 //    out/brand/palette/sample-N.png          the kit's sample screen in that option (+ sample-N-phone.png without
@@ -21,7 +25,10 @@ export async function run(flags, { cfg, tokens, rel }) {
   if (!MOODS[mood]) throw new Error(`--mood ${mood}: use ${Object.keys(MOODS).join(', ')}`);
   const count = Number(val(flags.options) || 3);
   if (!(count >= 1 && count <= 3)) throw new Error('--options takes 1, 2 or 3 (one per direction: drenched, night, paper)');
-  const options = generate(seed, { mood, count });
+  const look = val(flags.look);
+  const accent = val(flags.accent);
+  const theme = val(flags.theme) || (cfg.screens && cfg.screens.theme) || null;
+  const options = generate(seed, { mood, count, look, accent });
   const dir = `${OUT}/palette`;
   const name = brief.name || cfg.brand.name;
   const { fonts, headlineWeight } = currentFonts(tokens, cfg);
@@ -30,7 +37,7 @@ export async function run(flags, { cfg, tokens, rel }) {
   }
   writeJson(`${dir}/palettes.json`, { seed, mood, dir, sample: sampleCopy(brief, cfg, tokens), options });
 
-  console.log(`palette  seed ${seed} · mood ${mood} · ${options.length} option(s)`);
+  console.log(`palette  seed ${seed} · mood ${mood}${look ? ` · look ${look}` : ''}${accent ? ` · accent ${normHex(accent)}` : ''} · ${options.length} option(s)`);
   for (const o of options) {
     const bad = o.checks.filter((c) => !c.pass);
     console.log(`  ${o.id}  ${o.name.padEnd(28)} primary ${o.colors.primary}  accent ${o.colors.accent}  field ${o.field.padEnd(9)}`
@@ -40,8 +47,8 @@ export async function run(flags, { cfg, tokens, rel }) {
   try {
     for (const o of options) {
       const tokensFile = `${dir}/option-${o.id}.tokens.json`;
-      await shootSample(session, `${dir}/sample-${o.id}.png`, { tokens: tokensFile });
-      await shootSample(session, `${dir}/sample-${o.id}-phone.png`, { tokens: tokensFile, hide: 'card' });
+      await shootSample(session, `${dir}/sample-${o.id}.png`, { tokens: tokensFile, theme });
+      await shootSample(session, `${dir}/sample-${o.id}-phone.png`, { tokens: tokensFile, hide: 'card', theme });
     }
     await shootBoard(session, rel, 'palette', { data: `${dir}/palettes.json` }, `${dir}/palette-board.png`);
   } finally {

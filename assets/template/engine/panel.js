@@ -1,7 +1,7 @@
 // Orchestrates one store image, or every image of a panorama store on one strip.
 // Portrait targets (phone stores): fonts -> copy -> fit -> measure -> stage -> ornaments -> images.
 // Landscape targets (web, social, desktop): layout/wide.js. Then the sharpness check and window.__ready.
-import { target } from '../scripts/lib/config.js';
+import { target, normWatermark } from '../scripts/lib/config.js';
 import { q, loadConfig, ready, fail, plain } from './core/boot.js';
 import { applyColors, loadFonts } from './core/theme.js';
 import { waitImages } from './core/assets.js';
@@ -22,7 +22,7 @@ async function portrait(t, panels, strip, icon) {
   const field = (!strip && panels[0].field) || t.brand.field;
   const cv = makeCanvas({ W, H, slices: panels.length, field, grain: t.brand.grain });
   await loadFonts(t.brand, panels.map((p) => `${plain(p.headline)} ${p.sub || ''}`).join(' '));
-  await addWatermarks(cv, t.brand);
+  await addWatermarks(cv, t.brand, { perSlice: panels.map((p) => (p.watermark === undefined ? undefined : normWatermark(p.watermark, t.brand))) });
 
   const blocks = [];
   for (const [i, p] of panels.entries()) {

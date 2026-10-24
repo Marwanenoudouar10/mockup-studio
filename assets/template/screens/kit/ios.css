@@ -38,8 +38,8 @@
 .ios.dark {
   --bg: var(--app-bg-dark, #000000);
   --surface: var(--app-surface-dark, #1C1C1E);
-  --surface-2: #2C2C2E;
-  --sheet-bg: #1C1C1E;
+  --surface-2: var(--app-raised-dark, #2C2C2E);
+  --sheet-bg: var(--app-surface-dark, #1C1C1E);
   --fill: rgb(118 118 128 / .24);
   --text: #FFFFFF;
   --text-2: rgb(235 235 245 / .62);
@@ -48,7 +48,7 @@
   --outline: rgb(235 235 245 / .2);
   --tint-soft: color-mix(in oklab, var(--tint) 26%, #1C1C1E);
   --on-tint-soft: color-mix(in oklab, var(--tint) 45%, #fff);
-  --glass: rgb(44 44 48 / .6);
+  --glass: var(--app-glass-dark, rgb(44 44 48 / .6));
   --glass-rim: rgb(255 255 255 / .16);
   --glass-shadow: 0 0 0 .5px rgb(255 255 255 / .08), 0 8px 24px rgb(0 0 0 / .4);
   --shadow-card: none;
@@ -158,11 +158,11 @@
 .ios .segmented { height: 36px; padding: 2px; border-radius: 18px; background: var(--fill); }
 .ios .segmented > span { border-radius: 16px; font-weight: 500; font-size: 14px; letter-spacing: -.01em; color: var(--text); }
 .ios .segmented > span.on { background: var(--surface); font-weight: 600; box-shadow: 0 0 0 .5px rgb(0 0 0 / .04), 0 3px 8px rgb(0 0 0 / .12); }
-.ios.dark .segmented > span.on { background: #636366; }
+.ios.dark .segmented > span.on { background: var(--app-segment-dark, #636366); }
 
 .ios .switch { width: 62px; height: 28px; border-radius: 14px; background: rgb(120 120 128 / .16); }
 .ios .switch::after { top: 2px; left: 2px; width: 38px; height: 24px; border-radius: 12px; background: #fff; box-shadow: 0 2px 6px rgb(0 0 0 / .16), 0 0 0 .5px rgb(0 0 0 / .04); }
-.ios .switch.on { background: var(--green); }
+.ios .switch.on { background: var(--switch-on, var(--green)); }
 .ios .switch.on::after { left: 22px; }
 
 .ios .field .label { padding: 0 4px 6px; font-size: 13px; color: var(--text-2); }

@@ -1,4 +1,4 @@
-// <out>/render-report.json: what the renderer learned that the files cannot tell, keyed by file
+// <out>/render-report.json: what the renderer learned that the files cannot tell, keyed by file (f = the stage scale)
 // (relative to the project): { "final/en/og/01.png": { "scale": 1, "upscale": [{ what, ratio, src, px }],
 //   "ui": true, "issues": ["lift \"streak\" (insights) is cut by the right edge ..."] } }.
 // ui = the image shows the app (a screen over 2% of it, engine/core/checks.js); issues = the page's findings

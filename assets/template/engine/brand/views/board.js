@@ -8,6 +8,7 @@ import { contrast, onColor, level } from '../../../scripts/brand/lib/color.js';
 import { el, esc, page, swatch, label, iconShape, today } from '../ui.js';
 import { miniPanel } from '../thumb.js';
 import { at } from '../../core/root.js';
+import { brandFor } from '../../../scripts/lib/config.js';
 
 const tile = (cls, title) => {
   const t = el('section', `bb-cell ${cls}`);
@@ -71,10 +72,12 @@ export async function render(cfg, data) {
   const b = cfg.brand;
   const c = b.colors;
   const s = data.sample || {};
+  // the field as the first phone store renders it (brand.field may vary per store or platform)
+  const field = brandFor(cfg).field;
   await loadFonts(b, `${s.name} ${s.oneLiner} Aa ${s.headline}`);
   const src = data.source || {};
   const main = page({
-    eyebrow: 'Brand board · for approval',
+    eyebrow: data.label || 'Brand board · for approval',
     title: s.name || b.name,
     titleFont: 'var(--font-display)',
     sub: esc(s.oneLiner || ''),
@@ -102,8 +105,12 @@ export async function render(cfg, data) {
   icon.append(icons, el('div', 'bb-icon-name', esc(s.name || b.name)));
   const ui = tile('ui', 'Interface');
   const shot = tile('panel', null);
-  main.append(hero, reversed, shot, icon, palette(c), type(b.fonts, b.headlineWeight, s), ui);
-  fieldBackdrop(reversed, b.field, b.grain);
+  const typeTile = type(b.fonts, b.headlineWeight, s);
+  // on a dark field the store images set the accent word in the accent, so the specimen does too
+  const onField = data.specimen ? data.specimen === 'field' : field === 'dark';
+  if (onField) typeTile.classList.add('on-field');
+  main.append(hero, reversed, shot, icon, palette(c), typeTile, ui);
+  fieldBackdrop(reversed, field, b.grain);
   fitWordmarks(main);
 
   const card = data.box || data.crop;
@@ -114,13 +121,14 @@ export async function render(cfg, data) {
   // the phone shows another screen than the lifted card's (never the same card twice on one image)
   const two = data.phone && data.phone !== data.screen;
   await miniPanel(shot, {
-    W, H, cfg,
+    W, H, cfg, field,
     panel: { headline: s.headline, name: s.name, wordmark: !s.logo },
     stage: [
       { type: 'phone', screen: two ? data.phone : data.screen, w: 760, x: 660, y: 40, z: 20 },
       ...(two && card ? [{ type: 'lift', screen: data.screen, box: data.box, crop: data.crop, w: 640, x: 420, y: 1060, r: -4, z: 30 }] : []),
     ],
   });
+  if (onField) fieldBackdrop(typeTile, field, b.grain); // last: the UI card and thumbnail set the row height
 }
 
 // the box (from the capture's boxes file) or the --crop, cut out at the tile's width (as the engine's lift does)

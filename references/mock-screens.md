@@ -6,11 +6,13 @@ captures it for iOS and Android into `raw/`, exactly where Mode A captures go. F
 are the same. Web pages use the web kit: see `web.md`.
 
 ## Start from the app spec
-Write `briefs/app-spec.md` after the brand board is approved (the demo version shows the shape):
+`briefs/app-spec.md` (the demo version shows the shape) gets the intake description at Step 0; write the
+rest after the brand board is approved:
 - **5-8 key screens**, each with its purpose and realistic content.
 - **One demo persona** (name, "today", numbers that add up), the same on every screen.
 - **A story map:** which screen proves which store image, and which card each image lifts out. Those
-  cards become `data-box` names.
+  cards become `data-box` names. One proof per image: a card (a goal ring, a chart) that proves image 4
+  is not also the hero's lift, a fan's side phone and the feature graphic's card; that set looks thin.
 - Invented names only: no real people, brands or customer data.
 
 ## Files
@@ -22,7 +24,19 @@ screens/
   ios/<name>.html  android/<name>.html    optional: one screen overridden for one platform
   web/<name>.html                         desktop pages (web.md)
   kit/                                    the kit: kit.css, kit.js, chrome, components, icons, charts, art
+  css/<part>.css  js/icons.js              optional: app CSS split by job (app.css only @imports them, so no
+                                          file passes 300 lines); extra icons (`ICONS.x = '...'` in a module
+                                          loaded right after kit.js)
+  _sample.html                            optional: the brand boards' sample in this app's words (brand.md)
 ```
+A folder in `screens/` is read as a platform override only when it is a platform name (`ios`, `android`,
+`ipad`) and as web pages when it is `web` or `mac`; `css/`, `js/` and files starting with `_` are never
+captured.
+
+**Reserved class names.** The kit builds its chrome from generic classes: `bar` (the navbar row), `head`,
+`tabs`, `tab`, `ind`, `body`, `title`, `sub`, `trail`, `label`, `value`, `spacer`, `accessory`, `glass`.
+App CSS must not style them globally: a progress bar named `.bar` turned the whole iOS navbar into a band.
+Prefix the app's own classes (`.s-meter`, `.goal-bar`) or scope them (`.card .meter`).
 
 ## A new screen
 ```html
@@ -65,8 +79,12 @@ and use it in a panel: `{ type: 'lift', screen: 'settings', box: 'week', w: 600,
 - Data `.progress > i`, `.stat .value .label`; modals `.sheet` `.scrim` `.grabber`; `.section-head .link`, `.divider`
 
 **Drawn by attribute**
-- `i[data-icon=name]`: about 70 icons; selected tabs use the filled form.
-- `.chart[data-chart=bars|line|spark|ring|donut]` with `data-values`, `data-labels`, `data-hl`.
+- `i[data-icon=name]`: about 80 icons, money and security too (bank, cart, bus, receipt, repeat, shield,
+  faceid, fingerprint, target, coffee); selected tabs use the filled form.
+- `.chart[data-chart=bars|line|spark|ring|donut]` with `data-values`, `data-labels`, `data-hl`. A line's
+  y range is its data's own range (`data-min` / `data-max` to set it); `data-label-at="0,7,14,25"` ties
+  labels to data points; `data-colors` takes `color-mix(...)` and `var(--x, #fff)` (one colour per bar:
+  no fade). The header of `kit/charts.js` lists every attribute.
 - `.art[data-art=dusk|forest|sea|mountain|city|bloom|map|bowl][data-seed]`: invented photo stand-ins,
   nothing to license, no real places or faces.
 
@@ -112,8 +130,10 @@ Every element with `data-box="name"` is measured after the page is ready and wri
 with its corner radius, to `raw/<platform>/[<locale>/]<name>.boxes.json`. The engine reads the file next
 to the capture it uses, so boxes follow each platform's and each language's layout by themselves.
 `npm run screens` warns when a box runs off the screen, has no size, is used twice, or sits under the tab
-bar, the FAB, the toolbar or the home indicator. Fix every warning: a lifted card with a tab bar across
-it looks broken.
+bar, the FAB, the toolbar, the home indicator or anything marked `data-chrome` (a pinned button, a
+banner, a custom bottom bar: mark it). Fix every warning: a lifted card with a tab bar across it looks
+broken. A box's radius is its own, else its first child's (an M3 connected list rounds its rows, not
+the list); `data-box-radius="24"` (CSS px) sets it by hand.
 
 ## Languages, themes and sizes
 - **Languages:** UI strings go in `screens/strings.json` (the English text is the key). The default locale
@@ -123,7 +143,15 @@ it looks broken.
   and look at every language's captures for truncation.
 - **Right to left:** `ar`, `he`, `fa` and `ur` set `dir="rtl"`; the kit mirrors the layout.
 - **Dark mode:** `npm run screens -- --theme dark` OVERWRITES the light captures. For a set that shows
-  both, copy the screen to `screens/home-dark.html` with `<html lang="en" data-theme="dark">`.
+  both, copy the screen to `screens/home-dark.html` with `<html lang="en" data-theme="dark">`. An app
+  that is dark only: `screens: { theme: 'dark' }` in `studio.config.js` (the default of every run; a
+  page's own `data-theme` still wins), so a plain `npm run screens` never re-captures it in light.
+- **A branded dark app:** tokens from `brand apply` carry dark surfaces (`--app-bg-dark`,
+  `--app-surface-dark`, `--app-raised-dark`, the Android twins). The rest has hooks with Apple / M3
+  defaults: `--app-glass-dark`, `--app-segment-dark`, `--switch-on` (iOS switches are system green next
+  to a lime brand otherwise). Set them in `screens/app.css` under `.dark { ... }`, derived from the
+  brand: `--app-glass-dark: color-mix(in oklab, var(--brand-deep) 70%, transparent)`.
+- **Dark pills:** `.pill.good` / `.pill.bad` have dark variants; read every dark capture anyway.
 - **Sharpness:** `npm run screens -- --scale 2` captures at 2x the pixel ratio (iOS 2640x5736) for
   hi-res portfolio exports, so no screen is upscaled (`design.md`, "Sharpness").
 
@@ -131,6 +159,9 @@ it looks broken.
 - Leave the island and punch-hole area empty: the frames draw them.
 - Real-length content in the persona's voice. Charts with believable, uneven data. One "today".
 - Every screen must look like a finished app: no empty states unless the image is about one.
+- Android's nav bar is opaque: a row it cuts in half (only the top of "Recent" showing) looks like a
+  render glitch. End the content above it, or let a row boundary meet its top edge (`data-only="ios"`
+  on the last section works: the iOS glass tab bar hides the cut, Android cannot).
 - After every edit: `npm run screens`, then read the changed captures in `raw/ios/` and `raw/android/`
   before any render. The capture is what the store image shows.
 - Brand colours and fonts come only from `brand/tokens.json` (`npm run brand -- apply`). `app.css` holds

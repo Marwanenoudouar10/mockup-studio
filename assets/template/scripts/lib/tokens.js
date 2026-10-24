@@ -67,6 +67,12 @@ export function kitVars(tokens = {}) {
     '--on-tint': ui.onTint,
     '--accent': c.accent,
     '--app-bg': ui.bg,
+    // dark app surfaces from the palette (older token files have none: the kit keeps Apple / M3 dark greys)
+    '--app-bg-dark': ui.bgDark,
+    '--app-surface-dark': ui.surfaceDark,
+    '--app-raised-dark': ui.raisedDark,
+    '--app-bg-android-dark': ui.bgDark,
+    '--app-surface-android-dark': ui.surfaceDark,
     '--font-display': stack(display, 'system-ui, sans-serif'),
     '--font-text': stack(text, 'system-ui, sans-serif'),
     '--font-app': stack(app, 'system-ui, sans-serif'),

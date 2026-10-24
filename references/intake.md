@@ -121,18 +121,23 @@ Next      Step 1, Brand: the brief, then 3 palettes to choose from
 | Tone | `briefs/copy.md` | the header comment: tone and two example headlines |
 | Output | the project folder; `CLAUDE.md` | the delivery list in "Project notes" |
 
-Mode B also gets `briefs/app-spec.md` (screens, persona, story map) from the description.
+Mode B also gets `briefs/app-spec.md`: the description now (name, one-liner, audience, platforms); the
+persona, screens and story map after the brand board is approved.
 
-**Look -> palette.** The palette board always shows three directions from the seed: Drenched (gradient
-field), Night (dark field), Paper (soft mesh field). The look answer picks the mood and the option to
-recommend first:
+**Look -> palette.** The palette board shows three directions from the seed: Drenched (gradient field),
+Night (dark field), Paper (soft mesh field), or with `--look dark` three dark ones (Night, Graphite, Deep).
+The look answer picks the flags and the option to recommend first:
 
 | look | `npm run brand -- palette` | recommend | field |
 |---|---|---|---|
 | Bold and bright | `--mood bold` | 1 Drenched | `gradient` |
-| Dark and premium | `--mood serious` | 2 Night | `dark` |
+| Dark and premium | `--look dark --mood electric` (vivid accent) or `--mood serious` (muted gold) | 1 Night | `dark` |
 | Calm and soft | `--mood calm` | 3 Paper | `mesh` |
 | Clean and light | `--mood fresh` | 3 Paper, then set `brand.field: 'light'` | `light` |
+
+A client accent (Mode A) or an accent the brief names ("electric lime"): `--accent "#hex"` pins it.
+A dark-first app also gets `--theme dark` (dark sample screens) and `screens: { theme: 'dark' }` in
+`studio.config.js`, so every capture stays dark.
 
 **Language codes:** English `en`, French `fr`, Arabic `ar` (right to left: add
 `npm i @fontsource-variable/noto-sans-arabic` and `fonts: { extra: ['Noto Sans Arabic Variable'] }`),

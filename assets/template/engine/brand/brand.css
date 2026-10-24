@@ -155,6 +155,11 @@ body {
 .bb-type-col .sample { margin-top: 16px; padding-top: 14px; text-wrap: balance; border-top: 1px solid var(--bb-line); color: #3E3B45; }
 .bb-type-col .sample.display { font-weight: var(--headline-weight); font-size: 22px; line-height: 1.12; letter-spacing: -.025em; }
 .bb-type-col .sample.display em { font-style: normal; color: var(--primary); }
+/* --specimen field (default on a dark field): the type on the brand field, the accent word as in the store images */
+.bb-cell.type.on-field { color: #fff; }
+.bb-cell.type.on-field .bb-cell-label, .bb-cell.type.on-field .meta { color: rgb(255 255 255 / .66); }
+.bb-cell.type.on-field .sample { color: rgb(255 255 255 / .86); border-top-color: rgb(255 255 255 / .16); }
+.bb-cell.type.on-field .sample.display em { color: var(--accent); }
 .bb-type-col .sample.text { font-size: 15.5px; line-height: 1.5; }
 .bb-type-col .fam { font-size: 26px; letter-spacing: -.015em; line-height: 1.15; }
 .bb-type-col .meta { margin-top: 6px; font-size: 13.5px; line-height: 1.45; color: var(--bb-mute); }

@@ -2,7 +2,10 @@
 //   k  = W / 1320          (store px per design unit)
 //   DH = H / k             (design height: 2868-ish for iPhone, ~2347 for a 9:16 Play image)
 //   tall = DH > 2600       (short 9:16 canvases tighten the copy)
-// Panorama: `slices` images side by side on ONE canvas, sharing one continuous field.
+// Panorama: `slices` images side by side on ONE canvas, sharing one continuous field. The canvas then has the
+// class `panorama` and the variables --slices / --slice-w (design units), so brand/theme.css can style a strip
+// (one glow per image: background-size: calc(100% / var(--slices)) 100%) without matching inline styles.
+// The field presets in engine/styles/field.css are measured on the WHOLE strip (two glows for six images).
 import { DESIGN_W } from '../../scripts/lib/config.js';
 import { setPageSize } from '../core/boot.js';
 
@@ -17,6 +20,11 @@ export function makeCanvas({ W, H, slices = 1, field = 'gradient', grain = true,
   el.style.width = `${designW * slices}px`;
   el.style.height = `${DH}px`;
   el.style.transform = `scale(${k})`;
+  if (slices > 1) {
+    el.classList.add('panorama');
+    el.style.setProperty('--slices', String(slices));
+    el.style.setProperty('--slice-w', `${designW}px`);
+  }
   document.body.appendChild(el);
   return { el, k, DH, tall, slices, W, H, designW };
 }

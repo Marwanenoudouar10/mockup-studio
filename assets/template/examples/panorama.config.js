@@ -1,6 +1,8 @@
 // Panorama example: all images of a store render on ONE wide strip with one continuous field,
 // then get cut into separate files. Devices can sit on a seam and bridge two images.
-//   npm run render -- --config examples/panorama.config.js --out out/qa/panorama
+//   npm run render -- --config examples/panorama.config.js --out out/qa/panorama --strip   (+ the uncut strip)
+// Seams are edges on the product page: cards keep 40 units from them, and a bridging phone puts its bezel or
+// a real share of its screen across, never a sliver of text (the render warns; bridge: true = on purpose).
 //
 // In a panorama store, stage x is GLOBAL: 0..1320 is image 1, 1320..2640 image 2, and so on
 // (x = 1320 sits exactly on the first seam). y is shared: every image's stage starts at the
