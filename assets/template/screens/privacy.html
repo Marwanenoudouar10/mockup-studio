@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brimpage - Privacy</title>
+<meta name="kit-strings" content="strings.json">
+<meta name="kit-tokens" content="/brand/tokens.json">
+<link rel="stylesheet" href="kit/kit.css">
+<link rel="stylesheet" href="app.css">
+<script type="module" src="kit/kit.js"></script>
+</head>
+<body>
+<header class="navbar" data-large="ios" data-title="Privacy" data-back></header>
+
+<main class="content pad stack">
+  <section class="card lock-card" data-box="lock">
+    <div class="lock-mark"><i data-icon="lock" data-filled></i></div>
+    <h3 class="lock-title" data-android="Locked with your fingerprint">Locked with Face ID</h3>
+    <p class="t-sub muted">Brimpage asks for it every time you open your journal.</p>
+    <div class="row between lock-row"><span class="t-callout">Require on open</span><span class="switch on"></span></div>
+  </section>
+
+  <div class="list icons" data-box="options">
+    <div class="item"><span class="lead-icon" style="background: var(--tint)"><i data-icon="eye"></i></span>
+      <div class="body"><div class="title">Hide entries in previews</div></div><span class="switch on"></span></div>
+    <div class="item"><span class="lead-icon" style="background: var(--m5)"><i data-icon="cloud"></i></span>
+      <div class="body"><div class="title">Encrypted sync</div><div class="sub t-sub">Only your devices hold the key</div></div><span class="switch on"></span></div>
+    <div class="item"><span class="lead-icon" style="background: var(--m4)"><i data-icon="download"></i></span>
+      <div class="body"><div class="title">Export everything</div><div class="sub t-sub">PDF or plain text, any time</div></div><i class="chev" data-icon="chevron"></i></div>
+  </div>
+
+  <section class="card offline" data-box="offline">
+    <div class="row top">
+      <span class="lead-icon round" style="background: var(--m2)"><i data-icon="bolt" data-filled></i></span>
+      <div class="grow">
+        <h3 class="t-headline">Works offline</h3>
+        <p class="t-sub muted">No account needed. Your pages stay on this phone until you turn sync on.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<nav class="tabbar" data-tabs="Today:sun,Journal:book,Insights:chart,You:person" data-on="3"></nav>
+</body>
+</html>

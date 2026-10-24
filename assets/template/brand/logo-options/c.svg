@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 500 108" fill="currentColor">
+  <title>Day mark</title>
+  <desc>A bookmark holding a sun: the place you keep in your day. Simple, calm, abstract.</desc>
+  <path d="M10 0h60a10 10 0 0 1 10 10v90L40 76 0 100V10A10 10 0 0 1 10 0z"/>
+  <circle cx="40" cy="38" r="17" style="fill: var(--accent, #FFC27A)"/>
+  <text x="104" y="76" textLength="388" lengthAdjust="spacing" style="font-family: var(--font-display, 'Poppins', sans-serif); font-weight: 700; font-size: 80px; letter-spacing: -2.5px">Brimpage</text>
+</svg>

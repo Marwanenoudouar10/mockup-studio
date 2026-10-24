@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brimpage - Entry</title>
+<meta name="kit-strings" content="strings.json">
+<meta name="kit-tokens" content="/brand/tokens.json">
+<link rel="stylesheet" href="kit/kit.css">
+<link rel="stylesheet" href="app.css">
+<script type="module" src="kit/kit.js"></script>
+<style>
+  body { --bg: var(--surface); }
+  .android body { --bg: var(--md-surface); }
+  .feel { background: var(--bg); }
+</style>
+</head>
+<body>
+<header class="navbar" data-close data-title="Sunday, May 12" data-subtitle="7:48 PM" data-done="Save"></header>
+
+<main class="content pad">
+  <div class="row meta-line t-caption muted">
+    <i data-icon="pin"></i><span>Riverside Park</span><span class="faint">·</span><i data-icon="cloud"></i><span>18° Clear</span>
+  </div>
+  <h1 class="entry-h1">A quiet Sunday walk</h1>
+
+  <div class="feelings" data-box="moodPicker">
+    <span class="feel on"><span class="face good s"></span><span>Good</span></span>
+    <span class="feel"><span class="face great s"></span><span>Calm</span></span>
+    <span class="feel"><span class="face okay s"></span><span>Grateful</span></span>
+  </div>
+
+  <figure class="art photo" data-art="dusk" data-box="photo">
+    <span class="caption pill glass"><i data-icon="pin"></i><span>Riverside Park · 7:31 PM</span></span>
+  </figure>
+
+  <div class="prose app-font">
+    <p>Took the long way home by the river. The light did that soft orange thing and I stopped to watch the rowers for a while.</p>
+    <p data-ar="ملاحظة لنفسي: الهاتف في الحقيبة لا في اليد. بدت النزهة أطول بمرتين، بالمعنى الجميل.<span class=&quot;caret&quot;></span>" data-es="Nota: el móvil en la mochila, no en la mano. El paseo pareció el doble de largo, en el buen sentido.<span class=&quot;caret&quot;></span>">Note to self: phone in the bag, not in the hand. The walk felt twice as long, in a good way.<span class="caret"></span></p>
+  </div>
+
+  <div class="chips mt-l" data-box="tags">
+    <span class="chip tag">#walk</span>
+    <span class="chip tag">#slow sunday</span>
+    <span class="chip tag">#gratitude</span>
+    <span class="chip outline-add"><i data-icon="plus"></i><span>Tag</span></span>
+  </div>
+  <div class="words t-caption faint"><span>64 words</span><span>·</span><span>Saved</span></div>
+</main>
+
+<div class="toolbar">
+  <button class="on"><i data-icon="text"></i></button>
+  <button><i data-icon="photo"></i></button>
+  <button><i data-icon="camera"></i></button>
+  <button><i data-icon="mic"></i></button>
+  <button><i data-icon="pin"></i></button>
+  <button><i data-icon="tag"></i></button>
+</div>
+</body>
+</html>

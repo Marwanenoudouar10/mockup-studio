@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brimpage - Journal</title>
+<!-- platform=web screen. kit-sizes: also captured at iPad and iPhone width for responsive mockups
+     (raw/web/journal.png, raw/ipad/journal.png, raw/ios/journal.png). -->
+<meta name="kit-sizes" content="web,ipad,ios">
+<meta name="kit-strings" content="../strings.json">
+<meta name="kit-tokens" content="/brand/tokens.json">
+<link rel="stylesheet" href="../kit/kit.css">
+<link rel="stylesheet" href="../app.css">
+<link rel="stylesheet" href="app-web.css">
+<script type="module" src="../kit/kit.js"></script>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" data-logo="/brand/logo.svg" data-mark="/brand/mark.svg" data-cta="New entry:edit" data-on="1"
+    data-items="Today:sun,Journal:book:128,Insights:chart,Prompts:sparkle,Photos:photo"
+    data-groups="Collections:Travel|var(--m2),Gratitude|var(--m4),Running|var(--m5),Family|var(--m1)"
+    data-user="Sam Rivera|Brimpage Plus|SR"></aside>
+
+  <main class="main">
+    <header class="topbar" data-title="Journal" data-subtitle="128 entries" data-search="Search your journal" data-actions="bell">
+      <div class="segmented hide-tablet"><span class="on">List</span><span>Calendar</span></div>
+    </header>
+
+    <div class="cols">
+      <section class="col-list">
+        <div class="card tinted prompt" data-box="prompt">
+          <div class="eyebrow t-label"><i data-icon="sparkle" data-filled></i><span>Today's prompt</span></div>
+          <p class="q">What made you smile today, even for a second?</p>
+          <div class="row between">
+            <button class="btn light small"><i data-icon="pencil"></i><span>Write it down</span></button>
+            <span class="time t-caption"><i data-icon="clock"></i><span>2 min</span></span>
+          </div>
+        </div>
+
+        <div class="list-head"><span class="t-label">This week</span><span class="t-caption tint">See all</span></div>
+        <article class="entry-item on" data-box="entry">
+          <div class="art thumb" data-art="dusk"></div>
+          <div class="grow">
+            <h4 class="entry-title">A quiet Sunday walk</h4>
+            <p class="clamp-2">Took the long way home by the river and finally slowed down.</p>
+            <div class="meta row"><span>Sun, May 12</span><span class="dot" style="--c: var(--m4)"></span><span>Good</span><i data-icon="photo"></i><span>3</span></div>
+          </div>
+        </article>
+        <article class="entry-item">
+          <div class="art thumb" data-art="forest" data-seed="4"></div>
+          <div class="grow">
+            <h4 class="entry-title">First run in weeks</h4>
+            <p class="clamp-2">Legs heavy, head clear. Same time tomorrow?</p>
+            <div class="meta row"><span>Sat, May 11</span><span class="dot" style="--c: var(--m5)"></span><span>Great</span></div>
+          </div>
+        </article>
+        <article class="entry-item">
+          <div class="art thumb" data-art="bowl" data-seed="2"></div>
+          <div class="grow">
+            <h4 class="entry-title">Dinner with Maya</h4>
+            <p class="clamp-2">Tried the new noodle place. Talked until they stacked the chairs.</p>
+            <div class="meta row"><span>Thu, May 9</span><span class="dot" style="--c: var(--m4)"></span><span>Good</span><i data-icon="photo"></i><span>2</span></div>
+          </div>
+        </article>
+        <article class="entry-item">
+          <div class="art thumb" data-art="city" data-seed="7"></div>
+          <div class="grow">
+            <h4 class="entry-title">Long Tuesday</h4>
+            <p class="clamp-2">Too many meetings. Wrote this on the train, feeling lighter already.</p>
+            <div class="meta row"><span>Tue, May 7</span><span class="dot" style="--c: var(--m2)"></span><span>Meh</span></div>
+          </div>
+        </article>
+        <article class="entry-item">
+          <div class="art thumb" data-art="mountain" data-seed="5"></div>
+          <div class="grow">
+            <h4 class="entry-title">Weekend hike</h4>
+            <p class="clamp-2">Six miles, one wrong turn, the best sandwich of the year.</p>
+            <div class="meta row"><span>Sun, May 5</span><span class="dot" style="--c: var(--m5)"></span><span>Great</span><i data-icon="photo"></i><span>5</span></div>
+          </div>
+        </article>
+        <article class="entry-item">
+          <div class="art thumb" data-art="bloom" data-seed="3"></div>
+          <div class="grow">
+            <h4 class="entry-title">Market flowers</h4>
+            <p class="clamp-2">Bought tulips for no reason. The kitchen looks like spring.</p>
+            <div class="meta row"><span>Fri, May 3</span><span class="dot" style="--c: var(--m4)"></span><span>Good</span></div>
+          </div>
+        </article>
+      </section>
+
+      <article class="col-main entry-pane" data-box="editor">
+        <div class="row meta-line muted">
+          <i data-icon="calendar"></i><span>Sunday, May 12</span><span class="faint">·</span><span>7:48 PM</span>
+          <span class="faint">·</span><i data-icon="pin"></i><span>Riverside Park</span>
+        </div>
+        <h1 class="entry-h1">A quiet Sunday walk</h1>
+        <div class="feelings" data-box="moodPicker">
+          <span class="feel on"><span class="face good s"></span><span>Good</span></span>
+          <span class="feel"><span class="face great s"></span><span>Calm</span></span>
+          <span class="feel"><span class="face okay s"></span><span>Grateful</span></span>
+        </div>
+        <figure class="art photo" data-art="dusk" data-box="photo">
+          <span class="caption pill glass"><i data-icon="pin"></i><span>Riverside Park · 7:31 PM</span></span>
+        </figure>
+        <div class="prose app-font">
+          <p>Took the long way home by the river. The light did that soft orange thing and I stopped to watch the rowers for a while.</p>
+          <p>A dog on the bridge refused to move until everyone said hello. Everyone did.</p>
+          <p data-es="Nota: el móvil en la mochila, no en la mano. El paseo pareció el doble de largo, en el buen sentido.<span class=&quot;caret&quot;></span>">Note to self: phone in the bag, not in the hand. The walk felt twice as long, in a good way.<span class="caret"></span></p>
+        </div>
+        <div class="entry-foot">
+          <div class="chips" data-box="tags">
+            <span class="chip tag">#walk</span><span class="chip tag">#slow sunday</span><span class="chip tag">#gratitude</span>
+          </div>
+          <div class="words t-caption faint"><span>78 words</span><span>·</span><span>Saved</span></div>
+        </div>
+        <div class="list-head more-head"><span class="t-label">More from May</span></div>
+        <div class="grid-2 more">
+          <div class="art" data-art="mountain" data-seed="5"><span class="caption pill glass"><span>Weekend hike</span></span></div>
+          <div class="art" data-art="bloom" data-seed="3"><span class="caption pill glass"><span>Market flowers</span></span></div>
+        </div>
+      </article>
+
+      <aside class="col-rail">
+        <section class="card rail-card" data-box="streak">
+          <div class="streak-row">
+            <div><div class="t-label">Current streak</div><div class="big mt-s">12<small>days</small></div></div>
+            <div class="flame"><i data-icon="flame" data-filled></i></div>
+          </div>
+          <div class="streak-week">
+            <div class="sd done"><b><i data-icon="check"></i></b><span data-es="L">M</span></div>
+            <div class="sd done"><b><i data-icon="check"></i></b><span data-es="M">T</span></div>
+            <div class="sd done"><b><i data-icon="check"></i></b><span data-es="X">W</span></div>
+            <div class="sd done"><b><i data-icon="check"></i></b><span data-es="J">T</span></div>
+            <div class="sd done"><b><i data-icon="check"></i></b><span data-es="V">F</span></div>
+            <div class="sd done"><b><i data-icon="check"></i></b><span data-es="S">S</span></div>
+            <div class="sd today"><b></b><span data-es="D">S</span></div>
+          </div>
+        </section>
+        <section class="card rail-card" data-box="week">
+          <div class="row between"><h3>Mood this week</h3><span class="pill good"><i data-icon="arrow-up"></i><span>18%</span></span></div>
+          <div class="chart" data-chart="bars" data-values="2.4,3.3,2.9,4,3.7,4.8,4.4" data-min="1" data-max="5" data-hl="5" data-bar="22"
+            data-labels="M,T,W,T,F,S,S" data-colors="var(--m2),var(--m3),var(--m3),var(--m4),var(--m4),var(--m5),var(--m5)"></div>
+        </section>
+        <section class="card rail-card" data-box="memory">
+          <div class="t-label">On this day, 2025</div>
+          <div class="memory mt-m">
+            <div class="art thumb" data-art="sea" data-seed="3"></div>
+            <div><h4>Salt in my hair</h4><p class="t-caption muted mt-xs">First swim of the year. Too cold, worth it.</p></div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+</div>
+</body>
+</html>

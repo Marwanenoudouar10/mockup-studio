@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brimpage - Reminders</title>
+<meta name="kit-strings" content="strings.json">
+<meta name="kit-tokens" content="/brand/tokens.json">
+<link rel="stylesheet" href="kit/kit.css">
+<link rel="stylesheet" href="app.css">
+<script type="module" src="kit/kit.js"></script>
+</head>
+<body>
+<header class="navbar" data-large="ios" data-title="Reminders" data-back></header>
+
+<main class="content pad stack">
+  <section class="card tinted nudge" data-box="nudge">
+    <div class="row between">
+      <div class="eyebrow t-label"><i data-icon="bell" data-filled></i><span>Daily nudge</span></div>
+      <span class="switch on"></span>
+    </div>
+    <div class="nudge-time"><span data-es="20:30" data-ar="8:30">8:30</span><small data-es="" data-ar="م">PM</small></div>
+    <p class="t-callout muted">Two minutes before bed, when the day is still fresh.</p>
+    <div class="days">
+      <span class="on" data-es="L" data-ar="ن">M</span><span class="on" data-es="M" data-ar="ث">T</span><span class="on" data-es="X" data-ar="ر">W</span>
+      <span class="on" data-es="J" data-ar="خ">T</span><span class="on" data-es="V" data-ar="ج">F</span><span data-es="S" data-ar="س">S</span><span data-es="D" data-ar="ح">S</span>
+    </div>
+  </section>
+
+  <section class="card saver" data-box="saver">
+    <div class="row between top">
+      <div class="flame"><i data-icon="flame" data-filled></i></div>
+      <div class="grow">
+        <h3 class="t-headline">Streak saver</h3>
+        <p class="t-sub muted">Missed a day? One free pass a week keeps your streak alive.</p>
+      </div>
+      <span class="switch on"></span>
+    </div>
+  </section>
+
+  <div class="section-head mt-xs"><span>More nudges</span></div>
+  <div class="list icons" data-box="more">
+    <div class="item"><span class="lead-icon" style="background: var(--m5)"><i data-icon="calendar"></i></span>
+      <div class="body"><div class="title">Weekly review</div><div class="sub t-sub">Sundays at 6:00 PM</div></div><span class="switch on"></span></div>
+    <div class="item"><span class="lead-icon" style="background: var(--m2)"><i data-icon="sparkle"></i></span>
+      <div class="body"><div class="title">Prompt of the day</div><div class="sub t-sub">A new question every morning</div></div><span class="switch on"></span></div>
+    <div class="item"><span class="lead-icon" style="background: color-mix(in oklab, var(--tint) 70%, #000)"><i data-icon="moon"></i></span>
+      <div class="body"><div class="title">Quiet hours</div><div class="sub t-sub">10:00 PM to 7:00 AM</div></div><i class="chev" data-icon="chevron"></i></div>
+  </div>
+</main>
+
+<nav class="tabbar" data-tabs="Today:sun,Journal:book,Insights:chart,You:person" data-on="3"></nav>
+</body>
+</html>

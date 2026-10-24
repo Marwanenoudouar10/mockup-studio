@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 479 104" fill="currentColor">
+  <title>Sunrise B</title>
+  <desc>A heavy B monogram with the sun rising inside its lower counter. Ownable, works as a tiny icon.</desc>
+  <path fill-rule="evenodd" d="M8 0H38A22 22 0 0 1 38 44H42A26 26 0 0 1 42 96H8A8 8 0 0 1 0 88V8A8 8 0 0 1 8 0zM22 14V30H38A8 8 0 0 0 38 14zM22 58V82H42A12 12 0 0 0 42 58z"/>
+  <path d="M25 82a10 10 0 0 1 20 0z" style="fill: var(--accent, #FFC27A)"/>
+  <text x="92" y="74" textLength="379" lengthAdjust="spacing" style="font-family: var(--font-display, 'Poppins', sans-serif); font-weight: 600; font-size: 78px; letter-spacing: -2px">brimpage</text>
+</svg>

@@ -1,0 +1,64 @@
+/* Generic aluminium laptop (no trademark): --pw = SCREEN width. Lid with a thin black border and a camera,
+   a dark hinge, a wide base with a thumb notch, a soft contact shadow. finish-graphite = dark aluminium.
+   With a url the screen shows a browser bar (engine/devices/browser.css) above the capture. */
+.laptop { --alu-1: #EDEFF2; --alu-2: #D4D7DC; --alu-3: #A9AEB5; --alu-4: #7E838A; --rim: #BFC3C9; }
+.laptop.finish-graphite { --alu-1: #8A8E94; --alu-2: #5E6268; --alu-3: #3E4146; --alu-4: #2A2C30; --rim: #6B6F75; }
+
+.laptop .lid {
+  z-index: 1;
+  inset: calc(var(--pw) * -0.024) calc(var(--pw) * -0.024) calc(var(--pw) * -0.03);
+  border-radius: calc(var(--pw) * 0.026) calc(var(--pw) * 0.026) calc(var(--pw) * 0.008) calc(var(--pw) * 0.008);
+  background: #0A0A0C;
+  box-shadow:
+    0 0 0 calc(var(--pw) * 0.0028) var(--rim),
+    inset 0 0 0 calc(var(--pw) * 0.0016) rgb(255 255 255 / .08),
+    0 calc(var(--pw) * 0.05) calc(var(--pw) * 0.09) color-mix(in srgb, var(--shadow, #000) calc(34% * var(--shadow-k, 1)), transparent);
+}
+.laptop .screen, .laptop .glass { border-radius: calc(var(--pw) * 0.008) calc(var(--pw) * 0.008) 0 0; }
+.laptop .cam {
+  z-index: 3; left: 50%; top: calc(var(--pw) * -0.0125);
+  width: calc(var(--pw) * 0.0062); height: calc(var(--pw) * 0.0062);
+  transform: translate(-50%, -50%); border-radius: 50%;
+  background: radial-gradient(circle at 40% 38%, #3d4a66 0 20%, #0b0d12 62%);
+}
+.laptop .hinge {
+  z-index: 0;
+  left: calc(var(--pw) * -0.012); right: calc(var(--pw) * -0.012);
+  top: calc(100% + var(--pw) * 0.03); height: calc(var(--pw) * 0.009);
+  border-radius: 0 0 calc(var(--pw) * 0.006) calc(var(--pw) * 0.006);
+  background: linear-gradient(180deg, #1b1c1f, #4a4d52 70%, #2a2c30);
+}
+.laptop .base {
+  z-index: 1;
+  left: calc(var(--pw) * -0.125); right: calc(var(--pw) * -0.125);
+  top: calc(100% + var(--pw) * 0.036); height: calc(var(--pw) * 0.024);
+  border-radius: calc(var(--pw) * 0.003) calc(var(--pw) * 0.003) calc(var(--pw) * 0.05) calc(var(--pw) * 0.05) /
+    calc(var(--pw) * 0.003) calc(var(--pw) * 0.003) calc(var(--pw) * 0.016) calc(var(--pw) * 0.016);
+  background: linear-gradient(180deg, var(--alu-1) 0%, var(--alu-2) 28%, var(--alu-3) 74%, var(--alu-4) 100%);
+  box-shadow: inset 0 calc(var(--pw) * 0.0018) 0 rgb(255 255 255 / .75), inset 0 calc(var(--pw) * -0.002) 0 rgb(0 0 0 / .18);
+}
+.laptop .notch {
+  position: absolute; left: 50%; top: 0;
+  width: calc(var(--pw) * 0.15); height: calc(var(--pw) * 0.0085);
+  transform: translateX(-50%);
+  border-radius: 0 0 calc(var(--pw) * 0.012) calc(var(--pw) * 0.012);
+  background: linear-gradient(180deg, var(--alu-4), var(--alu-3) 60%, var(--alu-2));
+  opacity: .75;
+}
+.laptop .floor {
+  z-index: 0;
+  left: calc(var(--pw) * -0.1); right: calc(var(--pw) * -0.1);
+  top: calc(100% + var(--pw) * 0.05); height: calc(var(--pw) * 0.03);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--shadow, #000) calc(55% * var(--shadow-k, 1)), transparent);
+  filter: blur(calc(var(--pw) * 0.014));
+}
+.laptop.flat .lid { box-shadow: 0 0 0 calc(var(--pw) * 0.0028) var(--rim); }
+.laptop.flat .floor { display: none; }
+
+/* a website on a laptop or monitor screen: the browser bar, then the capture under it */
+.device .site { overflow: hidden; }
+.device .site > .bar { position: absolute; }
+.device.compact .site { --bar-h: calc(var(--u) * 52); }
+.device .site > .view { position: absolute; left: 0; right: 0; bottom: 0; top: var(--bar-h, calc(var(--u) * 84)); overflow: hidden; }
+.device .view > img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }

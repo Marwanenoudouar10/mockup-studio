@@ -1,0 +1,70 @@
+/* Brimpage web app (demo): only what is specific to this app on the desktop. The shared app tokens, mood
+   faces and editor pieces come from ../app.css; the desktop look from kit/web*.css. Replace per project. */
+
+/* the journal list */
+.col-list .prompt { padding: 18px 18px 16px; }
+.col-list .prompt .q { margin: 8px 0 16px; font-size: 21px; }
+.list-head { display: flex; align-items: baseline; justify-content: space-between; padding: 8px 6px 0; }
+.list-head .t-label { color: var(--text-3); }
+.entry-item { display: flex; gap: 12px; padding: 11px; border-radius: 13px; }
+.entry-item.on { background: var(--surface); box-shadow: var(--shadow-card); }
+.entry-item .thumb { width: 58px; height: 58px; flex: none; border-radius: 10px; }
+.entry-item .entry-title { font-size: 16.5px; }
+.entry-item p { margin-top: 2px; font-size: 13px; line-height: 1.4; color: var(--text-2); }
+.entry-item .meta { margin-top: 6px; gap: 6px; font-size: 12px; color: var(--text-3); }
+.entry-item .meta i[data-icon] { width: 13px; height: 13px; }
+
+/* the reading / writing pane */
+.entry-pane .meta-line { gap: 7px; margin-top: 0; font-size: 13px; }
+.web .entry-h1 { margin-top: 10px; font-size: 42px; line-height: 1.08; }
+.web .feelings { padding-top: 16px; }
+.web .feel { background: var(--surface); }
+.web .photo { height: 268px; margin-top: 20px; border-radius: 14px; }
+.web .prose { margin-top: 22px; font-size: 18.5px; line-height: 1.62; }
+.web .prose p + p { margin-top: 14px; }
+.entry-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 22px; }
+.entry-foot .words { margin-top: 0; }
+
+/* right rail */
+.rail-card h3 { font-weight: 600; font-size: 14px; }
+.rail-card .chart { height: 112px; margin-top: 12px; }
+.streak-row { display: flex; align-items: center; justify-content: space-between; }
+.streak-row .big { font-weight: 700; font-size: 30px; letter-spacing: -.03em; line-height: 1; }
+.streak-row .big small { margin-inline-start: 4px; font-size: 15px; font-weight: 600; letter-spacing: -.01em; color: var(--text-2); }
+.web .flame { width: 42px; height: 42px; }
+.web .flame i[data-icon] { width: 22px; height: 22px; }
+.web .streak-week { margin-top: 14px; }
+.web .sd b { width: 28px; height: 28px; }
+.web .sd b i[data-icon] { width: 15px; height: 15px; }
+.memory { display: flex; gap: 12px; align-items: center; }
+.memory .thumb { width: 64px; height: 64px; flex: none; border-radius: 12px; }
+.memory h4 { font-family: var(--font-app); font-weight: 600; font-size: 16px; line-height: 1.2; }
+
+/* insights dashboard */
+.kpi .ic { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: var(--tint-soft); color: var(--tint); }
+.kpi .ic i[data-icon] { width: 16px; height: 16px; }
+.trend-chart { height: 214px; }
+.web .lifts-list { gap: 15px; margin-top: 4px; }
+.web .lift-row .progress { width: 110px; }
+.donut-wrap { display: flex; align-items: center; gap: 22px; }
+.donut-wrap .chart { width: 168px; height: 168px; flex: none; }
+.donut-wrap .chart b { display: block; font-weight: 700; font-size: 30px; letter-spacing: -.03em; line-height: 1; }
+.donut-wrap .chart small { font-size: 12px; color: var(--text-2); }
+.mood-legend { flex: 1; display: flex; flex-direction: column; gap: 9px; font-size: 13px; }
+.mood-legend div { display: flex; align-items: center; gap: 10px; }
+.mood-legend b { margin-inline-start: auto; font-weight: 600; font-variant-numeric: tabular-nums; }
+.table .face { --s: 22px; }
+.table .entry-title { font-size: 15px; }
+
+/* phone viewport: the editor fills the screen, a little tighter */
+@media (max-width: 640px) {
+  .web .entry-h1 { font-size: 32px; }
+  .web .photo { height: 200px; }
+  .web .prose { font-size: 17px; }
+  .kpi .value { font-size: 24px; }
+  .trend-chart { height: 150px; }
+}
+.web .feel.on { background: var(--text); color: var(--surface); }
+.more-head { margin-top: 30px; padding: 0 0 10px; }
+.more .art { height: 150px; border-radius: 12px; }
+.col-list > * { flex: none; }

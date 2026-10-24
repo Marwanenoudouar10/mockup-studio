@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en" data-platform="web">
+<head>
+<meta charset="utf-8">
+<title>Brimpage - Web kit</title>
+<!-- Every web building block on one page (reference, not captured by npm run screens).
+     Open it through npm run preview: /screens/kit/web-demo.html?platform=web  (&theme=dark, &size=ios for the phone reflow)
+     Content is invented. Copy the parts you need into screens/web/<name>.html. -->
+<meta name="kit-tokens" content="/brand/tokens.json">
+<link rel="stylesheet" href="kit.css">
+<script type="module" src="kit.js"></script>
+<style>
+  body { overflow: auto; }
+  html, body { height: auto; min-height: 100vh; }
+  .demo { padding: 0 64px 64px; display: flex; flex-direction: column; gap: 40px; }
+  .demo h2 { margin-bottom: 14px; }
+  .modal-stage { position: relative; height: 340px; border-radius: 18px; overflow: hidden; background: var(--surface-2); }
+</style>
+</head>
+<body>
+<nav class="site-nav" data-logo="/brand/logo.svg" data-links="Product,Pricing,Changelog,Blog" data-on="1" data-login="Log in" data-cta="Start writing"></nav>
+
+<header class="hero">
+  <span class="eyebrow"><b>New</b><span>Weekly insights are here</span></span>
+  <h1>Your day, <em>one page</em> at a time</h1>
+  <p>A five-minute journal that turns small daily notes into clear patterns. Private by default.</p>
+  <div class="actions"><a class="btn">Start writing, it's free</a><a class="btn light">See how it works</a></div>
+</header>
+<div class="logos"><span>Northwind</span><span>Lumen&amp;Co</span><span>Fernway</span><span>Atlas Ridge</span><span>Quill</span></div>
+
+<main class="demo">
+  <section>
+    <h2 class="t-title">Features</h2>
+    <div class="features">
+      <div class="feature"><div class="ic"><i data-icon="sparkle"></i></div><h3>A prompt a day</h3><p>One small question, so you never face a blank page.</p></div>
+      <div class="feature"><div class="ic"><i data-icon="chart"></i></div><h3>Patterns, not pressure</h3><p>Weekly insights show what lifts your mood.</p></div>
+      <div class="feature"><div class="ic"><i data-icon="lock"></i></div><h3>Private by default</h3><p>End-to-end encrypted. Only you can read it.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="t-title">Pricing</h2>
+    <div class="pricing">
+      <div class="plan"><h3>Free</h3><div class="price">$0<small> / month</small></div>
+        <ul><li><i data-icon="check"></i>Unlimited entries</li><li><i data-icon="check"></i>Daily prompts</li></ul><a class="btn outline block">Start free</a></div>
+      <div class="plan featured"><span class="tag">Most popular</span><h3>Plus</h3><div class="price">$4<small> / month</small></div>
+        <ul><li><i data-icon="check"></i>Everything in Free</li><li><i data-icon="check"></i>Weekly insights</li><li><i data-icon="check"></i>Photos and tags</li></ul><a class="btn block">Try Plus</a></div>
+      <div class="plan"><h3>Family</h3><div class="price">$8<small> / month</small></div>
+        <ul><li><i data-icon="check"></i>Up to 5 journals</li><li><i data-icon="check"></i>Shared memories</li></ul><a class="btn outline block">Choose Family</a></div>
+    </div>
+  </section>
+
+  <section class="grid-2" style="gap: 24px">
+    <div class="card">
+      <h2 class="t-headline">Recent entries</h2>
+      <table class="table mt-m">
+        <thead><tr><th>Entry</th><th>Mood</th><th class="num">Words</th></tr></thead>
+        <tbody>
+          <tr><td>A quiet Sunday walk</td><td><span class="pill good">Good</span></td><td class="num muted">78</td></tr>
+          <tr><td>First run in weeks</td><td><span class="pill good">Great</span></td><td class="num muted">128</td></tr>
+          <tr><td>Long Tuesday</td><td><span class="pill bad">Meh</span></td><td class="num muted">96</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <form class="card form">
+      <h2 class="t-headline">Reminders</h2>
+      <div class="row"><label class="field"><span class="label">Name</span><span class="value">Sam Rivera</span></label>
+        <label class="field focus"><span class="label">Time</span><span class="value">9:00 PM<span class="caret"></span></span></label></div>
+      <label class="field"><span class="label">Email</span><span class="value placeholder">you@example.com</span><span class="hint">We only send your weekly summary.</span></label>
+      <div class="row between"><span class="check on"><span class="box"><i data-icon="check"></i></span>Weekly summary</span><span class="switch on"></span></div>
+      <div class="row"><a class="btn">Save</a><a class="btn plain">Cancel</a></div>
+    </form>
+  </section>
+
+  <section>
+    <h2 class="t-title">Modal</h2>
+    <div class="modal-stage">
+      <div class="scrim"></div>
+      <div class="modal">
+        <div class="head"><span>Export your journal</span><i data-icon="close"></i></div>
+        <div class="body">A ZIP with every entry as Markdown and your photos. It stays on your device.</div>
+        <div class="foot"><a class="btn light small">Cancel</a><a class="btn small">Export 128 entries</a></div>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="footer"><span>Brimpage, an invented demo app</span><span>Privacy · Terms</span></footer>
+</body>
+</html>

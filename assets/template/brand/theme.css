@@ -1,0 +1,14 @@
+/* Project overrides, loaded after the engine styles (engine/styles/index.css).
+   Brand colours come from brand/tokens.json (npm run brand -- apply) or studio.config.js and land on :root as
+   --primary --secondary --deep --accent --ink --paper; fonts as --font-display / --font-text.
+
+   Change a text role for every field:
+     .canvas { --sub: #e8e4ff; }
+   Add your own field preset, then set brand.field: 'dawn' in studio.config.js:
+     .canvas.field-dawn {
+       --text: #ffffff; --em: var(--accent);
+       background: linear-gradient(180deg, #ff9a6b 0%, var(--primary) 55%, var(--deep) 100%);
+     }
+   Tune a device for this project:
+     .iphone .body { background: linear-gradient(135deg, #e9e3d8, #b9ae9b 50%, #efe9df); }   (a light titanium)
+*/

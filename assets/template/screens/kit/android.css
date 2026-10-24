@@ -1,0 +1,174 @@
+/* Android look: Material 3 Expressive with Roboto. Tonal surfaces derived from --tint (dynamic colour),
+   large flexible top app bar, navigation bar with a pill indicator, extended FAB, 8dp chips,
+   segmented buttons with a check, M3 switches, connected list groups, gesture handle.
+   Sizes are dp (CSS px); captures are 360 x 800 dp @3x. */
+.android {
+  --font-ui: Roboto, system-ui, sans-serif;
+  --md-surface: var(--app-bg-android, color-mix(in oklab, var(--tint) 3%, #FEFBFF));
+  --md-low: color-mix(in oklab, var(--tint) 6%, #F8F5FA);
+  --md-container: color-mix(in oklab, var(--tint) 9%, #F3F0F6);
+  --md-high: color-mix(in oklab, var(--tint) 12%, #EEEAF1);
+  --md-highest: color-mix(in oklab, var(--tint) 16%, #E8E4EB);
+  --md-primary-container: color-mix(in oklab, var(--tint) 26%, #fff);
+  --md-on-primary-container: color-mix(in oklab, var(--tint) 72%, #000);
+  --md-secondary-container: color-mix(in oklab, var(--tint) 20%, #EDE9F0);
+  --md-on-secondary-container: color-mix(in oklab, var(--tint) 42%, #1D1B20);
+  --bg: var(--md-surface);
+  --surface: var(--app-surface-android, var(--md-container));
+  --surface-2: var(--md-high);
+  --sheet-bg: var(--md-low);
+  --fill: var(--md-highest);
+  --text: #1D1B20;
+  --text-2: #49454F;
+  --text-3: #79747E;
+  --line: color-mix(in oklab, var(--tint) 8%, #CAC4D0);
+  --outline: #79747E;
+  --tint-soft: var(--md-secondary-container);
+  --on-tint-soft: var(--md-on-secondary-container);
+  --gutter: 16px;
+  --gap: 12px;
+  --r-card: 24px;
+  --r-media: 20px;
+  --card-pad: 16px 18px;
+  --row-h: 56px;
+  --row-pad: 16px;
+  --btn-h: 44px;
+  --btn-h-s: 36px;
+  --btn-pad: 22px;
+  --r-btn: 999px;
+  --chip-h: 32px;
+  --r-chip: 8px;
+  --shadow-card: none;
+  --shadow-tint: none;
+  --elev-3: 0 1px 3px rgb(0 0 0 / .18), 0 4px 8px 3px rgb(0 0 0 / .1);
+  letter-spacing: .01em;
+}
+.android.dark {
+  --md-surface: var(--app-bg-android-dark, color-mix(in oklab, var(--tint) 5%, #141218));
+  --md-low: color-mix(in oklab, var(--tint) 6%, #1D1B20);
+  --md-container: color-mix(in oklab, var(--tint) 8%, #211F26);
+  --md-high: color-mix(in oklab, var(--tint) 9%, #2B2930);
+  --md-highest: color-mix(in oklab, var(--tint) 10%, #36343B);
+  --md-primary-container: color-mix(in oklab, var(--tint) 55%, #1D1B20);
+  --md-on-primary-container: color-mix(in oklab, var(--tint) 25%, #fff);
+  --md-secondary-container: color-mix(in oklab, var(--tint) 30%, #2B2930);
+  --md-on-secondary-container: color-mix(in oklab, var(--tint) 20%, #fff);
+  --text: #E6E0E9;
+  --text-2: #CAC4D0;
+  --text-3: #938F99;
+  --line: #49454F;
+  --outline: #938F99;
+  --bar-fade: .55;
+}
+
+/* type scale (M3 type roles) */
+.android .t-hero { font-weight: 400; font-size: 45px; line-height: 52px; letter-spacing: -.01em; }
+.android .t-large { font-weight: 400; font-size: 32px; line-height: 40px; letter-spacing: 0; }
+.android .t-title { font-weight: 400; font-size: 22px; line-height: 28px; letter-spacing: 0; }
+.android .t-headline { font-weight: 500; font-size: 16px; line-height: 24px; letter-spacing: .009em; }
+.android .t-body { font-weight: 400; font-size: 16px; line-height: 24px; letter-spacing: .03em; }
+.android .t-callout { font-weight: 400; font-size: 15px; line-height: 22px; letter-spacing: .02em; }
+.android .t-sub { font-weight: 400; font-size: 14px; line-height: 20px; letter-spacing: .018em; }
+.android .t-caption { font-weight: 400; font-size: 12px; line-height: 16px; letter-spacing: .033em; }
+.android .t-label { font-weight: 500; font-size: 14px; line-height: 20px; letter-spacing: .007em; }
+.android .t-micro { font-weight: 500; font-size: 11px; line-height: 16px; letter-spacing: .045em; }
+
+/* status bar: clock left, system icons right, the punch-hole camera (drawn by the frame) in between */
+.android .statusbar {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 60; height: 34px;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 20px 0 24px; color: var(--text);
+}
+.android .statusbar .time { font-weight: 500; font-size: 14px; letter-spacing: .02em; }
+.android .statusbar .sys { display: flex; align-items: center; gap: 5px; }
+
+/* top app bar: 64dp row (nav icon, actions) + large flexible headline */
+.android .navbar { position: relative; z-index: 20; padding-top: 34px; background: var(--bg); }
+.android .navbar .bar { height: 64px; display: flex; align-items: center; padding: 0 4px; }
+.android .navbar .bar .spacer { flex: 1; }
+.android .navbar .inline-title { flex: 1; min-width: 0; padding-inline-start: 12px; font-size: 22px; line-height: 28px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.android .navbar .bar .ibtn + .inline-title { padding-inline-start: 4px; }
+.android .navbar .inline-title small { display: block; font-size: 13px; line-height: 16px; color: var(--text-2); letter-spacing: .02em; }
+.android .navbar h1 { padding: 4px var(--gutter) 0; font-weight: 400; font-size: 32px; line-height: 40px; }
+.android .navbar .overline { order: 2; padding: 2px var(--gutter) 0; font-size: 14px; line-height: 20px; color: var(--text-2); letter-spacing: .018em; }
+.android .navbar .head { display: flex; flex-direction: column; padding-bottom: 12px; }
+.android .ibtn { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text); flex: none; }
+.android .ibtn i[data-icon] { width: 24px; height: 24px; }
+.android .ibtn .avatar { --size: 32px; }
+.android .navbar .done { margin: 0 8px 0 4px; height: 40px; padding: 0 20px; font-weight: 500; font-size: 14px; }
+
+/* navigation bar (M3 Expressive): pill indicator behind a filled icon, label under it */
+.android .tabbar {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 40; height: 86px; padding: 10px 6px 22px;
+  display: flex; background: var(--md-container);
+}
+.android .tabbar .tab {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-weight: 500; font-size: 12px; line-height: 16px; letter-spacing: .04em; color: var(--text-2);
+}
+.android .tabbar .tab .ind { width: 56px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; }
+.android .tabbar .tab i[data-icon] { width: 24px; height: 24px; }
+.android .tabbar .tab.on { color: var(--text); font-weight: 700; }
+.android .tabbar .tab.on .ind { background: var(--md-secondary-container); color: var(--md-on-secondary-container); }
+.android .indicator { position: absolute; left: 50%; bottom: 8px; z-index: 70; width: 108px; height: 4px; margin-left: -54px; border-radius: 2px; background: #1D1B20; opacity: .88; }
+.android.dark .indicator, .light-indicator .indicator { background: #fff; }
+
+/* extended FAB above the navigation bar */
+.android .fab {
+  position: absolute; right: 16px; bottom: 102px; z-index: 39; height: 56px; padding: 0 20px 0 16px; border-radius: 16px;
+  display: flex; align-items: center; gap: 10px; background: var(--md-primary-container); color: var(--md-on-primary-container);
+  font-weight: 500; font-size: 16px; letter-spacing: .01em; box-shadow: var(--elev-3);
+}
+.android .fab.solo { padding: 0; width: 56px; justify-content: center; }
+.android .fab i[data-icon] { width: 24px; height: 24px; }
+.android:not(:has(.tabbar)) .fab { bottom: 32px; }
+
+/* floating toolbar (M3 Expressive): a pill of icons, often next to a FAB */
+.android .toolbar {
+  position: absolute; left: 50%; transform: translateX(-50%); bottom: 30px; z-index: 40; height: 64px; border-radius: 32px; padding: 0 8px;
+  display: flex; align-items: center; gap: 2px; background: var(--md-high); color: var(--text-2); box-shadow: var(--elev-3);
+}
+.android .toolbar > * { width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; }
+.android .toolbar .on { background: var(--tint); color: var(--on-tint); }
+
+/* components */
+.android .btn { font-weight: 500; font-size: 15px; letter-spacing: .01em; }
+.android .btn.small { font-size: 14px; }
+.android .btn.outline { box-shadow: inset 0 0 0 1px var(--outline); }
+.android .chip { box-shadow: inset 0 0 0 1px var(--line); font-weight: 500; font-size: 14px; letter-spacing: .007em; color: var(--text-2); padding: 0 14px; }
+.android .chip.on { box-shadow: none; padding-inline-start: 8px; }
+.android .chip.tag { background: var(--fill); box-shadow: none; }
+.android .section-head { font-weight: 500; font-size: 16px; letter-spacing: .01em; }
+.android .section-head .link { font-weight: 500; font-size: 14px; }
+
+/* connected list group: separate tonal rows, big outer corners, small inner ones */
+.android .list { background: transparent; box-shadow: none; border-radius: 0; display: flex; flex-direction: column; gap: 2px; }
+.android .list .item { background: var(--surface); border-radius: 4px; }
+.android .list .item:first-child { border-top-left-radius: 20px; border-top-right-radius: 20px; }
+.android .list .item:last-child { border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
+.android .item .title { font-size: 16px; letter-spacing: .01em; }
+.android .item .sub { font-size: 14px; letter-spacing: .018em; }
+.android .item .trail { font-size: 14px; }
+.android .item .chev { display: none; }
+.android .lead-icon { width: 40px; height: 40px; border-radius: 50%; }
+
+.android .segmented { height: 40px; border-radius: 20px; box-shadow: inset 0 0 0 1px var(--outline); overflow: hidden; }
+.android .segmented > span { font-weight: 500; font-size: 14px; letter-spacing: .007em; color: var(--text); }
+.android .segmented > span + span { box-shadow: -1px 0 0 var(--outline); }
+.android .segmented > span.on { background: var(--md-secondary-container); color: var(--md-on-secondary-container); }
+
+.android .switch { width: 52px; height: 32px; border-radius: 16px; background: var(--md-highest); box-shadow: inset 0 0 0 2px var(--outline); }
+.android .switch::after { top: 8px; left: 8px; width: 16px; height: 16px; border-radius: 50%; background: var(--outline); }
+.android .switch.on { background: var(--tint); box-shadow: none; }
+.android .switch.on::after { top: 4px; left: 24px; width: 24px; height: 24px; background: #fff; }
+.android .switch.on i[data-icon] { position: absolute; top: 8px; left: 28px; z-index: 1; width: 16px; height: 16px; color: var(--tint); }
+
+.android .field .value { min-height: 56px; padding: 16px; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--outline); font-size: 16px; }
+.android .field .label { position: absolute; top: -9px; left: 12px; padding: 0 4px; background: var(--bg); font-size: 12px; line-height: 16px; color: var(--text-2); z-index: 1; }
+.android .field.focus .value { box-shadow: inset 0 0 0 2px var(--tint); }
+.android .field.focus .label { color: var(--tint); }
+.android .search { height: 56px; padding: 0 16px; border-radius: 28px; background: var(--md-high); font-size: 16px; color: var(--text-2); gap: 14px; }
+
+.android .sheet { border-radius: 28px 28px 0 0; padding: 22px 0 40px; }
+.android .grabber { width: 32px; height: 4px; margin-bottom: 18px; background: var(--outline); opacity: .6; }
+.android .stat .value { font-weight: 400; font-size: 28px; line-height: 36px; }
+.android .stat .label { font-size: 12px; letter-spacing: .03em; }

@@ -1,0 +1,49 @@
+/* Android phone (Pixel class): flat aluminium band, thin uniform bezel, tighter corners,
+   centred punch-hole camera (camera:false when the capture already shows one),
+   power above volume on the right side. */
+.pixel .band {
+  inset: calc(var(--pw) * -0.036);
+  border-radius: calc(var(--pw) * 0.108);
+  background: linear-gradient(135deg, #c9ced3 0%, #7d838a 9%, #4b5057 30%, #3d4248 62%, #6f757c 90%, #c2c7cc 100%);
+  box-shadow:
+    0 calc(var(--pw) * 0.09) calc(var(--pw) * 0.16) color-mix(in srgb, var(--shadow, #000) calc(44% * var(--shadow-k, 1)), transparent),
+    0 calc(var(--pw) * 0.02) calc(var(--pw) * 0.04) color-mix(in srgb, var(--shadow, #000) calc(30% * var(--shadow-k, 1)), transparent),
+    inset 0 0 0 calc(var(--pw) * 0.003) rgb(255 255 255 / .42);
+}
+/* the flat band's machined edge */
+.pixel .band::after {
+  content: "";
+  position: absolute;
+  inset: calc(var(--pw) * 0.0055);
+  border-radius: calc(var(--pw) * 0.102);
+  box-shadow: inset 0 0 0 calc(var(--pw) * 0.002) rgb(0 0 0 / .35);
+}
+.pixel .bezel {
+  z-index: 1;
+  inset: calc(var(--pw) * -0.027);
+  border-radius: calc(var(--pw) * 0.099);
+  background: #07080a;
+  box-shadow: inset 0 0 0 calc(var(--pw) * 0.0025) rgb(255 255 255 / .06);
+}
+.pixel .screen, .pixel .glass { border-radius: calc(var(--pw) * 0.074); }
+
+.pixel .punch {
+  z-index: 3;
+  left: 50%;
+  top: calc(var(--pw) * 0.024);
+  width: calc(var(--pw) * 0.036);
+  height: calc(var(--pw) * 0.036);
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 36%, #3b4762 0 14%, #11151f 38%, #030304 66%);
+  box-shadow: 0 0 0 calc(var(--pw) * 0.0035) #000;
+}
+
+.pixel .btn {
+  right: calc(var(--pw) * -0.045);
+  width: calc(var(--pw) * 0.011);
+  border-radius: calc(var(--pw) * 0.003);
+  background: linear-gradient(90deg, #5d636a, #b9bfc5 55%, #50555b);
+}
+.pixel .btn.power { top: 18%; height: 6.5%; }
+.pixel .btn.vol { top: 28%; height: 13%; }

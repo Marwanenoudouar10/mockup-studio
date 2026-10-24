@@ -1,0 +1,33 @@
+/* iPad (Pro 13" class): aluminium edge, even black border, gently rounded screen,
+   front camera centred in the top border (camera:false hides it). */
+.ipad .body {
+  inset: calc(var(--pw) * -0.047);
+  border-radius: calc(var(--pw) * 0.066);
+  background: linear-gradient(135deg, #cfd3d7 0%, #8f949a 10%, #5e6369 48%, #8a8f95 88%, #ccd0d4 100%);
+  box-shadow:
+    0 calc(var(--pw) * 0.06) calc(var(--pw) * 0.11) color-mix(in srgb, var(--shadow, #000) calc(42% * var(--shadow-k, 1)), transparent),
+    0 calc(var(--pw) * 0.014) calc(var(--pw) * 0.03) color-mix(in srgb, var(--shadow, #000) calc(28% * var(--shadow-k, 1)), transparent),
+    inset 0 0 0 calc(var(--pw) * 0.003) rgb(255 255 255 / .4);
+}
+.ipad .bezel {
+  z-index: 1;
+  inset: calc(var(--pw) * -0.040);
+  border-radius: calc(var(--pw) * 0.059);
+  background: #050607;
+  box-shadow: inset 0 0 0 calc(var(--pw) * 0.002) rgb(255 255 255 / .07);
+}
+.ipad .screen, .ipad .glass { border-radius: calc(var(--pw) * 0.024); }
+.ipad .cam {
+  z-index: 3;
+  left: 50%;
+  top: calc(var(--pw) * -0.021);
+  width: calc(var(--pw) * 0.010);
+  height: calc(var(--pw) * 0.010);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 36%, #3b4762 0 18%, #0b0e14 60%);
+}
+.ipad .btn { background: linear-gradient(90deg, #6a7076, #c3c8cd 55%, #5d6268); border-radius: calc(var(--pw) * 0.003); }
+.ipad .btn.top { top: calc(var(--pw) * -0.052); right: 9%; width: 8%; height: calc(var(--pw) * 0.007); }
+.ipad .btn.vol-up { right: calc(var(--pw) * -0.052); top: 6%; height: 4.5%; width: calc(var(--pw) * 0.007); }
+.ipad .btn.vol-down { right: calc(var(--pw) * -0.052); top: 11.5%; height: 4.5%; width: calc(var(--pw) * 0.007); }

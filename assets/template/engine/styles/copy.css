@@ -1,0 +1,63 @@
+/* The copy block: optional logo, headline (with an <em> accent word), optional sub line.
+   Sizes are set inline from config.layout; text-align uses logical sides so RTL mirrors. */
+.copy {
+  position: absolute;
+  z-index: 40;
+  text-align: start;
+}
+.copy.center { text-align: center; }
+
+.logo {
+  display: block;
+  color: var(--text);
+  margin-block-end: 70px;
+  margin-inline-start: -14px;
+}
+.copy.center .logo { margin-inline: auto; }
+.canvas.short .logo { margin-block-end: 44px; }
+.logo svg, .logo img { display: block; width: 100%; height: auto; }
+/* the name as text (brand boards before a logo exists) */
+.logo.wordmark {
+  margin-inline-start: 0;
+  font-family: var(--font-display);
+  font-weight: var(--headline-weight, 800);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+.logo svg { direction: ltr; unicode-bidi: isolate; }
+
+.headline {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-display);
+  font-weight: var(--headline-weight, 800);
+  line-height: 1.04;
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+  color: var(--text);
+}
+.headline em { font-style: normal; color: var(--em); }
+.copy.ornament-highlight .headline em { color: var(--ink); }
+[dir="rtl"] .headline { letter-spacing: 0; line-height: 1.25; }
+
+.sub {
+  margin-top: 72px;
+  font-family: var(--font-text);
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--sub);
+  text-wrap: balance;
+  max-width: 1000px;
+}
+.copy.center .sub { margin-inline: auto; }
+.canvas.short .sub { margin-top: 58px; }
+[dir="rtl"] .sub { line-height: 1.45; }
+
+/* highlight ornament: a marker band drawn behind the <em> word(s) */
+.copy .highlight-layer {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  overflow: visible;
+}

@@ -1,0 +1,42 @@
+/* Page + canvas. Every size inside .canvas is in DESIGN units: the canvas is 1320 wide
+   and scaled to the store width with transform: scale(k). */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: var(--page-w, 1320px);
+  height: var(--page-h, 2868px);
+  overflow: hidden;
+  background: var(--deep);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+body { font-family: var(--font-text); }
+
+.canvas {
+  position: absolute;
+  left: 0; top: 0;
+  direction: ltr; /* the stage is never mirrored; copy blocks and badges take the locale's dir */
+  overflow: hidden;
+  transform-origin: 0 0;
+  isolation: isolate;
+  color: var(--text);
+}
+
+.ornament-layer {
+  position: absolute; inset: 0;
+  z-index: 41;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.error-box {
+  position: fixed; inset: 40px auto auto 40px;
+  max-width: 1100px;
+  padding: 40px 48px;
+  background: #fff; color: #b00020;
+  font: 600 34px/1.4 ui-monospace, Menlo, monospace;
+  border: 6px solid #ff00aa;
+  z-index: 1000;
+  white-space: pre-wrap;
+}

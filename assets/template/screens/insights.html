@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brimpage - Insights</title>
+<meta name="kit-strings" content="strings.json">
+<meta name="kit-tokens" content="/brand/tokens.json">
+<link rel="stylesheet" href="kit/kit.css">
+<link rel="stylesheet" href="app.css">
+<script type="module" src="kit/kit.js"></script>
+</head>
+<body>
+<header class="navbar" data-large="ios" data-title="Insights" data-actions="calendar,share"></header>
+
+<main class="content pad stack">
+  <div class="segmented"><span class="on">Week</span><span>Month</span><span>Year</span></div>
+
+  <section class="card streak" data-box="streak">
+    <div class="row between top">
+      <div>
+        <div class="t-label muted">Current streak</div>
+        <div class="num mt-s">12<small>days</small><span class="pill">Longest yet</span></div>
+      </div>
+      <div class="flame"><i data-icon="flame" data-filled></i></div>
+    </div>
+    <div class="streak-week">
+      <div class="sd done"><b><i data-icon="check"></i></b><span data-es="L" data-ar="ن">M</span></div>
+      <div class="sd done"><b><i data-icon="check"></i></b><span data-es="M" data-ar="ث">T</span></div>
+      <div class="sd done"><b><i data-icon="check"></i></b><span data-es="X" data-ar="ر">W</span></div>
+      <div class="sd done"><b><i data-icon="check"></i></b><span data-es="J" data-ar="خ">T</span></div>
+      <div class="sd done"><b><i data-icon="check"></i></b><span data-es="V" data-ar="ج">F</span></div>
+      <div class="sd done"><b><i data-icon="check"></i></b><span data-es="S" data-ar="س">S</span></div>
+      <div class="sd today"><b></b><span data-es="D" data-ar="ح">S</span></div>
+    </div>
+  </section>
+
+  <section class="card" data-box="chart">
+    <div class="row between top">
+      <div>
+        <h3 class="t-headline">Mood this week</h3>
+        <p class="t-sub muted">Brightest on weekends</p>
+      </div>
+      <span class="pill good"><i data-icon="arrow-up"></i><span>18%</span></span>
+    </div>
+    <div class="chart mood-chart mt-m" data-chart="bars" data-values="2.4,3.3,2.9,4,3.7,4.8,4.4" data-min="1" data-max="5" data-hl="5" data-note="Best day"
+      data-labels="M,T,W,T,F,S,S" data-colors="var(--m2),var(--m3),var(--m3),var(--m4),var(--m4),var(--m5),var(--m5)"></div>
+  </section>
+
+  <section class="card" data-box="lifts">
+    <h3 class="t-headline">What lifts your mood</h3>
+    <div class="lifts-list">
+      <div class="lift-row"><span class="lead-icon" style="background: var(--m4)"><i data-icon="leaf"></i></span><span class="grow t-callout">Walks outside</span><span class="progress"><i style="width: 88%"></i></span><b>+32%</b></div>
+      <div class="lift-row"><span class="lead-icon" style="background: var(--m5)"><i data-icon="people"></i></span><span class="grow t-callout">Seeing friends</span><span class="progress"><i style="width: 74%"></i></span><b>+27%</b></div>
+      <div class="lift-row"><span class="lead-icon" style="background: var(--m2)"><i data-icon="book"></i></span><span class="grow t-callout">Reading</span><span class="progress"><i style="width: 52%"></i></span><b>+18%</b></div>
+    </div>
+  </section>
+
+  <div class="grid-3 stats">
+    <div class="card stat"><div class="value">23</div><div class="label">Entries</div></div>
+    <div class="card stat"><div class="value">6.4k</div><div class="label">Words</div></div>
+    <div class="card stat"><div class="value">14</div><div class="label">Photos</div></div>
+  </div>
+</main>
+
+<nav class="tabbar" data-tabs="Today:sun,Journal:book,Insights:chart,You:person" data-on="2"></nav>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!doctype html>
+<!-- Store Studio: every image of a store-screenshots project, live, on one canvas. Preview and drag only:
+     text, colours and new layouts are changed by Claude in the project files. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Store Studio</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237c6cf0'/%3E%3Cstop offset='1' stop-color='%23ffc580'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='16' height='16' rx='4' fill='url(%23g)'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/ui/styles/index.css">
+</head>
+<body>
+<header class="top">
+  <div class="logo"><i></i>Store Studio</div>
+  <div class="crumb">Projects / <b id="crumb">…</b></div>
+  <nav class="tabs" id="tabs" aria-label="Targets"></nav>
+  <div class="right">
+    <label class="pill locale" title="Locale"><select id="locale" aria-label="Locale"></select></label>
+    <span class="live" id="live">Connecting…</span>
+  </div>
+</header>
+<main class="main">
+  <aside class="side">
+    <section><div class="h">Projects</div><div id="projects" class="list"></div></section>
+    <div class="sep"></div>
+    <section><div class="h" id="layers-title">Layers</div><div id="layers" class="list"></div></section>
+    <div class="sep"></div>
+    <section><div class="h" id="screens-title">Screens · drag onto an image</div><div class="thumbs" id="screens"></div></section>
+  </aside>
+  <section class="canvas" id="canvas" tabindex="0" aria-label="Canvas">
+    <div class="world" id="world"></div>
+    <div class="overlay" id="overlay"></div>
+    <div class="banner" id="banner" hidden></div>
+    <div class="zoom" id="zoom"></div>
+    <div class="toast" id="toast" role="status"></div>
+  </section>
+  <aside class="insp" id="insp"></aside>
+</main>
+<script type="module" src="/ui/main.js"></script>
+</body>
+</html>

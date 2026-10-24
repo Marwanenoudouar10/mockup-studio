@@ -1,0 +1,15 @@
+/* The whole mock-screen kit in one link:
+     <link rel="stylesheet" href="kit/kit.css">        then your app's own tokens:  <link rel="stylesheet" href="app.css">
+   Fonts load from node_modules over the local server; only the faces a page uses are downloaded.
+   ios.css / android.css style phone screens; web*.css style platform=web pages (desktop apps and sites). */
+@import url("/node_modules/@fontsource-variable/inter/opsz.css");
+@import url("/node_modules/@fontsource/roboto/400.css");
+@import url("/node_modules/@fontsource/roboto/500.css");
+@import url("/node_modules/@fontsource/roboto/700.css");
+@import url("tokens.css");
+@import url("components.css");
+@import url("ios.css");
+@import url("android.css");
+@import url("web.css");
+@import url("web-layout.css");
+@import url("web-blocks.css");

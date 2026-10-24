@@ -1,0 +1,107 @@
+/* Web app shells (platform=web): sidebar + main panel, top bar, page grid, KPI tiles, split columns.
+   Responsive: <= 1100 px the sidebar is an icon rail; <= 640 px it becomes a top bar with a menu button.
+     <body><div class="app"> <aside class="sidebar" ...> <main class="main"> <header class="topbar" ...>
+       <div class="page"> <div class="dash"> <section class="card span-8">...   </div></div></main></div> */
+.web body { background: var(--bg); }
+.web .app { display: flex; width: 100vw; height: 100vh; }
+
+/* sidebar */
+.web .sidebar { width: var(--side-w); flex: none; display: flex; flex-direction: column; gap: 18px; padding: 18px 12px 12px; background: var(--side-bg); }
+.web .sidebar .brand, .web .mobilebar .brand, .web .site-nav .brand { display: flex; align-items: center; height: 32px; padding: 0 8px; color: var(--text); }
+.web .brand svg { height: 26px; width: auto; display: block; }
+.web .brand .wordmark { font-family: var(--font-display, var(--font-ui)); font-weight: 700; font-size: 20px; letter-spacing: -.02em; }
+.web .side-cta { justify-content: flex-start; margin: 0 2px; }
+.web .side-nav, .web .side-group { display: flex; flex-direction: column; gap: 2px; }
+.web .side-item {
+  position: relative; display: flex; align-items: center; gap: 11px; height: 36px; padding: 0 10px;
+  border-radius: 9px; color: var(--text-2); font-weight: 500; font-size: 14px; white-space: nowrap;
+}
+.web .side-item i[data-icon] { width: 19px; height: 19px; }
+.web .side-item.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow-card); }
+.web .side-item.on i[data-icon] { color: var(--tint); }
+.web .side-item em { margin-inline-start: auto; font-style: normal; font-size: 12px; font-weight: 500; color: var(--text-3); }
+.web .side-label { padding: 0 10px 6px; font-weight: 600; font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--text-3); }
+.web .swatch { width: 10px; height: 10px; margin: 0 4px; border-radius: 3px; background: var(--c); flex: none; }
+.web .side-extra { padding: 0 2px; }
+.web .side-user { margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 12px; }
+.web .side-user .who { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.25; }
+.web .side-user b { font-weight: 600; font-size: 13px; }
+.web .side-user small { font-size: 12px; color: var(--text-2); }
+.web .side-user i[data-icon] { width: 18px; height: 18px; color: var(--text-3); }
+
+/* the main panel floats on the sidebar colour */
+.web .main {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden;
+  margin: 8px 8px 8px 0; border-radius: 14px; background: var(--surface-2);
+  box-shadow: 0 0 0 1px var(--line), 0 1px 3px rgb(24 22 40 / .04);
+}
+.web .main.flush { margin: 0; border-radius: 0; box-shadow: none; }
+.web .topbar { flex: none; display: flex; align-items: center; gap: 12px; height: 64px; padding: 0 22px 0 28px; border-bottom: 1px solid var(--line); }
+.web .tb-title { display: flex; align-items: baseline; gap: 10px; white-space: nowrap; }
+.web .tb-title h1 { font-weight: 650; font-size: 18px; letter-spacing: -.02em; }
+.web .tb-title small { font-size: 13px; color: var(--text-2); }
+.web .tb-search { display: flex; align-items: center; gap: 8px; width: 280px; height: 36px; padding: 0 8px 0 12px; border-radius: 10px; background: var(--fill); color: var(--text-3); font-size: 13.5px; }
+.web .tb-search i[data-icon] { width: 16px; height: 16px; }
+.web .tb-search span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.web .page { flex: 1; min-height: 0; overflow: hidden; padding: 24px 28px; }
+
+/* 12-column dashboard grid + tiles */
+.web .dash { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
+.web .span-3 { grid-column: span 3; } .web .span-4 { grid-column: span 4; } .web .span-5 { grid-column: span 5; } .web .span-6 { grid-column: span 6; }
+.web .span-7 { grid-column: span 7; } .web .span-8 { grid-column: span 8; } .web .span-12 { grid-column: span 12; }
+.web .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.web .panel-head h3 { font-weight: 600; font-size: 15px; letter-spacing: -.012em; }
+.web .panel-head p { margin-top: 2px; font-size: 12.5px; color: var(--text-2); }
+.web .kpi { display: flex; flex-direction: column; gap: 6px; }
+.web .kpi .label { display: flex; align-items: center; gap: 7px; font-weight: 500; font-size: 13px; color: var(--text-2); }
+.web .kpi .label i[data-icon] { width: 16px; height: 16px; }
+.web .kpi .value { font-weight: 700; font-size: 28px; line-height: 1.1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.web .kpi .value small { margin-inline-start: 4px; font-weight: 600; font-size: 15px; letter-spacing: -.01em; color: var(--text-2); }
+.web .kpi .delta { font-size: 12.5px; font-weight: 500; color: var(--text-2); }
+.web .kpi .delta b { font-weight: 600; color: color-mix(in oklab, var(--green) 75%, #000); }
+.web .legend { display: flex; gap: 14px; font-size: 12px; color: var(--text-2); }
+.web .legend i { display: inline-block; width: 10px; height: 3px; margin-inline-end: 6px; vertical-align: 3px; border-radius: 2px; background: var(--c, var(--tint)); }
+
+/* split columns: a list beside a reading pane */
+.web .cols { flex: 1; min-height: 0; display: flex; }
+.web .col-list { width: 340px; flex: none; display: flex; flex-direction: column; gap: 10px; padding: 16px; border-inline-end: 1px solid var(--line); overflow: hidden; }
+.web .col-main { flex: 1; min-width: 0; overflow: hidden; padding: 36px 56px; }
+.web .col-rail { width: 288px; flex: none; display: flex; flex-direction: column; gap: 14px; padding: 20px; border-inline-start: 1px solid var(--line); }
+
+/* phone-only chrome, .web hidden on desktop; the mark replaces the logo in the icon rail */
+.web .mobilebar, .web .brand .mark { display: none; }
+
+@media (max-width: 1100px) {
+  .web { --side-w: 72px; }
+  .web .side-item span, .web .side-item em, .web .side-label, .web .side-cta span, .web .side-user .who, .web .side-user > i, .web .side-extra { display: none; }
+  .web .sidebar .brand { justify-content: center; padding: 0; overflow: hidden; }
+  .web .sidebar .brand.has-mark .full { display: none; }
+  .web .sidebar .brand .mark { display: block; }
+  .web .sidebar .brand .mark svg { height: 30px; }
+  .web .side-item { justify-content: center; padding: 0; }
+  .web .side-cta { justify-content: center; padding: 0; margin: 0; }
+  .web .side-user { justify-content: center; padding: 6px 0; }
+  .web .col-rail, .web .hide-tablet { display: none; }
+  .web .col-main { padding: 32px 40px; }
+  .web .col-list { width: 300px; }
+  .web .tb-search { width: 210px; }
+  .web .tb-search kbd { display: none; }
+  .web .dash > .span-8, .web .dash > .span-12 { grid-column: span 12; }
+  .web .dash > .span-4 { grid-column: span 6; }
+}
+
+@media (max-width: 640px) {
+  .web .app { flex-direction: column; }
+  .web .sidebar, .web .col-list, .web .hide-phone { display: none; }
+  .web .mobilebar { display: flex; flex: none; align-items: center; gap: 18px; height: 56px; padding: 0 18px 0 10px; }
+  .web .mobilebar i[data-icon] { width: 22px; height: 22px; color: var(--text); }
+  .web .main { margin: 0; border-radius: 18px 18px 0 0; }
+  .web .topbar { height: 52px; padding: 0 16px; }
+  .web .topbar .tb-search, .web .topbar .ibtn, .web .topbar > .avatar, .web .topbar .hide-phone { display: none; }
+  .web .page { padding: 16px; }
+  .web .col-main { padding: 22px 20px 40px; }
+  .web .dash { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  /* (0,3,0): beats the tablet rules above (.dash > .span-8 ...), which would add empty implicit columns */
+  .web .dash > *, .web .dash > [class*="span-"] { grid-column: 1 / -1; }
+  .web .dash > .kpi-tile, .web .dash > .kpi-tile[class*="span-"] { grid-column: span 1; }
+}

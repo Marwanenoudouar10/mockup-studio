@@ -1,0 +1,66 @@
+/* A website inside a phone or tablet frame ({ type:'phone', url:'brimpage.example' }): the status bar on top and the
+   mobile browser's address pill (iPhone: floating at the bottom; Android: under the status bar; iPad: a top
+   toolbar). --pt = one point of the device's CSS viewport (440 iPhone, 360 Android, 1032 iPad). */
+.screen.site.mobile { --m-bg: #FFFFFF; --m-ink: #0B0B0D; --m-ink-2: #6D7079; --m-pill: #EEF0F3;
+  font-family: "Inter Variable", "Inter", system-ui, sans-serif; color: var(--m-ink); background: var(--m-bg); }
+.dark .screen.site.mobile { --m-bg: #0B0B0D; --m-ink: #F2F3F5; --m-ink-2: #9A9DA5; --m-pill: #26272B; }
+.screen.site.mobile.ios { --pt: calc(var(--pw) / 440); --top: calc(var(--pt) * 59); }
+.screen.site.mobile.android { --pt: calc(var(--pw) / 360); --top: calc(var(--pt) * 92); }
+.screen.site.mobile.ipad { --pt: calc(var(--pw) / 1032); --top: calc(var(--pt) * 78); }
+.screen.site.mobile > * { position: absolute; left: 0; right: 0; }
+.screen.site.mobile > .view { top: var(--top); bottom: 0; overflow: hidden; z-index: 1; }
+
+.m-top { top: 0; height: var(--top); z-index: 2; background: var(--m-bg); }
+.m-status { display: flex; align-items: center; justify-content: space-between; height: calc(var(--pt) * 59); }
+.m-status .time { width: calc(var(--pt) * 157); text-align: center; font-weight: 600; font-size: calc(var(--pt) * 17); letter-spacing: -0.02em; }
+.m-status .sys { width: calc(var(--pt) * 157); display: flex; align-items: center; justify-content: center; gap: calc(var(--pt) * 6); }
+.m-status .sig { width: calc(var(--pt) * 19); } .m-status .wifi { width: calc(var(--pt) * 17); } .m-status .bat { width: calc(var(--pt) * 28); }
+.m-status svg { display: block; height: auto; }
+
+.m-row { display: flex; align-items: center; gap: calc(var(--pt) * 14); }
+.m-row .g, .m-bottom .g { display: inline-flex; flex: none; width: calc(var(--pt) * 22); height: calc(var(--pt) * 22); color: var(--m-ink); }
+.m-row .g svg { width: 100%; height: 100%; }
+.m-row .g.dim { color: var(--m-ink-2); }
+.m-row .g.sm { width: calc(var(--pt) * 14); height: calc(var(--pt) * 14); }
+.m-pill {
+  flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: calc(var(--pt) * 6);
+  height: calc(var(--pt) * 44); border-radius: calc(var(--pt) * 22); background: var(--m-pill);
+  font-size: calc(var(--pt) * 16); font-weight: 500; letter-spacing: -0.01em; white-space: nowrap;
+}
+
+/* iPhone: a glass bar floating over the page, above the home indicator */
+.mobile.ios > .m-bottom {
+  bottom: 0; height: calc(var(--pt) * 104); z-index: 3;
+  background: linear-gradient(to top, var(--m-bg) 30%, color-mix(in srgb, var(--m-bg) 0%, transparent));
+}
+.mobile.ios > .m-bottom .m-row { position: absolute; left: calc(var(--pt) * 18); right: calc(var(--pt) * 18); bottom: calc(var(--pt) * 30); }
+.mobile.ios > .m-bottom .m-pill {
+  height: calc(var(--pt) * 50); border-radius: calc(var(--pt) * 25);
+  background: color-mix(in srgb, var(--m-bg) 86%, transparent);
+  box-shadow: 0 0 0 calc(var(--pt) * .6) rgb(0 0 0 / .08), 0 calc(var(--pt) * 8) calc(var(--pt) * 24) rgb(0 0 0 / .12);
+}
+.mobile.ios > .m-bottom::after, .mobile.ipad > .m-bottom::after {
+  content: ""; position: absolute; left: 50%; bottom: calc(var(--pt) * 8);
+  width: calc(var(--pt) * 144); height: calc(var(--pt) * 5); margin-left: calc(var(--pt) * -72);
+  border-radius: calc(var(--pt) * 3); background: var(--m-ink);
+}
+
+/* Android: status bar, then the address field under it; gesture handle at the bottom */
+.mobile.android > .m-top .m-status { height: calc(var(--pt) * 34); padding: 0 calc(var(--pt) * 18); }
+.mobile.android > .m-top .m-status .time, .mobile.android > .m-top .m-status .sys { width: auto; font-weight: 500; font-size: calc(var(--pt) * 14); }
+.mobile.android > .m-top .m-row { height: calc(var(--pt) * 58); padding: 0 calc(var(--pt) * 12) 0 calc(var(--pt) * 14); }
+.mobile.android > .m-top .m-pill { justify-content: flex-start; padding: 0 calc(var(--pt) * 14); height: calc(var(--pt) * 44); font-size: calc(var(--pt) * 15); }
+.mobile.android > .m-bottom { bottom: 0; height: calc(var(--pt) * 20); z-index: 3; }
+.mobile.android > .m-bottom::after {
+  content: ""; position: absolute; left: 50%; bottom: calc(var(--pt) * 7);
+  width: calc(var(--pt) * 108); height: calc(var(--pt) * 4); margin-left: calc(var(--pt) * -54);
+  border-radius: calc(var(--pt) * 2); background: var(--m-ink); opacity: .8;
+}
+
+/* iPad: a thin status bar, then one toolbar row with a centred address pill */
+.mobile.ipad > .m-top .m-status { height: calc(var(--pt) * 26); padding: 0 calc(var(--pt) * 22); }
+.mobile.ipad > .m-top .m-status .time, .mobile.ipad > .m-top .m-status .sys { width: auto; font-size: calc(var(--pt) * 13); }
+.mobile.ipad > .m-top .m-row { height: calc(var(--pt) * 52); padding: 0 calc(var(--pt) * 22); gap: calc(var(--pt) * 22); }
+.mobile.ipad > .m-top .m-pill { flex: 0 1 46%; margin: 0 auto; height: calc(var(--pt) * 36); border-radius: calc(var(--pt) * 12); font-size: calc(var(--pt) * 15); }
+.mobile.ipad > .m-top { box-shadow: inset 0 calc(var(--pt) * -1) 0 rgb(0 0 0 / .08); }
+.mobile.ipad > .m-bottom { bottom: 0; height: calc(var(--pt) * 20); z-index: 3; }

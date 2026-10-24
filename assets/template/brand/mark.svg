@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="4 29 120 98" fill="currentColor">
+  <title>Sunrise page</title>
+  <desc>A sun rising over an open page: the day, written down. Literal and warm.</desc>
+  <circle cx="64" cy="58" r="25" style="fill: var(--accent, #FFC27A)"/>
+  <path d="M8 84c20-10 40-11 52 1v38c-12-11-32-11-52-2z"/>
+  <path d="M120 84c-20-10-40-11-52 1v38c12-11 32-11 52-2z"/>
+</svg>

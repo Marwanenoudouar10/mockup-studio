@@ -1,0 +1,104 @@
+/* Field presets (the background). All driven by brand colours set on :root:
+   --primary --secondary --deep --accent --ink --paper, and --onField (copy colour on the
+   coloured presets; white unless brand.colors.onField says otherwise, e.g. ink on a light yellow).
+   Each preset also sets the text roles: --text (headline), --sub, --em (accent word),
+   --ornament (brush / highlight), --shadow (tint of every drop shadow), --watermark. */
+
+.canvas {
+  --text: var(--onField, #ffffff);
+  --sub: color-mix(in srgb, var(--onField, #ffffff) 82%, var(--accent));
+  --em: var(--accent);
+  --ornament: var(--onField, #ffffff);
+  --shadow: color-mix(in srgb, var(--deep) 75%, #000000);
+  --shadow-k: 1;
+  --watermark: var(--onField, #ffffff);
+  --watermark-opacity: .08;
+}
+
+/* the drenched brand gradient with two radial lights */
+.canvas.field-gradient {
+  background:
+    radial-gradient(1100px 900px at 18% 8%, rgb(255 255 255 / .16), rgb(255 255 255 / 0) 70%),
+    radial-gradient(1400px 1200px at 110% 100%, color-mix(in srgb, var(--deep) 60%, transparent), transparent 70%),
+    linear-gradient(168deg, var(--primary) 0%, color-mix(in oklab, var(--primary), var(--secondary)) 38%,
+      var(--secondary) 78%, var(--deep) 100%);
+}
+
+/* one flat brand colour, lit from the top left */
+.canvas.field-solid {
+  background:
+    radial-gradient(1200px 1000px at 15% 5%, rgb(255 255 255 / .12), rgb(255 255 255 / 0) 70%),
+    radial-gradient(1500px 1300px at 100% 105%, rgb(0 0 0 / .18), rgb(0 0 0 / 0) 70%),
+    var(--primary);
+}
+
+/* near-black with a brand glow */
+.canvas.field-dark {
+  --text: #ffffff;
+  --sub: color-mix(in srgb, #ffffff 82%, var(--accent));
+  --ornament: #ffffff;
+  --watermark: #ffffff;
+  --shadow: #000000;
+  --watermark-opacity: .06;
+  background:
+    radial-gradient(1300px 1000px at 50% 0%, color-mix(in srgb, var(--primary) 42%, transparent), transparent 72%),
+    radial-gradient(1200px 1200px at 100% 100%, color-mix(in srgb, var(--secondary) 35%, transparent), transparent 70%),
+    color-mix(in srgb, var(--deep) 45%, #07070b);
+}
+
+/* pale paper, dark text */
+.canvas.field-light {
+  --text: var(--ink);
+  --sub: color-mix(in srgb, var(--ink) 66%, var(--paper));
+  --em: var(--primary);
+  --ornament: var(--primary);
+  --shadow: color-mix(in srgb, var(--ink) 70%, var(--primary));
+  --shadow-k: .55;
+  --watermark: var(--primary);
+  --watermark-opacity: .05;
+  background:
+    radial-gradient(1200px 900px at 10% 0%, color-mix(in srgb, var(--primary) 12%, transparent), transparent 70%),
+    radial-gradient(1300px 1100px at 100% 100%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%),
+    var(--paper);
+}
+
+/* soft multi-colour mesh on paper, dark text */
+.canvas.field-mesh {
+  --text: var(--ink);
+  --sub: color-mix(in srgb, var(--ink) 68%, var(--paper));
+  --em: var(--primary);
+  --ornament: var(--primary);
+  --shadow: color-mix(in srgb, var(--ink) 70%, var(--secondary));
+  --shadow-k: .6;
+  --watermark: var(--ink);
+  --watermark-opacity: .04;
+  background:
+    radial-gradient(900px 800px at 0% 0%, color-mix(in srgb, var(--primary) 34%, transparent), transparent 70%),
+    radial-gradient(900px 900px at 100% 18%, color-mix(in srgb, var(--accent) 42%, transparent), transparent 70%),
+    radial-gradient(1100px 1000px at 12% 72%, color-mix(in srgb, var(--secondary) 22%, transparent), transparent 70%),
+    radial-gradient(1000px 900px at 95% 98%, color-mix(in srgb, var(--primary) 28%, transparent), transparent 70%),
+    var(--paper);
+}
+
+/* fine print grain so the field reads as a surface, not a flat fill */
+.canvas.grain::after {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  opacity: .06;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 90;
+}
+.canvas.field-light.grain::after,
+.canvas.field-mesh.grain::after { mix-blend-mode: multiply; opacity: .05; filter: invert(1); }
+
+/* the giant faint logo */
+.watermark {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  color: var(--watermark);
+  opacity: var(--watermark-opacity);
+}
+.watermark svg, .watermark img { display: block; width: 100%; height: auto; direction: ltr; }

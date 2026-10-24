@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brand sample screen</title>
+<!-- A generic app screen dressed in the brand tokens, for the brand boards (npm run brand). It is not
+     part of any app and npm run screens does not capture it. Boxes: card (the hero card), stats, week.
+     Preview: npm run preview, then /screens/kit/sample.html?platform=ios (&tokens=/out/brand/...json, &hide=card). -->
+<meta name="kit-tokens" content="/brand/tokens.json">
+<link rel="stylesheet" href="kit.css">
+<script type="module" src="kit.js"></script>
+<style>
+  .hero { padding: 20px 20px 18px; overflow: hidden; }
+  .hero::before { content: ""; position: absolute; right: -70px; top: -90px; width: 250px; height: 250px; border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--accent) 55%, transparent), transparent 68%); }
+  .hero::after { content: ""; position: absolute; right: -50px; bottom: -130px; width: 230px; height: 230px; border-radius: 50%;
+    border: 1.5px solid rgb(255 255 255 / .14); box-shadow: 0 0 0 26px rgb(255 255 255 / .05); }
+  .hero > * { position: relative; z-index: 1; }
+  .hero .eyebrow { display: flex; align-items: center; gap: 6px; color: rgb(255 255 255 / .84); }
+  .hero .eyebrow i[data-icon] { width: 16px; height: 16px; color: var(--accent); }
+  .hero h2 { margin: 12px 0 6px; font-family: var(--font-display, var(--font-ui)); font-weight: 700; font-size: 27px; line-height: 1.1; letter-spacing: -.02em; }
+  .hero p { color: rgb(255 255 255 / .8); }
+  .stat { padding: 16px 16px 14px; }
+  .stat .value { font-family: var(--font-display, var(--font-ui)); }
+  .stat .badge-ico { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--tint-soft); color: var(--tint); }
+  .stat .badge-ico i[data-icon] { width: 17px; height: 17px; }
+  .stat .progress { height: 6px; }
+  .ink-icon { color: var(--brand-ink, #111); }
+</style>
+</head>
+<body>
+<header class="navbar" data-large data-title="Today" data-subtitle="Tuesday, May 14" data-actions="search" data-avatar="A"></header>
+
+<main class="content pad stack">
+  <section class="card tinted hero" data-box="card">
+    <div class="eyebrow t-label"><i data-icon="sparkle" data-filled></i><span data-brand="name">Your app</span></div>
+    <h2>Your first step is ready</h2>
+    <p class="t-callout">Five quiet minutes today keeps your streak going.</p>
+    <div class="row between mt-l">
+      <button class="btn light small"><i data-icon="play" data-filled></i><span>Start</span></button>
+      <span class="pill glass"><i data-icon="clock"></i><span>5 min</span></span>
+    </div>
+  </section>
+
+  <div class="grid-2" data-box="stats">
+    <div class="card stat">
+      <div class="row between"><span class="value">12</span><span class="badge-ico"><i data-icon="flame" data-filled></i></span></div>
+      <div class="label">Day streak</div>
+      <div class="progress mt-s"><i style="width: 72%"></i></div>
+    </div>
+    <div class="card stat">
+      <div class="row between"><span class="value">84%</span><span class="badge-ico"><i data-icon="trend"></i></span></div>
+      <div class="label">Weekly goal</div>
+      <div class="progress mt-s"><i style="width: 84%; background: var(--accent)"></i></div>
+    </div>
+  </div>
+
+  <section class="card" data-box="week">
+    <div class="row between"><h3 class="t-headline">This week</h3><span class="t-sub muted">5 of 7 days</span></div>
+    <div class="chart mt-m" data-chart="bars" data-values="3,5,4,6,7,2,1" data-labels="M,T,W,T,F,S,S" data-hl="4" style="height: 92px"></div>
+  </section>
+
+  <div class="section-head mt-s"><h3 class="t-headline">Up next</h3><span class="link t-sub">See all</span></div>
+  <div class="list icons">
+    <div class="item"><span class="lead-icon" style="background: var(--tint)"><i data-icon="bell"></i></span>
+      <div class="body"><div class="title">Morning check-in</div><div class="sub t-sub">Daily at 8:00</div></div><span class="switch on"></span></div>
+    <div class="item"><span class="lead-icon ink-icon" style="background: var(--accent)"><i data-icon="star" data-filled></i></span>
+      <div class="body"><div class="title">Weekly review</div><div class="sub t-sub">Sunday evening</div></div><i class="chev" data-icon="chevron"></i></div>
+    <div class="item"><span class="lead-icon" style="background: color-mix(in oklab, var(--tint) 60%, #000)"><i data-icon="people"></i></span>
+      <div class="body"><div class="title">Invite a friend</div><div class="sub t-sub">Share your progress</div></div><i class="chev" data-icon="chevron"></i></div>
+  </div>
+</main>
+
+<nav class="tabbar" data-tabs="Today:sun,Explore:search,Progress:chart,You:person" data-on="0"></nav>
+<script>
+  // ?hide=card: the boards' phone shows this screen without the card they lift out (never one card twice)
+  for (const b of (new URLSearchParams(location.search).get('hide') || '').split(',').filter(Boolean)) {
+    const n = document.querySelector(`[data-box="${CSS.escape(b)}"]`);
+    if (n) n.remove();
+  }
+</script>
+</body>
+</html>

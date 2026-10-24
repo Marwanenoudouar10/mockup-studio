@@ -1,0 +1,175 @@
+/* iOS 26 look: Inter (optical sizes) as the SF Pro stand-in, large titles, inset grouped lists,
+   Liquid Glass bar buttons and a floating glass tab bar, capsule controls, home indicator.
+   Sizes are points (CSS px); captures are @3x. */
+.ios {
+  --font-ui: "Inter Variable", "Inter", system-ui, sans-serif;
+  --bg: var(--app-bg, #F2F2F7);
+  --surface: var(--app-surface, #FFFFFF);
+  --surface-2: #F7F7FA;
+  --sheet-bg: var(--app-surface, #FFFFFF);
+  --fill: rgb(118 118 128 / .12);
+  --text: #000000;
+  --text-2: rgb(60 60 67 / .62);
+  --text-3: rgb(60 60 67 / .32);
+  --line: rgb(60 60 67 / .16);
+  --outline: rgb(60 60 67 / .22);
+  --tint-soft: color-mix(in oklab, var(--tint) 13%, #fff);
+  --on-tint-soft: color-mix(in oklab, var(--tint) 88%, #000);
+  --glass: rgb(255 255 255 / .66);
+  --glass-rim: rgb(255 255 255 / .95);
+  --glass-shadow: 0 0 0 .5px rgb(0 0 0 / .05), 0 8px 24px rgb(0 0 0 / .09), 0 1px 3px rgb(0 0 0 / .05);
+  --gutter: 20px;
+  --gap: 14px;
+  --r-card: 26px;
+  --r-media: 22px;
+  --card-pad: 18px 20px;
+  --row-h: 52px;
+  --row-pad: 16px;
+  --btn-h: 50px;
+  --btn-h-s: 34px;
+  --btn-pad: 22px;
+  --r-btn: 999px;
+  --chip-h: 34px;
+  --r-chip: 999px;
+  --shadow-card: 0 .5px 1px rgb(0 0 0 / .03), 0 8px 24px rgb(0 0 0 / .045);
+  --shadow-tint: 0 14px 30px color-mix(in srgb, var(--tint) 30%, transparent);
+  letter-spacing: -.012em;
+}
+.ios.dark {
+  --bg: var(--app-bg-dark, #000000);
+  --surface: var(--app-surface-dark, #1C1C1E);
+  --surface-2: #2C2C2E;
+  --sheet-bg: #1C1C1E;
+  --fill: rgb(118 118 128 / .24);
+  --text: #FFFFFF;
+  --text-2: rgb(235 235 245 / .62);
+  --text-3: rgb(235 235 245 / .3);
+  --line: rgb(84 84 88 / .55);
+  --outline: rgb(235 235 245 / .2);
+  --tint-soft: color-mix(in oklab, var(--tint) 26%, #1C1C1E);
+  --on-tint-soft: color-mix(in oklab, var(--tint) 45%, #fff);
+  --glass: rgb(44 44 48 / .6);
+  --glass-rim: rgb(255 255 255 / .16);
+  --glass-shadow: 0 0 0 .5px rgb(255 255 255 / .08), 0 8px 24px rgb(0 0 0 / .4);
+  --shadow-card: none;
+  --green: #30D158; --red: #FF453A; --orange: #FF9F0A; --blue: #0A84FF;
+  --bar-fade: .55;
+}
+
+/* type scale (Apple HIG text styles) */
+.ios .t-hero { font-weight: 700; font-size: 44px; line-height: 48px; letter-spacing: -.03em; }
+.ios .t-large { font-weight: 700; font-size: 34px; line-height: 41px; letter-spacing: -.024em; }
+.ios .t-title { font-weight: 700; font-size: 22px; line-height: 28px; letter-spacing: -.02em; }
+.ios .t-headline { font-weight: 600; font-size: 17px; line-height: 22px; letter-spacing: -.022em; }
+.ios .t-body { font-weight: 400; font-size: 17px; line-height: 23px; letter-spacing: -.022em; }
+.ios .t-callout { font-weight: 400; font-size: 16px; line-height: 21px; letter-spacing: -.02em; }
+.ios .t-sub { font-weight: 400; font-size: 15px; line-height: 20px; letter-spacing: -.016em; }
+.ios .t-caption { font-weight: 400; font-size: 13px; line-height: 18px; letter-spacing: -.006em; }
+.ios .t-label { font-weight: 600; font-size: 12px; line-height: 16px; letter-spacing: .06em; text-transform: uppercase; }
+.ios .t-micro { font-weight: 500; font-size: 11px; line-height: 13px; letter-spacing: .01em; }
+
+/* status bar: time and glyphs centred in the two "ears" beside the Dynamic Island (drawn by the frame) */
+.ios .statusbar {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 60; height: 59px;
+  display: flex; align-items: center; justify-content: space-between; padding-top: 2px; color: var(--text);
+}
+.ios .statusbar .time { width: 157px; text-align: center; padding-inline-start: 8px; font-weight: 600; font-size: 17px; letter-spacing: -.02em; }
+.ios .statusbar .sys { width: 157px; display: flex; align-items: center; justify-content: center; gap: 6px; padding-inline-end: 8px; }
+.light-status .statusbar, .statusbar.light { color: #fff; }
+
+/* navigation bar: glass buttons on a 54pt row, large title under it */
+.ios .navbar { position: relative; z-index: 20; padding-top: 59px; }
+.ios .navbar .bar { position: relative; height: 54px; display: flex; align-items: center; gap: 10px; padding: 0 16px; }
+.ios .navbar .bar .spacer { flex: 1; }
+.ios .navbar .inline-title {
+  position: absolute; left: 90px; right: 90px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-weight: 600; font-size: 17px; letter-spacing: -.022em;
+}
+.ios .navbar .inline-title small { display: block; font-weight: 400; font-size: 12px; color: var(--text-2); letter-spacing: 0; }
+.ios .navbar .overline { padding: 2px var(--gutter) 0; font-weight: 600; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--text-2); }
+.ios .navbar h1 { padding: 0 var(--gutter) 10px; font-weight: 700; font-size: 34px; line-height: 41px; letter-spacing: -.024em; }
+.ios .navbar .overline + h1 { margin-top: 1px; }
+
+/* Liquid Glass: bar buttons, button groups, tab bar */
+.ios .glass {
+  background: var(--glass);
+  backdrop-filter: blur(14px) saturate(1.8);
+  box-shadow: inset 0 0 0 .6px var(--glass-rim), inset 0 1.5px 0 rgb(255 255 255 / .55), var(--glass-shadow);
+}
+.ios .gbtn {
+  height: 44px; min-width: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center;
+  padding: 0 11px; gap: 18px; color: var(--text);
+}
+.ios .gbtn i[data-icon] { width: 22px; height: 22px; }
+.ios .gbtn.prominent { background: var(--tint); color: var(--on-tint); box-shadow: inset 0 1px 0 rgb(255 255 255 / .35), 0 6px 16px color-mix(in srgb, var(--tint) 35%, transparent); }
+.ios .gbtn.text { font-weight: 600; font-size: 17px; padding: 0 16px; letter-spacing: -.02em; }
+.ios .gbtn .avatar { --size: 36px; margin: 0 -7px; }
+
+.ios .tabbar { position: absolute; left: 21px; right: 21px; bottom: 25px; z-index: 40; height: 64px; display: flex; gap: 10px; }
+.ios .tabbar .tabs { flex: 1; display: flex; padding: 4px; border-radius: 32px; }
+.ios .tabbar .tab {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  border-radius: 28px; color: var(--text); font-weight: 600; font-size: 10px; letter-spacing: .005em;
+}
+.ios .tabbar .tab i[data-icon] { width: 27px; height: 27px; }
+.ios .tabbar .tab.on { color: var(--tint); background: rgb(118 118 128 / .13); }
+.ios.dark .tabbar .tab.on { background: rgb(255 255 255 / .1); }
+.ios .tabbar .accessory { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text); }
+.ios .tabbar .accessory i[data-icon] { width: 26px; height: 26px; }
+.ios .tabbar .accessory.prominent { background: var(--tint); color: var(--on-tint); box-shadow: inset 0 1px 0 rgb(255 255 255 / .35), 0 8px 22px color-mix(in srgb, var(--tint) 40%, transparent); }
+
+/* scroll-edge effect: content softly fades under the floating bars */
+.ios .edge-bottom {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 112px; z-index: 35;
+  background: linear-gradient(to top, color-mix(in srgb, var(--bg) 92%, transparent) 18%, transparent);
+  backdrop-filter: blur(3px);
+  mask-image: linear-gradient(to top, #000 45%, transparent);
+}
+.ios .indicator { position: absolute; left: 50%; bottom: 8px; z-index: 70; width: 144px; height: 5px; margin-left: -72px; border-radius: 3px; background: #000; }
+.ios.dark .indicator, .light-indicator .indicator { background: #fff; }
+
+/* floating action (no tab bar): a prominent glass circle */
+.ios .fab { position: absolute; right: 22px; bottom: 44px; z-index: 40; width: 60px; height: 60px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; background: var(--tint); color: var(--on-tint);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .35), 0 10px 26px color-mix(in srgb, var(--tint) 40%, transparent); }
+.ios .fab .label { display: none; }
+.ios .fab i[data-icon] { width: 26px; height: 26px; }
+
+/* floating glass toolbar (editor bottoms) */
+.ios .toolbar { position: absolute; left: 21px; right: 21px; bottom: 25px; z-index: 40; height: 56px; border-radius: 28px;
+  display: flex; align-items: center; justify-content: space-around; padding: 0 8px; color: var(--text); }
+
+/* components */
+.ios .btn { font-weight: 600; font-size: 17px; letter-spacing: -.02em; }
+.ios .btn.small { font-size: 15px; }
+.ios .chip { background: var(--fill); font-weight: 500; font-size: 15px; letter-spacing: -.015em; }
+.ios .chip.on { background: var(--tint); color: var(--on-tint); }
+.ios .section-head { font-weight: 700; font-size: 20px; letter-spacing: -.02em; }
+.ios .section-head .link { font-weight: 400; font-size: 17px; letter-spacing: -.02em; }
+
+.ios .list .item + .item::before { content: ""; position: absolute; top: 0; right: 0; left: var(--sep-inset, 16px); height: .5px; background: var(--line); }
+.ios .list.icons { --sep-inset: 60px; }
+.ios .item .title { font-size: 17px; letter-spacing: -.022em; }
+.ios .item .sub { font-size: 14px; letter-spacing: -.01em; }
+.ios .item .trail { font-size: 17px; color: var(--text-2); }
+.ios .item .chev { width: 13px; height: 13px; color: var(--text-3); }
+.ios .lead-icon { width: 30px; height: 30px; border-radius: 8px; }
+
+.ios .segmented { height: 36px; padding: 2px; border-radius: 18px; background: var(--fill); }
+.ios .segmented > span { border-radius: 16px; font-weight: 500; font-size: 14px; letter-spacing: -.01em; color: var(--text); }
+.ios .segmented > span.on { background: var(--surface); font-weight: 600; box-shadow: 0 0 0 .5px rgb(0 0 0 / .04), 0 3px 8px rgb(0 0 0 / .12); }
+.ios.dark .segmented > span.on { background: #636366; }
+
+.ios .switch { width: 62px; height: 28px; border-radius: 14px; background: rgb(120 120 128 / .16); }
+.ios .switch::after { top: 2px; left: 2px; width: 38px; height: 24px; border-radius: 12px; background: #fff; box-shadow: 0 2px 6px rgb(0 0 0 / .16), 0 0 0 .5px rgb(0 0 0 / .04); }
+.ios .switch.on { background: var(--green); }
+.ios .switch.on::after { left: 22px; }
+
+.ios .field .label { padding: 0 4px 6px; font-size: 13px; color: var(--text-2); }
+.ios .field .value { min-height: 48px; padding: 13px 16px; border-radius: 14px; background: var(--surface); font-size: 17px; letter-spacing: -.02em; }
+.ios .search { height: 44px; padding: 0 14px; border-radius: 22px; background: var(--fill); font-size: 17px; letter-spacing: -.02em; }
+
+.ios .sheet { left: 8px; right: 8px; bottom: 8px; border-radius: 40px; padding: 6px 0 28px; box-shadow: 0 -2px 30px rgb(0 0 0 / .14); }
+.ios .grabber { width: 36px; height: 5px; margin-bottom: 14px; }
+.ios .stat .value { font-weight: 700; font-size: 28px; line-height: 34px; letter-spacing: -.025em; }
+.ios .stat .label { font-size: 13px; }

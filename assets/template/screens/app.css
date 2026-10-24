@@ -1,0 +1,165 @@
+/* Brimpage (demo app): only what is specific to this app. Replace this file per project.
+   The brand colours and fonts (--tint --tint-2 --accent --app-bg --font-display --font-text) come from
+   brand/tokens.json through <meta name="kit-tokens"> (npm run brand -- apply): do not repeat them here.
+   Anything set here wins over the tokens on purpose, like this app's editorial serif for entry titles. */
+@import url("/node_modules/@fontsource-variable/newsreader/opsz.css");
+@import url("/node_modules/@fontsource-variable/noto-sans-arabic/index.css"); /* RTL captures (--locale ar) */
+
+:root {
+  --font-app: "Newsreader Variable", Georgia, serif;
+  --m1: #F27D72;
+  --m2: #F6A15C;
+  --m3: #F2C94C;
+  --m4: #6CC08B;
+  --m5: #59B3E3;
+}
+
+/* week strip */
+.week { display: flex; justify-content: space-between; padding: 8px; }
+.day { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 0 9px; border-radius: 16px; color: var(--text-2); font-size: 12px; font-weight: 500; }
+.day b { font-size: 18px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+.day i { width: 6px; height: 6px; border-radius: 50%; background: var(--c, transparent); }
+.day.today { background: var(--tint); color: rgb(255 255 255 / .75); }
+.day.today b { color: #fff; }
+.day.today i { background: #fff; }
+.day.later b { color: var(--text-3); }
+.android .day { border-radius: 20px; }
+.android .day.today { background: var(--md-on-primary-container); }
+.android.dark .day.today { background: var(--tint); }
+
+/* prompt card */
+.prompt { padding: 20px 20px 18px; overflow: hidden; }
+.prompt::before { content: ""; position: absolute; right: -60px; top: -70px; width: 230px; height: 230px; border-radius: 50%;
+  background: radial-gradient(circle, rgb(255 190 130 / .55), rgb(255 190 130 / 0) 68%); }
+.prompt::after { content: ""; position: absolute; right: -40px; bottom: -120px; width: 220px; height: 220px; border-radius: 50%;
+  border: 1.5px solid rgb(255 255 255 / .12); box-shadow: 0 0 0 26px rgb(255 255 255 / .04); }
+.android .prompt { padding: 16px 18px; }
+.prompt > * { position: relative; z-index: 1; }
+.prompt .eyebrow { display: flex; align-items: center; gap: 6px; color: rgb(255 255 255 / .8); }
+.prompt .eyebrow i[data-icon] { width: 16px; height: 16px; color: #FFD3A3; }
+.prompt .q { margin: 10px 0 18px; font-family: var(--font-app); font-weight: 500; font-size: 25px; line-height: 1.18; letter-spacing: -.01em; }
+.android .prompt .q { font-size: 22px; margin: 8px 0 14px; }
+.prompt .time { display: flex; align-items: center; gap: 5px; color: rgb(255 255 255 / .78); }
+.prompt .time i[data-icon] { width: 16px; height: 16px; }
+
+/* mood faces: <span class="face good"></span>  (low meh okay good great) */
+.face { --s: 40px; position: relative; display: inline-block; width: var(--s); height: var(--s); border-radius: 50%; background: var(--c); flex: none; }
+.face::before { content: ""; position: absolute; left: 32%; top: 36%; width: 11%; height: 14%; border-radius: 50%;
+  background: rgb(30 24 60 / .78); box-shadow: calc(var(--s) * .25) 0 0 rgb(30 24 60 / .78); }
+.face::after { content: ""; position: absolute; left: 32%; right: 32%; top: 58%; height: 13%; border: calc(var(--s) * .065) solid rgb(30 24 60 / .78); border-top: 0; border-radius: 0 0 99px 99px; }
+.face.low { --c: var(--m1); } .face.low::after { top: 62%; transform: scaleY(-1); }
+.face.meh { --c: var(--m2); } .face.meh::after { height: 0; border-radius: 9px; top: 64%; left: 36%; right: 36%; }
+.face.okay { --c: var(--m3); } .face.okay::after { height: 6%; top: 62%; }
+.face.good { --c: var(--m4); }
+.face.great { --c: var(--m5); } .face.great::after { height: 19%; background: rgb(30 24 60 / .78); }
+.face.s { --s: 26px; }
+
+.moods { display: flex; justify-content: space-between; margin-top: 16px; }
+.mood { display: flex; flex-direction: column; align-items: center; gap: 7px; width: 58px; font-size: 12px; font-weight: 500; color: var(--text-2); }
+.mood.on { color: var(--text); font-weight: 600; }
+.mood.on .face { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5.5px var(--tint); }
+
+/* journal rows */
+.entry-row { display: flex; gap: 14px; align-items: center; padding: 12px 16px 12px 12px; }
+.entry-row .thumb { width: 72px; height: 72px; border-radius: 16px; flex: none; }
+.entry-title { font-family: var(--font-app); font-weight: 600; font-size: 19px; line-height: 1.2; letter-spacing: -.005em; color: var(--text); }
+.entry-row p { margin-top: 3px; }
+.entry-row .meta { margin-top: 6px; gap: 6px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--c); display: inline-block; }
+.meta i[data-icon] { width: 14px; height: 14px; }
+
+/* editor */
+.meta-line { gap: 6px; margin-top: 10px; }
+.android .meta-line { margin-top: 2px; }
+.meta-line i[data-icon] { width: 15px; height: 15px; }
+.entry-h1 { font-family: var(--font-app); font-weight: 600; font-size: 34px; line-height: 1.1; letter-spacing: -.015em; margin-top: 8px; }
+.android .entry-h1 { font-size: 31px; }
+.feelings { display: flex; gap: 8px; padding: 14px 0 2px; }
+.feel { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 13px 0 6px; border-radius: 19px; background: var(--surface); font-size: 15px; font-weight: 500; color: var(--text); box-shadow: inset 0 0 0 1px var(--line); }
+.feel.on { background: var(--text); color: var(--bg); box-shadow: none; }
+.android .feel { border-radius: 10px; height: 36px; font-size: 14px; }
+.android .feel.on { background: var(--md-secondary-container); color: var(--md-on-secondary-container); }
+.photo { height: 236px; margin-top: 14px; }
+.android .photo { height: 178px; }
+.photo .caption { background: rgb(28 20 70 / .32); }
+.prose { margin-top: 18px; font-size: 20px; line-height: 1.5; color: var(--text); letter-spacing: 0; }
+.android .prose { font-size: 17px; margin-top: 14px; }
+.android .prose p + p { margin-top: 10px; }
+.android .feelings { padding-top: 10px; }
+.words { margin-top: 14px; display: flex; gap: 6px; }
+.prose p + p { margin-top: 12px; }
+.chip.outline-add { background: transparent; box-shadow: inset 0 0 0 1px var(--line); color: var(--tint); }
+
+/* insights */
+.streak { padding: 18px 20px 16px; }
+.streak .num { font-weight: 700; font-size: 40px; line-height: 1; letter-spacing: -.03em; color: var(--text); }
+.android .streak .num { font-weight: 400; font-size: 44px; }
+.streak .num .pill { margin-inline-start: 10px; vertical-align: 6px; font-size: 12px; letter-spacing: 0; }
+.streak .num small { font-size: 20px; font-weight: 600; letter-spacing: -.01em; margin-inline-start: 4px; }
+.flame { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, #FFC27A, #FF8A5B); color: #fff; box-shadow: 0 6px 16px rgb(255 138 91 / .4); }
+.flame i[data-icon] { width: 28px; height: 28px; }
+.streak-week { display: flex; justify-content: space-between; margin-top: 16px; }
+.android .streak-week { margin-top: 12px; }
+.android .streak { padding: 14px 18px 14px; }
+.android .streak .num { font-size: 40px; }
+.sd { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: var(--text-2); }
+.sd b { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--fill); color: transparent; }
+.sd b i[data-icon] { width: 18px; height: 18px; }
+.sd.done b { background: linear-gradient(160deg, #FFB86B, #FF8A5B); color: #fff; }
+.sd.today b { background: transparent; box-shadow: inset 0 0 0 2.5px #FF8A5B; }
+.lifts-list { margin-top: 12px; display: flex; flex-direction: column; gap: 14px; }
+.lift-row { display: flex; align-items: center; gap: 12px; }
+.lift-row .lead-icon { width: 34px; height: 34px; border-radius: 10px; }
+.android .lift-row .lead-icon { border-radius: 50%; }
+.lift-row .progress { width: 92px; }
+.lift-row .progress > i { background: var(--m4); }
+.lift-row b { width: 44px; text-align: end; font-size: 15px; font-weight: 600; color: color-mix(in oklab, var(--m4) 62%, #000); font-variant-numeric: tabular-nums; }
+.stats .stat { padding: 14px 14px 12px; }
+.mood-chart { height: 142px; }
+.android .mood-chart { height: 116px; }
+
+/* Android: 800dp of height, so the boxes that panels lift stay clear of the FAB and navigation bar */
+.android { --gap: 10px; }
+.android .week { padding: 6px; }
+.android .day { padding: 6px 0 7px; }
+.android .moods { margin-top: 12px; }
+.android .face { --s: 38px; }
+.android .face.s { --s: 26px; }
+.android .lifts-list { gap: 10px; margin-top: 10px; }
+.android .lift-row .lead-icon { width: 32px; height: 32px; }
+.android .mood-chart { height: 104px; }
+.android .sd b { width: 30px; height: 30px; }
+.android .lift-row .progress { width: 72px; }
+
+/* reminders */
+.nudge { padding: 18px 20px 20px; }
+.nudge .eyebrow { display: flex; align-items: center; gap: 6px; color: rgb(255 255 255 / .84); }
+.nudge .eyebrow i[data-icon] { width: 16px; height: 16px; color: #FFD3A3; }
+.nudge-time { margin: 10px 0 2px; font-family: var(--font-display, var(--font-ui)); font-weight: 700; font-size: 58px; line-height: 1; letter-spacing: -.035em; }
+.nudge-time small { margin-inline-start: 6px; font-size: 22px; font-weight: 600; letter-spacing: 0; opacity: .8; }
+.days { display: flex; gap: 6px; margin-top: 16px; }
+.days span { flex: 1; height: 36px; display: grid; place-items: center; border-radius: 12px; font-size: 14px; font-weight: 600; background: rgb(255 255 255 / .14); color: rgb(255 255 255 / .7); }
+.days span.on { background: #fff; color: color-mix(in oklab, var(--tint) 85%, #000); }
+.saver { padding: 16px 18px; }
+.saver .row { gap: 14px; }
+.saver .flame { width: 44px; height: 44px; flex: none; }
+.saver .flame i[data-icon] { width: 24px; height: 24px; }
+
+/* privacy */
+.lock-card { padding: 22px 20px 16px; text-align: center; }
+.lock-mark { width: 64px; height: 64px; margin: 0 auto 12px; border-radius: 50%; display: grid; place-items: center; background: var(--tint); color: #fff; box-shadow: 0 8px 22px color-mix(in srgb, var(--tint) 40%, transparent); }
+.lock-mark i[data-icon] { width: 30px; height: 30px; }
+.lock-title { font-family: var(--font-display, var(--font-ui)); font-weight: 700; font-size: 24px; letter-spacing: -.02em; color: var(--text); }
+.lock-row { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); text-align: start; }
+.offline { padding: 16px 18px; }
+.offline .row { gap: 14px; }
+.lead-icon.round { width: 40px; height: 40px; border-radius: 50%; }
+.android .nudge-time { font-size: 52px; }
+.android .lock-card { padding: 18px 18px 12px; }
+
+/* right to left (npm run screens -- --locale ar): an Arabic face behind the UI fonts, which have no Arabic */
+.ios[dir="rtl"] { --font-ui: "Inter Variable", "Noto Sans Arabic Variable", system-ui, sans-serif; }
+.android[dir="rtl"] { --font-ui: Roboto, "Noto Sans Arabic Variable", system-ui, sans-serif; }
+[dir="rtl"] { --font-app: "Noto Sans Arabic Variable", var(--font-ui); }
+.android .lock-title { font-size: 21px; }

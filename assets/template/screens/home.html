@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brimpage - Today</title>
+<meta name="kit-strings" content="strings.json">
+<meta name="kit-tokens" content="/brand/tokens.json">
+<link rel="stylesheet" href="kit/kit.css">
+<link rel="stylesheet" href="app.css">
+<script type="module" src="kit/kit.js"></script>
+</head>
+<body>
+<header class="navbar" data-large="ios" data-title="Good morning, Sam" data-subtitle="Tuesday, May 14" data-actions="search" data-avatar="S"></header>
+
+<main class="content pad stack">
+  <div class="card week">
+    <div class="day"><span data-es="L" data-ar="ن">M</span><b>13</b><i style="--c: var(--m4)"></i></div>
+    <div class="day today"><span data-es="M" data-ar="ث">T</span><b>14</b><i></i></div>
+    <div class="day later"><span data-es="X" data-ar="ر">W</span><b>15</b><i></i></div>
+    <div class="day later"><span data-es="J" data-ar="خ">T</span><b>16</b><i></i></div>
+    <div class="day later"><span data-es="V" data-ar="ج">F</span><b>17</b><i></i></div>
+    <div class="day later"><span data-es="S" data-ar="س">S</span><b>18</b><i></i></div>
+    <div class="day later"><span data-es="D" data-ar="ح">S</span><b>19</b><i></i></div>
+  </div>
+
+  <section class="card tinted prompt" data-box="prompt">
+    <div class="eyebrow t-label"><i data-icon="sparkle" data-filled></i><span>Today's prompt</span></div>
+    <p class="q">What made you smile today, even for a second?</p>
+    <div class="row between">
+      <button class="btn light small"><i data-icon="pencil"></i><span>Write it down</span></button>
+      <span class="time t-caption"><i data-icon="clock"></i><span>2 min</span></span>
+    </div>
+  </section>
+
+  <section class="card" data-box="mood">
+    <div class="row between">
+      <h3 class="t-headline">How are you feeling?</h3>
+      <span class="t-sub tint">Log</span>
+    </div>
+    <div class="moods">
+      <div class="mood"><span class="face low"></span><span>Low</span></div>
+      <div class="mood"><span class="face meh"></span><span>Meh</span></div>
+      <div class="mood"><span class="face okay"></span><span>Okay</span></div>
+      <div class="mood on"><span class="face good"></span><span>Good</span></div>
+      <div class="mood"><span class="face great"></span><span>Great</span></div>
+    </div>
+  </section>
+
+  <div class="section-head mt-xs"><span>Recent</span><span class="link">See all</span></div>
+
+  <article class="card entry-row" data-box="entry">
+    <div class="art thumb" data-art="dusk"></div>
+    <div class="grow">
+      <h4 class="entry-title">A quiet Sunday walk</h4>
+      <p class="t-sub muted clamp-2">Took the long way home by the river and finally slowed down.</p>
+      <div class="meta row t-caption muted"><span>Sun, May 12</span><span class="dot" style="--c: var(--m4)"></span><span>Good</span><i data-icon="photo"></i><span>3</span></div>
+    </div>
+  </article>
+
+  <article class="card entry-row">
+    <div class="art thumb" data-art="forest" data-seed="4"></div>
+    <div class="grow">
+      <h4 class="entry-title">First run in weeks</h4>
+      <p class="t-sub muted clamp-2">Legs heavy, head clear. Same time tomorrow?</p>
+      <div class="meta row t-caption muted"><span>Sat, May 11</span><span class="dot" style="--c: var(--m5)"></span><span>Great</span></div>
+    </div>
+  </article>
+</main>
+
+<nav class="tabbar" data-tabs="Today:sun,Journal:book,Insights:chart,You:person" data-on="0"></nav>
+<button class="fab"><i data-icon="edit"></i><span class="label">New entry</span></button>
+</body>
+</html>

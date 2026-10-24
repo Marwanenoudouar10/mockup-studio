@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mock-screen kit - components</title>
+<!-- Every kit component on one tall page, for reference and QA. Not captured by npm run screens.
+     Preview: npm run preview, then open /screens/kit/demo.html?platform=ios (or android, &theme=dark). -->
+<link rel="stylesheet" href="kit.css">
+<script type="module" src="kit.js"></script>
+<style>
+  :root { --tint: #0F8F84; --accent: #F59E0B; }
+  html, body { height: auto; overflow: visible; }
+  .demo-h { margin: 10px 2px -4px; }
+  .art-grid .art { aspect-ratio: 1; border-radius: 14px; }
+  .art-grid .art span { position: absolute; left: 8px; bottom: 6px; color: #fff; font-size: 11px; font-weight: 600; text-shadow: 0 1px 2px rgb(0 0 0 / .4); }
+  .sheet-demo { position: relative; height: 330px; border-radius: 30px; overflow: hidden; background: var(--bg); box-shadow: inset 0 0 0 1px var(--line); }
+  .sheet-demo .sheet { padding-inline: 20px; }
+  .ring-box { height: 132px; }
+  .ring-box b { display: block; font-size: 22px; }
+</style>
+</head>
+<body>
+<header class="navbar" data-large data-title="Components" data-subtitle="Mock-screen kit" data-back data-actions="search,more"></header>
+
+<main class="content pad stack">
+  <div class="search"><i data-icon="search"></i><span>Search places, people, notes</span></div>
+  <div class="segmented"><span class="on">Day</span><span>Week</span><span>Month</span></div>
+
+  <div class="t-label muted demo-h">Chips and buttons</div>
+  <div class="chips"><span class="chip on">Running</span><span class="chip">Yoga</span><span class="chip">Cycling</span><span class="chip tag">#weekend</span></div>
+  <div class="row wrap"><button class="btn">Continue</button><button class="btn tonal">Tonal</button><button class="btn outline">Outline</button><button class="btn plain">Plain</button></div>
+  <div class="row wrap"><button class="btn small"><i data-icon="plus"></i><span>Add</span></button><button class="btn tonal small"><i data-icon="share"></i><span>Share</span></button><button class="btn icon tonal"><i data-icon="heart"></i></button><button class="btn block">Full width</button></div>
+
+  <div class="t-label muted demo-h">List</div>
+  <div class="list icons">
+    <div class="item"><span class="lead-icon" style="background: #FF9500"><i data-icon="bell"></i></span><div class="body"><div class="title">Notifications</div><div class="sub">Daily at 9:00</div></div><div class="trail"><span class="switch on"></span></div></div>
+    <div class="item"><span class="lead-icon" style="background: #34C759"><i data-icon="lock"></i></span><div class="body"><div class="title">App lock</div></div><div class="trail"><span class="switch"></span></div></div>
+    <div class="item"><span class="lead-icon" style="background: #007AFF"><i data-icon="globe"></i></span><div class="body"><div class="title">Language</div></div><div class="trail"><span>English</span><i class="chev" data-icon="chevron"></i></div></div>
+    <div class="item"><div class="avatar">MR</div><div class="body"><div class="title">Maya Reyes</div><div class="sub">Shared 4 entries with you</div></div><div class="trail"><span class="badge">2</span></div></div>
+  </div>
+
+  <div class="t-label muted demo-h">Inputs</div>
+  <label class="field"><span class="label">Email</span><span class="value">sam@example.com</span></label>
+  <label class="field focus mt-s"><span class="label">Name</span><span class="value">Sam Rivera<span class="caret"></span></span></label>
+  <label class="field mt-s"><span class="label">Note</span><span class="value placeholder">Add a note</span></label>
+
+  <div class="t-label muted demo-h">People and labels</div>
+  <div class="row wrap">
+    <div class="avatars"><div class="avatar">AK</div><div class="avatar" style="background: #5B8DEF">JL</div><div class="avatar"><div class="art" data-art="bloom"></div></div></div>
+    <span class="badge">12</span><span class="pill good"><i data-icon="arrow-up"></i><span>12%</span></span><span class="pill bad"><i data-icon="arrow-down"></i><span>4%</span></span><span class="pill"><i data-icon="clock"></i><span>25 min</span></span>
+  </div>
+
+  <div class="card">
+    <div class="row between"><span class="t-headline">Weekly goal</span><span class="t-sub muted">4 of 5</span></div>
+    <div class="progress mt-s"><i style="width: 80%"></i></div>
+    <div class="grid-3 mt-m">
+      <div class="stat"><div class="value">8,214</div><div class="label">Steps</div></div>
+      <div class="stat"><div class="value">5.2 km</div><div class="label">Distance</div></div>
+      <div class="stat"><div class="value">412</div><div class="label">kcal</div></div>
+    </div>
+  </div>
+
+  <div class="t-label muted demo-h">Charts</div>
+  <div class="grid-2">
+    <div class="card"><div class="chart ring-box" data-chart="ring" data-values=".82,.64" data-colors="#FF2D55,#A3E635"><div><b>82%</b><span class="t-caption muted">Move</span></div></div></div>
+    <div class="card"><div class="chart ring-box" data-chart="donut" data-values="45,30,25" data-colors="var(--tint),var(--accent),#8B5CF6"><div><b>$1,240</b><span class="t-caption muted">Spent</span></div></div></div>
+  </div>
+  <div class="card">
+    <div class="row between"><span class="t-headline">Resting heart rate</span><span class="t-sub muted">bpm</span></div>
+    <div class="chart mt-m" data-chart="line" data-values="64,62,63,60,61,58,57" data-compare="66,65,65,64,64,63,63" data-labels="M,T,W,T,F,S,S" data-grid data-dots style="height: 150px"></div>
+    <div class="row between mt-m"><span class="t-sub muted">Last 30 days</span><div class="chart" data-chart="spark" data-values="3,5,4,6,5,7,6,8,7,9" style="width: 120px; height: 32px"></div></div>
+  </div>
+
+  <div class="t-label muted demo-h">Art (photo stand-ins)</div>
+  <div class="grid-3 art-grid">
+    <div class="art" data-art="dusk"><span>dusk</span></div><div class="art" data-art="forest"><span>forest</span></div><div class="art" data-art="sea"><span>sea</span></div>
+    <div class="art" data-art="mountain"><span>mountain</span></div><div class="art" data-art="city"><span>city</span></div><div class="art" data-art="bloom"><span>bloom</span></div>
+    <div class="art" data-art="map"><span>map</span></div><div class="art" data-art="bowl"><span>bowl</span></div><div class="art" data-art="city" data-seed="3"><span>city, seed 3</span></div>
+  </div>
+
+  <div class="t-label muted demo-h">Sheet</div>
+  <div class="sheet-demo">
+    <div class="scrim"></div>
+    <div class="sheet">
+      <div class="grabber"></div>
+      <div class="t-title">Share entry</div>
+      <p class="t-sub muted mt-xs">Anyone with the link can read it.</p>
+      <div class="list mt-m"><div class="item"><i data-icon="mail"></i><div class="body"><div class="title">Email</div></div></div><div class="item"><i data-icon="chat"></i><div class="body"><div class="title">Messages</div></div></div></div>
+    </div>
+  </div>
+</main>
+
+<nav class="tabbar" data-tabs="Home:home,Explore:map,Saved:bookmark,Profile:person" data-on="0" data-accessory="search" style="position: fixed"></nav>
+</body>
+</html>

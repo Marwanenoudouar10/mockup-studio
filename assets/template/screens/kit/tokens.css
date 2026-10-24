@@ -1,0 +1,68 @@
+/* Mock-screen kit: tokens, reset and layout helpers.
+   Three layers of variables:
+     1. app tokens   --tint --tint-2 --accent --font-app --app-bg --app-surface   (set them in screens/app.css)
+     2. semantic     --bg --surface --surface-2 --fill --text --text-2 --text-3 --line --tint-soft ...
+                     (ios.css and android.css map them to each platform's system palette, light and dark)
+     3. derived      color-mix() from --tint, so one brand colour themes both platforms
+   kit.js puts the platform and theme on <html>: class="ios|android [dark]". */
+:root {
+  --tint: #007AFF;
+  --tint-2: color-mix(in oklab, var(--tint) 62%, #fff);
+  --accent: #FF9500;
+  --on-tint: #fff;
+  --font-ui: system-ui, sans-serif;
+  --font-app: var(--font-ui);
+  --green: #34C759;
+  --red: #FF3B30;
+  --orange: #FF9500;
+  --yellow: #FFCC00;
+  --blue: #007AFF;
+  --teal: #30B0C7;
+  --pink: #FF2D55;
+  --purple: #AF52DE;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100vw; height: 100vh; overflow: hidden; }
+body {
+  position: relative;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-optical-sizing: auto;
+}
+img, svg { display: block; }
+button { font: inherit; color: inherit; border: 0; background: none; }
+
+/* layout helpers (all spacing in CSS px = pt / dp) */
+.pad { padding-inline: var(--gutter); }
+.stack { display: flex; flex-direction: column; gap: var(--gap, 14px); }
+.row { display: flex; align-items: center; gap: var(--row-gap, 10px); }
+.wrap { flex-wrap: wrap; }
+.between { justify-content: space-between; }
+.center { justify-content: center; text-align: center; }
+.grow { flex: 1; min-width: 0; }
+.top { align-items: flex-start; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.mt-xs { margin-top: 4px; } .mt-s { margin-top: 8px; } .mt-m { margin-top: 14px; } .mt-l { margin-top: 22px; } .mt-xl { margin-top: 32px; }
+.clip { overflow: hidden; }
+.nowrap { white-space: nowrap; }
+.ellipsis { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* colour helpers */
+.tint { color: var(--tint); }
+.muted { color: var(--text-2); }
+.faint { color: var(--text-3); }
+.good { color: var(--green); }
+.bad { color: var(--red); }
+.on-tint { color: var(--on-tint); }
+.app-font { font-family: var(--font-app); }
+.num { font-variant-numeric: tabular-nums; }
+
+/* the page body under the chrome: content scrolls under the tab bar like a real app */
+.content { position: relative; z-index: 1; padding-bottom: 140px; }

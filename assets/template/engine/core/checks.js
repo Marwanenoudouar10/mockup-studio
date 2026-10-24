@@ -1,0 +1,101 @@
+// Layout checks, run after every element is drawn (sharpness is quality.js). Findings are issues
+// (core/issues.js): printed in the render log and listed by `npm run validate`.
+//   edges   lifts, badges and the copy keep EDGE (40) design units from the image edges (SKILL rule 14);
+//           an element with bleed: true is cut on purpose. Devices and tiles may bleed (fans, big phones).
+//           A panorama strip is checked against its outer edges only: its seams are meant to be crossed.
+//   doubles a lift whose card is also visible in a phone, tablet or tile of the same image.
+//   ui      per image (each slice of a panorama): does it show the app? A screen drawn over 2% or more of
+//           the image counts. render-report.json keeps it, so the store rule "real UI on most images" is
+//           checked on the pixels, not the config.
+import { issue } from './issues.js';
+
+const EDGE = 40;
+const UI_SHARE = 0.02;
+
+function rectOf(node, cv, c) {
+  const r = node.getBoundingClientRect();
+  return { l: (r.left - c.left) / cv.k, r: (r.right - c.left) / cv.k, t: (r.top - c.top) / cv.k, b: (r.bottom - c.top) / cv.k };
+}
+
+const area = (a) => Math.max(0, a.r - a.l) * Math.max(0, a.b - a.t);
+const clip = (a, b) => ({ l: Math.max(a.l, b.l), r: Math.min(a.r, b.r), t: Math.max(a.t, b.t), b: Math.min(a.b, b.b) });
+const what = (n) => n.dataset.what || (n.classList.contains('copy') ? 'the copy' : n.className.split(' ')[0]);
+
+function edges(cv, c, W, H) {
+  const nodes = [...cv.el.querySelectorAll('.lift, .badge, .copy')].filter((n) => n.dataset.bleed !== '1');
+  for (const n of nodes) {
+    const a = rectOf(n, cv, c);
+    const slice = Math.max(0, Math.min(cv.slices - 1, Math.floor((a.l + a.r) / 2 / cv.designW)));
+    const gaps = { left: a.l, right: W - a.r, top: a.t, bottom: H - a.b };
+    const bad = Object.entries(gaps).filter(([, g]) => g < EDGE - 0.5);
+    if (!bad.length) continue;
+    const text = bad.map(([side, g]) => (g < 0 ? `cut by the ${side} edge` : `${Math.round(g)} units from the ${side} edge`)).join(', ');
+    issue(`${what(n)} is ${text} (keep ${EDGE}, or set bleed: true when the cut is on purpose)`, cv.slices > 1 ? { slice } : {});
+  }
+}
+
+// the part of the capture a device or tile shows, in capture pixels
+function visibleSource(node) {
+  const img = node.querySelector('img');
+  if (!img || !img.naturalWidth) return null;
+  if (!node.classList.contains('tile')) return { l: 0, t: 0, r: img.naturalWidth, b: img.naturalHeight };
+  const bw = img.offsetWidth;
+  const bh = img.offsetHeight;
+  const fit = getComputedStyle(img).objectFit;
+  const s = fit === 'contain' ? Math.min(bw / img.naturalWidth, bh / img.naturalHeight) : Math.max(bw / img.naturalWidth, bh / img.naturalHeight);
+  const [px, py] = getComputedStyle(img).objectPosition.split(' ').map((v) => parseFloat(v) / 100);
+  const vw = Math.min(img.naturalWidth, bw / s);
+  const vh = Math.min(img.naturalHeight, bh / s);
+  const x0 = (img.naturalWidth - vw) * (Number.isFinite(px) ? px : 0.5);
+  const y0 = (img.naturalHeight - vh) * (Number.isFinite(py) ? py : 0.5);
+  return { l: x0, t: y0, r: x0 + vw, b: y0 + vh };
+}
+
+function doubles(cv, c) {
+  const sliceOf = (n) => {
+    const a = rectOf(n, cv, c);
+    return Math.floor((a.l + a.r) / 2 / cv.designW);
+  };
+  const shows = [...cv.el.querySelectorAll('.device[data-src], .tile[data-src]')];
+  for (const lift of cv.el.querySelectorAll('.lift[data-src][data-crop]')) {
+    const [x, y, w, h] = lift.dataset.crop.split(',').map(Number);
+    const card = { l: x, t: y, r: x + w, b: y + h };
+    for (const d of shows) {
+      if (d.dataset.src !== lift.dataset.src || sliceOf(d) !== sliceOf(lift)) continue;
+      const v = visibleSource(d);
+      if (v && area(clip(card, v)) > 0.5 * area(card)) {
+        issue(`${what(lift)} is also visible in ${what(d)} on the same image: lift a card from another screen`,
+          cv.slices > 1 ? { slice: sliceOf(lift) } : {});
+      }
+    }
+  }
+}
+
+// -> [true|false per image]
+function uiPerImage(cv, c, H) {
+  const out = [];
+  const nodes = [...cv.el.querySelectorAll('[data-ui="1"]')].map((n) => rectOf(n, cv, c));
+  for (let i = 0; i < cv.slices; i++) {
+    const img = { l: i * cv.designW, r: (i + 1) * cv.designW, t: 0, b: H };
+    out.push(nodes.some((a) => area(clip(a, img)) >= UI_SHARE * area(img)));
+  }
+  return out;
+}
+
+export function layoutCheck(cv) {
+  const c = cv.el.getBoundingClientRect();
+  const W = cv.designW * cv.slices;
+  const H = cv.DH;
+  edges(cv, c, W, H);
+  doubles(cv, c);
+  const ui = uiPerImage(cv, c, H);
+  if (cv.slices > 1) {
+    ui.forEach((has, i) => {
+      if (!has) {
+        issue(`panorama image ${i + 1} shows no screen: in a panorama, stage x is GLOBAL (image ${i + 1} spans x `
+          + `${i * cv.designW}-${(i + 1) * cv.designW}); give this store its own stage, stage: { <store id>: [...], default: [...] }`, { slice: i });
+      }
+    });
+  }
+  return { ui };
+}

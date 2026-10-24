@@ -1,0 +1,133 @@
+/* Mock-screen kit: components shared by both platforms. Shapes, heights and type that differ per
+   platform live in ios.css / android.css; this file only holds the structure.
+
+   .card [.tinted|.soft|.flat]          surfaces            .list > .item (.lead .body .trail)   rows
+   .btn [.tonal|.outline|.plain|.small|.block|.icon]       .chip [.on]   .chips
+   .segmented > span[.on]               .switch[.on]        .field (.label .value) / .search
+   .avatar [.s|.l]  .avatars            .badge  .pill       .progress > i   .stat (.value .label)
+   .chart[data-chart]  .art[data-art]   .sheet + .scrim     .divider  .section-head
+   [data-icon="name"] -> inline SVG (kit/icons.js) */
+
+/* surfaces */
+.card {
+  position: relative;
+  background: var(--surface);
+  border-radius: var(--r-card);
+  padding: var(--card-pad);
+  box-shadow: var(--shadow-card);
+}
+.card.flat { box-shadow: none; }
+.card.soft { background: var(--tint-soft); color: var(--on-tint-soft); box-shadow: none; }
+.card.tinted {
+  color: var(--on-tint);
+  background:
+    radial-gradient(120% 90% at 100% 0%, color-mix(in oklab, var(--tint-2) 70%, transparent), transparent 60%),
+    linear-gradient(150deg, color-mix(in oklab, var(--tint) 88%, #fff), color-mix(in oklab, var(--tint) 82%, #000));
+  box-shadow: var(--shadow-tint);
+}
+.card.tinted .muted, .card.tinted .faint { color: color-mix(in srgb, var(--on-tint) 72%, transparent); }
+.divider { height: 1px; background: var(--line); }
+
+.section-head { display: flex; align-items: baseline; justify-content: space-between; padding-inline: 2px; }
+.section-head .link { color: var(--tint); }
+
+/* list rows */
+.list { background: var(--surface); border-radius: var(--r-card); overflow: hidden; box-shadow: var(--shadow-card); }
+.item { position: relative; display: flex; align-items: center; gap: 14px; min-height: var(--row-h); padding: 10px var(--row-pad); }
+.item .body { flex: 1; min-width: 0; }
+.item .title { color: var(--text); }
+.item .sub { color: var(--text-2); margin-top: 2px; }
+.item .trail { display: flex; align-items: center; gap: 6px; color: var(--text-2); flex: none; }
+.lead-icon { display: flex; align-items: center; justify-content: center; flex: none; color: #fff; }
+.lead-icon svg { width: 60%; height: 60%; }
+
+/* buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: var(--btn-h); padding: 0 var(--btn-pad); border-radius: var(--r-btn);
+  background: var(--tint); color: var(--on-tint); white-space: nowrap;
+}
+.btn.tonal { background: var(--tint-soft); color: var(--on-tint-soft); }
+.btn.outline { background: transparent; color: var(--tint); box-shadow: inset 0 0 0 1px var(--outline); }
+.btn.plain { background: transparent; color: var(--tint); padding: 0 6px; }
+.btn.light { background: #fff; color: color-mix(in oklab, var(--tint) 80%, #000); }
+.btn.small { height: var(--btn-h-s); padding: 0 calc(var(--btn-pad) * .75); }
+.btn.block { display: flex; width: 100%; }
+.btn.icon { width: var(--btn-h); padding: 0; }
+
+/* chips and tags */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; height: var(--chip-h); padding: 0 12px;
+  border-radius: var(--r-chip); color: var(--text); white-space: nowrap;
+}
+.chip.on { background: var(--tint-soft); color: var(--on-tint-soft); }
+
+/* segmented control */
+.segmented { display: flex; position: relative; }
+.segmented > span { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; }
+
+/* switch */
+.switch { position: relative; display: inline-block; flex: none; }
+.switch::after { content: ""; position: absolute; }
+
+/* inputs */
+.field { display: block; position: relative; }
+.field .label { display: block; }
+.field .value { display: block; color: var(--text); }
+.field .placeholder { color: var(--text-3); }
+.search { display: flex; align-items: center; gap: 8px; color: var(--text-2); }
+.caret { display: inline-block; width: 2px; height: 1.15em; margin-inline-start: 1px; vertical-align: -.2em; background: var(--tint); border-radius: 1px; }
+
+/* people */
+.avatar {
+  --size: 40px;
+  width: var(--size); height: var(--size); border-radius: 50%; flex: none;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+  font-weight: 600; font-size: calc(var(--size) * .38); color: #fff;
+  background: linear-gradient(140deg, var(--accent), color-mix(in oklab, var(--accent) 55%, var(--tint)));
+}
+.avatar.s { --size: 28px; } .avatar.l { --size: 56px; } .avatar.xl { --size: 84px; }
+.avatar .art { width: 100%; height: 100%; }
+.avatars { display: flex; }
+.avatars .avatar { box-shadow: 0 0 0 2px var(--surface); }
+.avatars .avatar + .avatar { margin-inline-start: -10px; }
+
+/* small labels */
+.badge {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px;
+  border-radius: 10px; background: var(--red); color: #fff; font-size: 12px; font-weight: 600;
+}
+.pill {
+  display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px; border-radius: 13px;
+  background: var(--fill); color: var(--text); font-size: 13px; font-weight: 600; white-space: nowrap;
+}
+.pill.good { background: color-mix(in srgb, var(--green) 16%, transparent); color: color-mix(in oklab, var(--green) 70%, #000); }
+.pill.bad { background: color-mix(in srgb, var(--red) 14%, transparent); color: color-mix(in oklab, var(--red) 80%, #000); }
+.pill.glass { background: rgb(255 255 255 / .28); color: #fff; backdrop-filter: blur(12px); }
+
+/* progress */
+.progress { height: 8px; border-radius: 4px; background: var(--fill); overflow: hidden; }
+.progress > i { display: block; height: 100%; border-radius: inherit; background: var(--tint); }
+
+/* stats */
+.stat .value { color: var(--text); font-variant-numeric: tabular-nums; }
+.stat .label { color: var(--text-2); }
+
+/* charts and art are drawn by kit.js into these boxes; give them a size */
+.chart { position: relative; width: 100%; }
+.chart svg, .art svg { width: 100%; height: 100%; }
+.chart[data-chart="ring"], .chart[data-chart="donut"] { display: grid; place-items: center; text-align: center; }
+.chart > :not(svg) { position: relative; z-index: 1; }
+.art { position: relative; overflow: hidden; border-radius: var(--r-media); background: var(--fill); }
+.art .caption { position: absolute; inset-inline-start: 10px; bottom: 10px; }
+
+/* modal sheet over a dimmed page */
+.scrim { position: absolute; inset: 0; z-index: 30; background: rgb(0 0 0 / .32); }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 31; background: var(--sheet-bg); }
+.grabber { margin: 0 auto; border-radius: 3px; background: var(--text-3); }
+
+/* icons: <i data-icon="name"></i> (kit/icons.js); 22px by default, 1.25em inside text controls */
+i[data-icon] { display: inline-flex; width: 22px; height: 22px; flex: none; font-style: normal; }
+i[data-icon] > svg { width: 100%; height: 100%; }
+.btn i[data-icon], .chip i[data-icon], .pill i[data-icon], .segmented i[data-icon], .search i[data-icon] { width: 1.25em; height: 1.25em; }

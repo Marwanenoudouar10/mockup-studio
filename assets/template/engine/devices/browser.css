@@ -1,0 +1,120 @@
+/* Browser window (generic, no trademark): traffic lights, a tab, the address bar with a real domain.
+   --pw = window width. --u = one CSS px of the captured 1440-wide viewport, 15% larger so the chrome reads.
+   .browser.dark = dark chrome; .browser.compact = one-row bar (lights, centred address pill).
+   The same .bar sits on top of a laptop or monitor screen when the element has a url. */
+@import url("../../node_modules/@fontsource-variable/inter/index.css");
+
+.device.browser, .device .site { --u: calc(var(--pw) / 1252); }
+.device.browser {
+  --bar-h: calc(var(--u) * 84);
+  aspect-ratio: auto;
+  height: calc(var(--pw) / var(--ar) + var(--bar-h));
+}
+.device.browser.compact { --bar-h: calc(var(--u) * 52); }
+
+.bar {
+  --frame: #E6E8EC; --chrome: #FFFFFF; --omni: #EEF0F3; --ink: #1F2125; --ink-2: #646872; --rim: rgb(0 0 0 / .1);
+  position: absolute; left: 0; right: 0; top: 0; z-index: 3;
+  display: flex; flex-direction: column;
+  height: var(--bar-h, calc(var(--u) * 84));
+  font-family: "Inter Variable", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+  background: var(--chrome);
+  border-radius: inherit;
+}
+.dark .bar, .bar.dark {
+  --frame: #1E1F23; --chrome: #33353A; --omni: #222327; --ink: #ECEDEF; --ink-2: #A3A6AD; --rim: rgb(255 255 255 / .09);
+}
+
+.window {
+  position: absolute; inset: 0; z-index: 0;
+  border-radius: calc(var(--u) * 14);
+  background: var(--chrome, #fff);
+  box-shadow:
+    0 0 0 calc(var(--u) * 1) rgb(0 0 0 / .14),
+    0 calc(var(--pw) * .045) calc(var(--pw) * .08) color-mix(in srgb, var(--shadow, #000) calc(40% * var(--shadow-k, 1)), transparent),
+    0 calc(var(--pw) * .01) calc(var(--pw) * .02) color-mix(in srgb, var(--shadow, #000) calc(24% * var(--shadow-k, 1)), transparent);
+}
+.browser.dark .window { background: #33353A; box-shadow: 0 0 0 calc(var(--u) * 1) rgb(255 255 255 / .14),
+  0 calc(var(--pw) * .045) calc(var(--pw) * .08) color-mix(in srgb, var(--shadow, #000) calc(48% * var(--shadow-k, 1)), transparent); }
+.browser.flat .window { box-shadow: 0 0 0 calc(var(--u) * 1) var(--rim, rgb(0 0 0 / .14)); }
+.browser > .bar { border-radius: calc(var(--u) * 14) calc(var(--u) * 14) 0 0; overflow: hidden; }
+.device.browser > .view {
+  position: absolute; left: 0; right: 0; bottom: 0; top: var(--bar-h); z-index: 2;
+  overflow: hidden; border-radius: 0 0 calc(var(--u) * 14) calc(var(--u) * 14);
+  background: #f3f4f6;
+}
+
+/* tab strip */
+.bar .strip {
+  display: flex; align-items: flex-end; gap: calc(var(--u) * 2);
+  height: calc(var(--u) * 40); padding: 0 calc(var(--u) * 10) 0 calc(var(--u) * 16);
+  background: var(--frame);
+}
+.bar .lights { display: flex; gap: calc(var(--u) * 8); align-self: center; margin-right: calc(var(--u) * 14); }
+.bar .lights i {
+  width: calc(var(--u) * 12); height: calc(var(--u) * 12); border-radius: 50%;
+  background: #FF5F57; box-shadow: inset 0 0 0 calc(var(--u) * .6) rgb(0 0 0 / .14);
+}
+.bar .lights i:nth-child(2) { background: #FEBC2E; }
+.bar .lights i:nth-child(3) { background: #28C840; }
+.bar .tab {
+  position: relative; display: flex; align-items: center; gap: calc(var(--u) * 8);
+  width: calc(var(--u) * 232); height: calc(var(--u) * 32); padding: 0 calc(var(--u) * 10) 0 calc(var(--u) * 12);
+  border-radius: calc(var(--u) * 10) calc(var(--u) * 10) 0 0;
+  font-size: calc(var(--u) * 12.5); font-weight: 500; color: var(--ink-2);
+}
+.bar .tab.on { background: var(--chrome); color: var(--ink); }
+.bar .tab.on::before, .bar .tab.on::after {
+  content: ""; position: absolute; bottom: 0; width: calc(var(--u) * 10); height: calc(var(--u) * 10);
+  background: radial-gradient(circle at 0 0, transparent calc(var(--u) * 10), var(--chrome) calc(var(--u) * 10.5));
+}
+.bar .tab.on::before { left: calc(var(--u) * -10); transform: scaleX(-1); }
+.bar .tab.on::after { right: calc(var(--u) * -10); }
+.bar .tab .t { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar .fav { width: calc(var(--u) * 16); height: calc(var(--u) * 16); border-radius: calc(var(--u) * 4); flex: none; object-fit: cover; }
+.bar .fav.dot { background: var(--ink-2); opacity: .35; border-radius: 50%; }
+.bar .g { display: inline-flex; flex: none; width: calc(var(--u) * 18); height: calc(var(--u) * 18); color: var(--ink); }
+.bar .g svg { width: 100%; height: 100%; }
+.bar .g.sm { width: calc(var(--u) * 14); height: calc(var(--u) * 14); }
+.bar .g.dim { color: var(--ink-2); }
+.bar .g.x { width: calc(var(--u) * 13); height: calc(var(--u) * 13); color: var(--ink-2); }
+.bar .g.new { align-self: center; margin-left: calc(var(--u) * 6); color: var(--ink-2); }
+
+/* toolbar: navigation, address field, profile, menu */
+.bar .toolbar {
+  flex: 1; display: flex; align-items: center; gap: calc(var(--u) * 16);
+  padding: 0 calc(var(--u) * 14) 0 calc(var(--u) * 16);
+  background: var(--chrome);
+  box-shadow: inset 0 calc(var(--u) * -1) 0 var(--rim);
+}
+.bar .omni {
+  flex: 1; display: flex; align-items: center; gap: calc(var(--u) * 9);
+  height: calc(var(--u) * 32); padding: 0 calc(var(--u) * 14);
+  border-radius: calc(var(--u) * 16); background: var(--omni);
+  font-size: calc(var(--u) * 14); white-space: nowrap; overflow: hidden;
+}
+.bar .omni .host { color: var(--ink); font-weight: 450; }
+.bar .omni .path { color: var(--ink-2); margin-left: calc(var(--u) * -9); }
+.bar .omni .end { margin-left: auto; }
+.bar .me {
+  width: calc(var(--u) * 22); height: calc(var(--u) * 22); border-radius: 50%; flex: none;
+  background: linear-gradient(140deg, var(--accent, #f6a15c), var(--primary, #6c5ce7));
+}
+
+/* compact: one row, centred address pill */
+.bar.compact {
+  flex-direction: row; align-items: center; gap: calc(var(--u) * 16);
+  padding: 0 calc(var(--u) * 18);
+  background: var(--frame);
+  box-shadow: inset 0 calc(var(--u) * -1) 0 var(--rim);
+}
+.bar.compact .lights { margin-right: calc(var(--u) * 6); }
+.bar.compact .omni.center {
+  flex: 0 1 44%; margin: 0 auto; justify-content: center; position: relative;
+  background: var(--chrome); box-shadow: 0 0 0 calc(var(--u) * 1) var(--rim);
+}
+.bar.compact .omni.center .g:first-child { position: absolute; left: calc(var(--u) * 12); }
+.bar.compact .omni.center .g:last-child { position: absolute; right: calc(var(--u) * 12); }
+.dark .bar.compact .omni.center { background: #3A3C41; }

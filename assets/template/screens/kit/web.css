@@ -1,0 +1,112 @@
+/* Desktop look (platform=web): tokens, type scale and the shared components restyled for a mouse UI.
+   Inter at 14 px body, 10 px radii, hairline borders instead of heavy shadows, light and dark.
+   App shells live in web-layout.css, marketing blocks in web-blocks.css. */
+.web {
+  --font-ui: "Inter Variable", "Inter", system-ui, sans-serif;
+  --bg: var(--app-bg, #F5F4F1);
+  --side-bg: var(--bg);
+  --surface: var(--app-surface, #FFFFFF);
+  --surface-2: color-mix(in srgb, var(--surface) 60%, var(--bg));
+  --sheet-bg: var(--surface);
+  --fill: rgb(24 22 40 / .055);
+  --text: #18171F;
+  --text-2: #696875;
+  --text-3: #A4A3AD;
+  --line: rgb(24 22 40 / .085);
+  --outline: rgb(24 22 40 / .15);
+  --tint-soft: color-mix(in oklab, var(--tint) 11%, #fff);
+  --on-tint-soft: color-mix(in oklab, var(--tint) 82%, #000);
+  --gutter: 28px;
+  --gap: 16px;
+  --r-card: 16px;
+  --r-media: 12px;
+  --card-pad: 20px 22px;
+  --row-h: 48px;
+  --row-pad: 16px;
+  --btn-h: 38px;
+  --btn-h-s: 32px;
+  --btn-pad: 16px;
+  --r-btn: 10px;
+  --chip-h: 30px;
+  --r-chip: 8px;
+  --shadow-card: 0 0 0 1px rgb(24 22 40 / .06), 0 1px 2px rgb(24 22 40 / .04), 0 6px 16px rgb(24 22 40 / .03);
+  --shadow-pop: 0 0 0 1px rgb(24 22 40 / .06), 0 24px 60px rgb(24 22 40 / .18), 0 4px 12px rgb(24 22 40 / .06);
+  --shadow-tint: 0 10px 24px color-mix(in srgb, var(--tint) 26%, transparent);
+  --side-w: 248px;
+  font-size: 14px;
+  line-height: 1.45;
+  letter-spacing: -.006em;
+}
+.web.dark {
+  --bg: var(--app-bg-dark, #111114);
+  --surface: var(--app-surface-dark, #1B1B20);
+  --surface-2: #17171B;
+  --fill: rgb(255 255 255 / .07);
+  --text: #F2F2F5;
+  --text-2: #A3A3AE;
+  --text-3: #6C6C78;
+  --line: rgb(255 255 255 / .08);
+  --outline: rgb(255 255 255 / .16);
+  --tint-soft: color-mix(in oklab, var(--tint) 24%, #1B1B20);
+  --on-tint-soft: color-mix(in oklab, var(--tint) 42%, #fff);
+  --shadow-card: 0 0 0 1px rgb(255 255 255 / .07);
+  --shadow-pop: 0 0 0 1px rgb(255 255 255 / .1), 0 24px 60px rgb(0 0 0 / .5);
+  --bar-fade: .5;
+}
+
+/* type scale (desktop) */
+.web .t-hero { font-family: var(--font-display, var(--font-ui)); font-weight: 700; font-size: 64px; line-height: 1.04; letter-spacing: -.035em; }
+.web .t-large { font-weight: 700; font-size: 30px; line-height: 36px; letter-spacing: -.025em; }
+.web .t-title { font-weight: 650; font-size: 20px; line-height: 26px; letter-spacing: -.018em; }
+.web .t-headline { font-weight: 600; font-size: 15px; line-height: 20px; letter-spacing: -.012em; }
+.web .t-body { font-size: 14px; line-height: 22px; }
+.web .t-callout { font-size: 14px; line-height: 20px; }
+.web .t-sub { font-size: 13px; line-height: 18px; }
+.web .t-caption { font-size: 12px; line-height: 16px; }
+.web .t-label { font-weight: 600; font-size: 11px; line-height: 14px; letter-spacing: .07em; text-transform: uppercase; color: var(--text-3); }
+.web .t-micro { font-weight: 500; font-size: 11px; line-height: 13px; }
+
+/* components */
+.web .btn { font-weight: 600; font-size: 14px; letter-spacing: -.01em; box-shadow: inset 0 1px 0 rgb(255 255 255 / .18), 0 1px 2px rgb(0 0 0 / .1); }
+.web .btn.small { font-size: 13px; }
+.web .btn.tonal, .web .btn.plain { box-shadow: none; }
+.web .btn.outline { box-shadow: inset 0 0 0 1px var(--outline); color: var(--text); }
+.web .btn.light { background: var(--surface); color: var(--text); box-shadow: 0 0 0 1px var(--line), 0 1px 2px rgb(0 0 0 / .05); }
+.web .chip { background: var(--fill); font-weight: 500; font-size: 13px; }
+.web .chip.on { background: var(--tint-soft); color: var(--on-tint-soft); }
+.web .section-head { font-weight: 650; font-size: 16px; letter-spacing: -.015em; }
+.web .section-head .link { font-weight: 500; font-size: 13px; }
+
+.web .list .item + .item::before { content: ""; position: absolute; top: 0; right: 0; left: var(--sep-inset, 16px); height: 1px; background: var(--line); }
+.web .item .title { font-weight: 500; font-size: 14px; }
+.web .item .sub { font-size: 12.5px; }
+.web .lead-icon { width: 30px; height: 30px; border-radius: 8px; }
+
+.web .segmented { height: 34px; padding: 3px; border-radius: 10px; background: var(--fill); }
+.web .segmented > span { padding: 0 14px; border-radius: 7px; font-weight: 500; font-size: 13px; color: var(--text-2); }
+.web .segmented > span.on { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: 0 0 0 1px var(--line), 0 1px 3px rgb(0 0 0 / .08); }
+.web.dark .segmented > span.on { background: #2C2C33; }
+
+.web .switch { width: 36px; height: 20px; border-radius: 10px; background: var(--outline); }
+.web .switch::after { top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgb(0 0 0 / .2); }
+.web .switch.on { background: var(--tint); }
+.web .switch.on::after { left: 18px; }
+
+.web .field .label { padding-bottom: 6px; font-weight: 600; font-size: 12.5px; color: var(--text); }
+.web .field .value { min-height: 40px; padding: 10px 12px; border-radius: 10px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--outline); font-size: 14px; }
+.web .field.focus .value { box-shadow: inset 0 0 0 1.5px var(--tint), 0 0 0 4px color-mix(in srgb, var(--tint) 16%, transparent); }
+.web .field .hint { display: block; padding-top: 6px; font-size: 12px; color: var(--text-2); }
+.web .search { height: 36px; padding: 0 12px; border-radius: 10px; background: var(--fill); font-size: 13.5px; }
+.web .pill { height: 22px; padding: 0 8px; border-radius: 6px; font-size: 12px; }
+.web .badge { height: 18px; min-width: 18px; border-radius: 9px; font-size: 11px; }
+.web .stat .value { font-weight: 700; font-size: 26px; line-height: 32px; letter-spacing: -.025em; }
+.web .stat .label { font-size: 12.5px; }
+.web .progress { height: 6px; border-radius: 3px; }
+.web .avatar.s { --size: 30px; } .web .avatar { --size: 36px; }
+.web .divider { margin: 4px 0; }
+.web kbd { font: 500 11px/1 var(--font-ui); padding: 4px 6px; border-radius: 6px; background: var(--surface); color: var(--text-3); box-shadow: 0 0 0 1px var(--line); }
+.web .ibtn { width: 36px; height: 36px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; color: var(--text-2); }
+.web .ibtn i[data-icon] { width: 19px; height: 19px; }
+.web .card.tinted { box-shadow: var(--shadow-tint); }
+.web.dark .pill.good { color: color-mix(in oklab, var(--green) 70%, #fff); }
+.web.dark .pill.bad { color: color-mix(in oklab, var(--red) 65%, #fff); }

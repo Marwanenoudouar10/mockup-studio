@@ -1,0 +1,48 @@
+/* Desktop display on a stand (generic): --pw = SCREEN width. Thin black border, aluminium rim,
+   a tapered neck and a flat foot below. finish-graphite = dark aluminium. */
+.monitor { --alu-1: #F1F2F4; --alu-2: #D3D6DA; --alu-3: #ABB0B6; --alu-4: #868B92; --rim: #C9CDD2; }
+.monitor.finish-graphite { --alu-1: #8A8E94; --alu-2: #5E6268; --alu-3: #3E4146; --alu-4: #2A2C30; --rim: #6B6F75; }
+
+.monitor .display {
+  z-index: 1;
+  inset: calc(var(--pw) * -0.014);
+  border-radius: calc(var(--pw) * 0.016);
+  background: #0A0A0C;
+  box-shadow:
+    0 0 0 calc(var(--pw) * 0.0035) var(--rim),
+    inset 0 0 0 calc(var(--pw) * 0.0012) rgb(255 255 255 / .08),
+    0 calc(var(--pw) * 0.04) calc(var(--pw) * 0.08) color-mix(in srgb, var(--shadow, #000) calc(32% * var(--shadow-k, 1)), transparent);
+}
+.monitor .screen, .monitor .glass { border-radius: calc(var(--pw) * 0.004); }
+.monitor .neck {
+  z-index: 0;
+  left: 50%; top: calc(100% - var(--pw) * 0.02);
+  width: calc(var(--pw) * 0.17); height: calc(var(--pw) * 0.2);
+  transform: translateX(-50%);
+  clip-path: polygon(6% 0, 94% 0, 100% 100%, 0 100%);
+  background: linear-gradient(90deg, var(--alu-4) 0%, var(--alu-2) 18%, var(--alu-1) 48%, var(--alu-2) 74%, var(--alu-3) 100%);
+}
+.monitor .neck::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 30%;
+  background: linear-gradient(180deg, rgb(0 0 0 / .35), transparent);
+}
+.monitor .foot {
+  z-index: 1;
+  left: 50%; top: calc(100% + var(--pw) * 0.176);
+  width: calc(var(--pw) * 0.36); height: calc(var(--pw) * 0.022);
+  transform: translateX(-50%);
+  border-radius: calc(var(--pw) * 0.008) calc(var(--pw) * 0.008) calc(var(--pw) * 0.014) calc(var(--pw) * 0.014);
+  background: linear-gradient(180deg, var(--alu-1) 0%, var(--alu-2) 40%, var(--alu-3) 85%, var(--alu-4) 100%);
+  box-shadow: inset 0 calc(var(--pw) * 0.0018) 0 rgb(255 255 255 / .7);
+}
+.monitor .floor {
+  z-index: 0;
+  left: 50%; top: calc(100% + var(--pw) * 0.19);
+  width: calc(var(--pw) * 0.46); height: calc(var(--pw) * 0.03);
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--shadow, #000) calc(50% * var(--shadow-k, 1)), transparent);
+  filter: blur(calc(var(--pw) * 0.012));
+}
+.monitor.flat .display { box-shadow: 0 0 0 calc(var(--pw) * 0.0035) var(--rim); }
+.monitor.flat .floor { display: none; }
