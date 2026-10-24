@@ -5,7 +5,7 @@
 import { graphic } from '../../core/assets.js';
 import { applyColors, loadFonts } from '../../core/theme.js';
 import { contrast, onColor, level } from '../../../scripts/brand/lib/color.js';
-import { el, esc, page, swatch, label, iconShape, today } from '../ui.js';
+import { el, esc, page, swatch, swatchKeys, label, iconShape, today } from '../ui.js';
 import { miniPanel } from '../thumb.js';
 import { at } from '../../core/root.js';
 import { brandFor } from '../../../scripts/lib/config.js';
@@ -42,13 +42,13 @@ function fieldBackdrop(node, preset, grain) {
   node.prepend(cv);
 }
 
-function palette(c) {
+function palette(c, list) {
   const t = tile('colour', 'Colour');
   const row = el('div', 'bb-swatches big');
-  for (const k of ['primary', 'secondary', 'deep', 'accent', 'ink', 'paper']) {
-    const on = onColor(c[k], c.ink);
-    const r = contrast(on, c[k]);
-    row.append(swatch(k, c[k], `Aa ${r.toFixed(1)} · ${level(r)}`));
+  for (const { key, name } of swatchKeys(c, list)) {
+    const on = onColor(c[key], c.ink);
+    const r = contrast(on, c[key]);
+    row.append(swatch(name, c[key], `Aa ${r.toFixed(1)} · ${level(r)}`));
   }
   t.append(row);
   return t;
@@ -66,6 +66,21 @@ function type(f, weight, s) {
     spec('--font-display', fam(f.display), weight, 'Headlines, wordmark', `Weight ${weight}`, s.headline || '', 'display')
     + spec('--font-text', fam(f.text), 400, 'Sub lines, interface', `Weights ${f.text.weights.join(' ')}`, esc(s.oneLiner || ''), 'text')));
   return t;
+}
+
+// The "on colour" tile: --reversed (a field preset, or primary / ink as a flat fill), default the brand field,
+// or the primary on a light field (else it repeats the hero lockup on the same paper). The logo takes the colour
+// that reads there, and its accent shapes turn paper or ink when the fill IS the accent (a one-accent brand).
+const LIGHT = ['light', 'paper', 'mesh'];
+function reversedOf(want, field, c) {
+  const pick = want || (LIGHT.includes(field) ? 'primary' : field);
+  const flat = pick === 'primary' ? c.primary : pick === 'ink' ? c.ink : null;
+  const bg = flat || (LIGHT.includes(pick) ? c.paper : pick === 'dark' ? '#0B0B10' : c.primary);
+  const fit = (x) => (x && contrast(x, bg) >= 3 ? x : null);
+  const logo = fit(LIGHT.includes(pick) ? c.ink : pick === 'dark' || pick === 'ink' ? '#FFFFFF' : c.onField) || onColor(bg, c.ink);
+  const accent = contrast(c.accent, bg) < 1.6 ? (logo === c.ink ? c.paper : c.ink) : null;
+  const title = pick === field ? 'On the brand field' : pick === 'primary' ? 'On the primary' : pick === 'ink' ? 'On ink' : `On the ${pick} field`;
+  return { flat, preset: flat ? null : pick, logo, accent, title };
 }
 
 export async function render(cfg, data) {
@@ -96,8 +111,13 @@ export async function render(cfg, data) {
   const logo = s.logo ? b.logo : null;
   hero.append(await logoTile(logo, 'hero', c.ink, '62%', s.name || b.name));
   if (s.personality && s.personality.length) hero.append(el('div', 'bb-words', s.personality.map(esc).join('<i></i>')));
-  const reversed = tile('reversed', 'On the brand field');
-  reversed.append(await logoTile(logo, 'rev', c.onField || '#FFFFFF', '74%', s.name || b.name));
+  const rev = reversedOf(data.reversed, field, c);
+  const reversed = tile('reversed', rev.title);
+  reversed.style.setProperty('--rev-ink', rev.logo);
+  if (rev.flat) reversed.style.background = rev.flat;
+  const revLogo = await logoTile(logo, 'rev', rev.logo, '74%', s.name || b.name);
+  if (rev.accent) revLogo.style.setProperty('--accent', rev.accent);
+  reversed.append(revLogo);
   const icon = tile('icon', 'App icon');
   const icons = el('div', 'bb-icons');
   if (s.logo) icons.append(iconShape(at(cfg.icon.src), 96, 'ios'), iconShape(at(cfg.icon.src), 60, 'android'), iconShape(at(cfg.icon.src), 38, 'ios'));
@@ -109,8 +129,8 @@ export async function render(cfg, data) {
   // on a dark field the store images set the accent word in the accent, so the specimen does too
   const onField = data.specimen ? data.specimen === 'field' : field === 'dark';
   if (onField) typeTile.classList.add('on-field');
-  main.append(hero, reversed, shot, icon, palette(c), typeTile, ui);
-  fieldBackdrop(reversed, field, b.grain);
+  main.append(hero, reversed, shot, icon, palette(c, data.swatches), typeTile, ui);
+  if (rev.preset) fieldBackdrop(reversed, rev.preset, b.grain);
   fitWordmarks(main);
 
   const card = data.box || data.crop;
@@ -118,14 +138,16 @@ export async function render(cfg, data) {
   const W = shot.getBoundingClientRect().width;
   const H = Math.round((W * 2868) / 1320);
   shot.style.height = `${H}px`;
-  // the phone shows another screen than the lifted card's (never the same card twice on one image)
+  // the phone shows another screen than the Interface card's; a lift only with --lift (another card than the
+  // Interface tile's: never the same card twice on one board)
   const two = data.phone && data.phone !== data.screen;
+  const lift = data.lift && !(data.lift.screen === data.screen && data.lift.box === data.box) ? data.lift : null;
   await miniPanel(shot, {
     W, H, cfg, field,
     panel: { headline: s.headline, name: s.name, wordmark: !s.logo },
     stage: [
       { type: 'phone', screen: two ? data.phone : data.screen, w: 760, x: 660, y: 40, z: 20 },
-      ...(two && card ? [{ type: 'lift', screen: data.screen, box: data.box, crop: data.crop, w: 640, x: 420, y: 1060, r: -4, z: 30 }] : []),
+      ...(lift ? [{ type: 'lift', screen: lift.screen, box: lift.box, w: 640, x: 420, y: 1060, r: -4, z: 30 }] : []),
     ],
   });
   if (onField) fieldBackdrop(typeTile, field, b.grain); // last: the UI card and thumbnail set the row height

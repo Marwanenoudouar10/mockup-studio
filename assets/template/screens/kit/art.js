@@ -1,6 +1,9 @@
 // Photo stand-ins for mock screens: flat illustrated scenes as inline SVG (no stock photos, nothing to license).
 //   <div class="art" data-art="dusk" style="height: 220px"></div>      scenes: SCENES below
 //   data-seed="3" varies the random bits (trees, windows, toppings); the scene fills the box (cover).
+//   map: coloured from CSS variables (--map-land, --map-water, --map-park, --map-road, --map-major, --map-route,
+//   default the tint), so it takes the brand's look; data-route="M70 230C..." draws your own route (400 x 300 box).
+//   Km markers or a highlighted split: draw them in a page script on kit:ready (path.getPointAtLength).
 // Add your own: SCENES.name = (id, rnd) => '<svg markup in a 400 x 300 box>'.
 let count = 0;
 
@@ -99,16 +102,22 @@ export const SCENES = {
     <g filter="url(#${id}f)"><circle cx="110" cy="110" r="70" fill="#FFB49A"/><circle cx="270" cy="90" r="64" fill="#C9B6F2"/><circle cx="220" cy="220" r="80" fill="#FF9BB8" opacity=".8"/></g>
     <g transform="translate(200 150)">${[0, 60, 120, 180, 240, 300].map((r) => `<ellipse rx="22" ry="52" transform="rotate(${r}) translate(0 -46)" fill="#FFFFFF" opacity=".55"/>`).join('')}<circle r="18" fill="#FFD27A"/></g>`,
 
-  map: (id) => `<rect width="400" height="300" fill="#EEF0EA"/>
-    <path d="M250 -10C230 60 300 110 280 170S300 260 330 310H400V-10Z" fill="#BFDDF1"/>
-    <path d="M20 40h120v90H20zM40 190h110v80H40z" fill="#CFE8C9"/>
-    <g stroke="#FFFFFF" stroke-width="5" fill="none"><path d="M0 150h400M160 0v300M0 60h260M60 0v300M0 240h300M220 0l-30 300"/></g>
-    <g stroke="#FFFFFF" stroke-width="12" fill="none" stroke-linecap="round"><path d="M-10 100C80 110 140 160 210 150S330 90 410 120"/></g>
-    <g stroke="#F6D99A" stroke-width="7" fill="none" stroke-linecap="round"><path d="M-10 100C80 110 140 160 210 150S330 90 410 120"/></g>
-    <path d="M70 230C90 180 130 200 160 150S200 90 240 70" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M70 230C90 180 130 200 160 150S200 90 240 70" fill="none" style="stroke: var(--tint)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="70" cy="230" r="8" fill="#fff"/><circle cx="70" cy="230" r="5" style="fill: var(--tint)"/>
-    <circle cx="240" cy="70" r="11" style="fill: var(--tint)"/><circle cx="240" cy="70" r="4.5" fill="#fff"/>`,
+  map: (id, rnd, node) => {
+    const route = (node && node.dataset.route) || 'M70 230C90 180 130 200 160 150S200 90 240 70';
+    const ends = route.match(/-?[\d.]+/g).map(Number);
+    const [sx, sy, ex, ey] = [ends[0], ends[1], ends[ends.length - 2], ends[ends.length - 1]];
+    const v = (k, d) => `var(--map-${k}, ${d})`;
+    return `<rect width="400" height="300" style="fill:${v('land', '#EEF0EA')}"/>
+    <path d="M250 -10C230 60 300 110 280 170S300 260 330 310H400V-10Z" style="fill:${v('water', '#BFDDF1')}"/>
+    <path d="M20 40h120v90H20zM40 190h110v80H40z" style="fill:${v('park', '#CFE8C9')}"/>
+    <g style="stroke:${v('road', '#FFFFFF')}" stroke-width="5" fill="none"><path d="M0 150h400M160 0v300M0 60h260M60 0v300M0 240h300M220 0l-30 300"/></g>
+    <g style="stroke:${v('road', '#FFFFFF')}" stroke-width="12" fill="none" stroke-linecap="round"><path d="M-10 100C80 110 140 160 210 150S330 90 410 120"/></g>
+    <g style="stroke:${v('major', '#F6D99A')}" stroke-width="7" fill="none" stroke-linecap="round"><path d="M-10 100C80 110 140 160 210 150S330 90 410 120"/></g>
+    <path class="map-route-halo" d="${route}" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+    <path class="map-route" d="${route}" fill="none" style="stroke:${v('route', 'var(--tint)')}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${sx}" cy="${sy}" r="8" fill="#fff"/><circle cx="${sx}" cy="${sy}" r="5" style="fill:${v('route', 'var(--tint)')}"/>
+    <circle cx="${ex}" cy="${ey}" r="11" style="fill:${v('route', 'var(--tint)')}"/><circle cx="${ex}" cy="${ey}" r="4.5" fill="#fff"/>`;
+  },
 
   bowl: (id, rnd) => {
     const bits = [];
@@ -139,7 +148,7 @@ export function drawArt(root = document) {
       continue;
     }
     const id = `art${++count}`;
-    const svg = `<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${scene(id, rng(node.dataset.seed || 7))}</svg>`;
+    const svg = `<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${scene(id, rng(node.dataset.seed || 7), node)}</svg>`;
     node.insertAdjacentHTML('afterbegin', svg);
     const el = node.firstElementChild;
     el.style.cssText = 'position:absolute;inset:0;width:100%;height:100%';

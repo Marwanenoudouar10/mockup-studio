@@ -1,5 +1,6 @@
 // npm run brand -- board [--screen today --box tasks | --crop x,y,w,h] [--phone home] [--platform ios]
 //                        [--label "Brand board"] [--specimen field|paper] [--theme dark] [--sample screens/_sample.html]
+//                        [--lift progress#load] [--swatches "primary:Signal,ink:Ink,paper:Paper"] [--reversed solid]
 // The brand board for approval, BEFORE any mock screen or store image: the logo on paper and on the field,
 // the app icon, the palette with its contrast, the type pair, a UI card and a store-image thumbnail,
 // all from brand/tokens.json + brand/logo.svg, mark.svg, icon.svg (the files the engine will use).
@@ -14,7 +15,14 @@
 //              field, where the store images set it that way); paper: on paper with the word in the primary
 //   --theme    the sample screen's theme (default: the config's screens.theme); --sample: another sample page
 //              (copy screens/kit/sample.html to screens/_sample.html and give it the app's own content; keep
-//              its data-box="card" and the ?hide script), so a finance brand is not judged on habit-app copy
+//              its data-box="card" and the ?hide script), so a finance brand is not judged on habit-app copy;
+//              screens/_sample.html is used by default when it exists
+//   --lift     a card lifted over the thumbnail's phone, <capture>#<box> (default: none, so the Interface tile's
+//              card never shows twice on one board; pick a DIFFERENT card than --box)
+//   --swatches the colour row: keys with optional names, e.g. "primary:Signal,ink:Ink,paper:Paper" (default: the
+//              six colours, with accent dropped when it equals primary: a one-accent brand)
+//   --reversed the "on colour" tile: a field preset (gradient, solid, dark, light, paper, mesh) or primary / ink
+//              (default: the brand field; on a light field, the primary, so the tile never repeats the hero)
 //   Mode B once real mock screens exist: --screen home --box <card> shows the real app on the board, so the
 //              board and the delivered set never show two different apps.
 // Before `apply --logo` the boards set the name as text (scripts/brand/lib/brief.js logoReady).
@@ -25,7 +33,7 @@ import path from 'node:path';
 import { ROOT } from '../lib/cli.js';
 import { readBrief, sampleCopy, logoReady } from './lib/brief.js';
 import { writeJson, OUT } from './lib/tokens-io.js';
-import { shootBoard, shootSample, shootAsset } from './lib/shoot.js';
+import { shootBoard, shootSample, shootAsset, samplePage } from './lib/shoot.js';
 import { openSession } from '../lib/session.js';
 
 const val = (v) => (v === undefined || v === true ? null : String(v));
@@ -44,6 +52,28 @@ function parseCrop(v) {
   const c = String(v).split(/[\s,]+/).map(Number);
   if (c.length !== 4 || !c.every(Number.isFinite) || c[2] <= 0 || c[3] <= 0) throw new Error(`--crop ${v}: use x,y,w,h in capture pixels`);
   return c;
+}
+
+const REVERSED = ['gradient', 'solid', 'dark', 'light', 'paper', 'mesh', 'primary', 'ink'];
+const KEYS = ['primary', 'secondary', 'deep', 'accent', 'ink', 'paper'];
+
+// "primary:Signal,ink:Ink,paper" -> [{ key, name }]
+function parseSwatches(v) {
+  if (!v) return null;
+  return v.split(',').map((s) => s.trim()).filter(Boolean).map((s) => {
+    const [key, ...name] = s.split(':');
+    if (!KEYS.includes(key.trim())) throw new Error(`--swatches ${key}: use ${KEYS.join(', ')}`);
+    return { key: key.trim(), name: name.join(':').trim() || key.trim() };
+  });
+}
+
+// "progress#load" -> { screen: 'raw/ios/progress.png', box: 'load' }
+function parseLift(v, platform) {
+  if (!v) return null;
+  const [name, box] = v.split('#');
+  const screen = findCapture(platform, name) || (fs.existsSync(path.join(ROOT, name)) ? name : null);
+  if (!screen || !box) throw new Error(`--lift ${v}: use <capture>#<box>, a capture in raw/${platform}/ and a box from its .boxes.json`);
+  return { screen, box };
 }
 
 function realScreen(flags) {
@@ -76,14 +106,15 @@ export async function run(flags, { cfg, raw, tokens, rel }) {
     if (!shot) {
       const t = tokens ? raw.brand.tokens : null;
       const theme = val(flags.theme) || (cfg.screens && cfg.screens.theme) || null;
-      const page = val(flags.sample) || undefined;
-      if (page && !fs.existsSync(path.join(ROOT, page))) throw new Error(`--sample ${page}: no such page`);
+      const page = samplePage(flags.sample);
       await shootSample(session, `${dir}/sample.png`, { tokens: t, theme, page });
       await shootSample(session, `${dir}/sample-phone.png`, { tokens: t, hide: 'card', theme, page });
       shot = { screen: `${dir}/sample.png`, box: 'card', crop: null, phone: `${dir}/sample-phone.png` };
     }
-    const extra = { label: val(flags.label) || null, specimen: val(flags.specimen) || null };
+    const extra = { label: val(flags.label) || null, specimen: val(flags.specimen) || null, reversed: val(flags.reversed) || null,
+      swatches: parseSwatches(val(flags.swatches)), lift: parseLift(val(flags.lift), val(flags.platform) || 'ios') };
     if (extra.specimen && !['field', 'paper'].includes(extra.specimen)) throw new Error(`--specimen ${extra.specimen}: use field or paper`);
+    if (extra.reversed && !REVERSED.includes(extra.reversed)) throw new Error(`--reversed ${extra.reversed}: use ${REVERSED.join(', ')}`);
     writeJson(`${dir}/board.json`, { sample: sampleCopy(brief, cfg, tokens), audience: brief.audience || '', ...shot, ...extra, source: (tokens && tokens.source) || {} });
     await shootBoard(session, rel, 'board', { data: `${dir}/board.json` }, 'final/brand/brand-board.png');
     const c = cfg.brand.colors;

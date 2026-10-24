@@ -15,7 +15,7 @@ This page is the method. The project's `brand/README.md` holds the SVG file rule
 | 1 | brief | fill `briefs/brand-brief.md`, set `brand.name` in `studio.config.js` | nothing yet |
 | 2 | colours | `npm run brand -- palette --seed "#6C5CE7" --mood warm` | `out/brand/palette/palette-board.png` |
 |   | choose | `npm run brand -- apply --palette 1` | |
-| 3 | fonts | `npm run brand -- fonts --pairs "Poppins/Inter,Newsreader/Inter,Space Grotesk/Inter"` | `out/brand/fonts/font-board.png` |
+| 3 | fonts | `npm run brand -- fonts --pairs "Poppins/Inter,Newsreader/Inter,Space Grotesk/Inter"` (after the palette apply: the board shows the applied colours) | `out/brand/fonts/font-board.png` |
 |   | choose | `npm run brand -- apply --fonts 1` | |
 | 4 | logo + icon | draw `brand/logo-options/{a,b,c}.svg` + `.mark.svg`, then `npm run brand -- logos` | `out/brand/logos/logo-board.png` |
 |   | choose | `npm run brand -- apply --logo a --icon-style gradient` | |
@@ -37,6 +37,11 @@ Audience, Category, Competitors to stand apart from, Must keep, Avoid, Mode. One
 - **Competitors** decide the colour more than taste does: if the category is blue, a calm violet or a
   warm green stands out in search results.
 - **Avoid** stops repeat mistakes: "no hearts or brains as symbols", "nothing clinical".
+- **The name check** (an invented name for a concept or a portfolio set): search both stores and the web
+  for the exact name, THEN compare it with the category's leaders: no shared first syllable or ending, and
+  never a sound-alike in the leader's signature colour (a red-orange running app named "Str...a" read as a
+  copy of the category leader, although no app had that exact name). Write the check, and the names
+  rejected, in the brief.
 
 ## 2. Colours: three directions from one seed
 `palette` works in OKLCH (even lightness steps across hues) and always makes three directions:
@@ -52,7 +57,14 @@ kit uses them in dark mode instead of Apple and M3 greys).
 - **A dark brief:** `--look dark` gives three dark directions (Night, Graphite, Deep) instead of one dark
   option out of three. Add `--theme dark` so the sample screens are dark too.
 - **A fixed accent:** `--accent "#C6F432"` pins it (the client's real accent in Mode A, or the brief's).
-  Read its checks: a pinned accent is not nudged to reach 3:1.
+  Read its checks: a pinned accent is not nudged to reach 3:1 (palette notes an option where it is the
+  field colour itself: the accent word would vanish).
+- **A bold brief on a light field** (off-white, black type, ONE hot accent: sportswear, food, editorial):
+  `--look light` gives Chalk, Bone and Sand: a `paper` field (no colour in the corners), near-black ink,
+  the seed kept hot and nudged only to 3:1 (the accent word is large text), accent = primary, black
+  buttons (`ui.tint` = ink) and `onField` = ink. Such a one-accent brand then needs: `--icon-style ink`
+  (or a hand-drawn icon), the board's reversed tile on the primary (its default on a light field), and
+  `--logo-accent` on any field painted in the accent (the feature graphic; the render warns).
 
 **Contrast checks** (WCAG ratios, printed on the board, a failing check in red):
 
@@ -109,7 +121,10 @@ Variable`, Hebrew `Noto Sans Hebrew Variable`, Japanese `Noto Sans JP Variable`,
 Devanagari Variable` (each `@fontsource-variable/<slug>`).
 
 `npm run brand -- fonts --pairs "Archivo/Inter"` prints the exact `npm i` line when a family is missing
-and shows the pairs that are installed. Only fontsource fonts: they are open-licensed and load from
+and shows the pairs that are installed. Headlines take 800 (600 for serif and handwriting faces);
+`"Big Shoulders Display:900/Inter"` sets a pair's weight. A condensed face needs bigger headlines to fill
+the same width: about 1.25x (`layout: { headline: 148, headlineShort: 132 }`); then re-check Play's 20%
+tagline rule (the render measures it) and drop the Play sub line if it trips. Only fontsource fonts: they are open-licensed and load from
 `node_modules`, so renders never depend on the network. Check the licence of any other font first.
 
 ## 4. Logo and icon
@@ -121,7 +136,8 @@ one accent shape, no strokes or transforms, `textLength`, title and desc) and co
 project's `brand/README.md`; `npm run brand -- logos` checks the wordmark width and the viewBox.
 
 **The icon** is derived from the chosen symbol by `apply --logo <id>` (`--icon-style gradient | solid |
-night | paper`, `--icon-scale 0.56`). It must work as a full-bleed square that each store masks: keep what
+night | paper | ink`, `--icon-scale 0.56`; a hand-drawn `<id>.icon.svg` is copied and kept). Accent
+shapes the tile's own colour would hide turn paper or ink by themselves. It must work as a full-bleed square that each store masks: keep what
 matters in the centre two thirds, no text, no screenshot, no fake notification dot, no black background
 (Apple). Sizes and formats: `store-specs.md`; a hand-drawn icon: `brand/README.md`. Icon checklist:
 - the tile matches the screenshots' field (a dark set gets `--icon-style night`, not a bright gradient a
@@ -140,16 +156,22 @@ field, the app icon (square, rounded, circle, small), the palette with its contr
 pair, a UI card, and a store-image thumbnail made by the real engine. It also exports the brand kit:
 `final/brand/logo.png`, `logo-white.png`, `mark.png` (transparent).
 - Mode B: the UI card comes from the kit's sample screen dressed in the tokens; the thumbnail's phone shows
-  that screen without the card it lifts out (never the same card twice on one image). The sample is a
-  generic habit app: for another category, copy `screens/kit/sample.html` to `screens/_sample.html`, give
-  it the app's own content and pass `--sample screens/_sample.html`. A dark app: `--theme dark`.
+  that screen without the card (never the same card twice on one board). The sample is a
+  generic habit app: for another category, copy `screens/kit/sample.html` to `screens/_sample.html` and
+  give it the app's own content (keep `data-box="card"`); the palette and board steps use it by themselves.
+  A dark app: `--theme dark`.
+- **One of each:** the Interface tile shows the card, the thumbnail a phone; `--lift <capture>#<box>`
+  adds a DIFFERENT card over that phone. A one-accent or three-colour system shows only its real colours:
+  `--swatches "primary:Signal,ink:Ink,paper:Paper"` (accent is folded into primary when they are equal).
+  `--reversed solid|dark|primary|ink|<preset>` picks the "on colour" tile (default: the field, or the
+  primary on a light field, so it never repeats the hero lockup on the same paper).
 - **Once the real screens exist, re-render the board from them** (`board --screen home --box <card>
   --phone <other>`): a board whose sample shows another accent or other screens than the delivered set
   reads as a second brand. For a portfolio, `--label "Brand board"` drops "for approval". On a dark
   field the type specimen sits on the field with the accent word in the accent (`--specimen field|paper`).
 - Mode A: show a client capture: `npm run brand -- board --screen today --crop 60,480,1200,700 --platform ios`
   (capture pixels; `--box name` once `raw/ios/today.boxes.json` names it). The thumbnail's phone shows
-  another capture (`--phone home`, default: the first other one), so the lifted card is not also in it.
+  another capture (`--phone home`, default: the first other one), so the Interface card is not also in it.
 
 Approval means: the person said yes to this board. Write "approved" in the brief's decision table. A
 later change of colour or font goes through `apply` again, then `npm run screens` (Mode B) and

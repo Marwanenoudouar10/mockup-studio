@@ -4,6 +4,8 @@
 //                -> a sample app screen + its boxes, so the boards show the brand on real kit UI before any app
 //                screen exists (hide: 'card' drops that box, for a phone beside the lifted card; theme: 'dark')
 //   shootAsset   one SVG (logo, mark) on a transparent background -> RGBA PNG for the client's brand kit
+//   samplePage   the sample page the boards dress: --sample <page>, else screens/_sample.html when the project
+//                has one (the kit's sample in this app's own words), else the kit's habit-app sample
 import fs from 'node:fs';
 import path from 'node:path';
 import { capture } from '../../lib/session.js';
@@ -19,6 +21,13 @@ const write = (rel, buf) => {
   fs.writeFileSync(file, buf);
   return file;
 };
+
+export function samplePage(flag) {
+  const asked = flag === undefined || flag === true ? null : String(flag);
+  if (asked && !fs.existsSync(path.join(ROOT, asked))) throw new Error(`--sample ${asked}: no such page`);
+  if (asked) return asked;
+  return fs.existsSync(path.join(ROOT, 'screens/_sample.html')) ? 'screens/_sample.html' : undefined;
+}
 
 export async function shootBoard(session, cfgRel, view, query, outRel, { dpr = 2 } = {}) {
   const qs = new URLSearchParams({ view, config: cfgRel, ...query }).toString();

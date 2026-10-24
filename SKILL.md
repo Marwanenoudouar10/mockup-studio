@@ -107,16 +107,20 @@ step that is not done; never restart at Step 0.
 **Step 1: Brand** (`references/brand.md`). Brief -> colours -> fonts -> logo + icon -> brand board.
 First write the app's name in `briefs/brand-brief.md` (Name, One-liner, Hero line) and in
 `studio.config.js` (`brand.name`): every board prints it, set in each candidate face, until a logo exists.
+An invented name is checked in both stores AND against the category leaders (no shared prefix or ending,
+not their colour: `brand.md`).
 ```bash
 npm run brand -- palette --seed "#6C5CE7" --mood warm      # 3 palettes with contrast checks -> out/brand/palette/
-npm run brand -- fonts --pairs "Poppins/Inter,Newsreader/Inter,Space Grotesk/Inter"
-npm run brand -- apply --palette 1 --fonts 1                # brand/tokens.json: the one source of colours and fonts
+npm run brand -- apply --palette 1                          # brand/tokens.json: the one source of colours and fonts
+npm run brand -- fonts --pairs "Poppins/Inter,Newsreader/Inter,Space Grotesk/Inter"   # shown in those colours
+npm run brand -- apply --fonts 1
 npm run brand -- logos                                      # after drawing brand/logo-options/{a,b,c}.svg + .mark.svg
 npm run brand -- apply --logo a                             # logo.svg, mark.svg, icon.svg
 npm run brand -- board                                      # final/brand/brand-board.png
 ```
-A dark brief: `palette --look dark --mood electric --theme dark` (three dark options); a client's or the
-brief's accent: `--accent "#hex"`; a dark-only app also sets `screens: { theme: 'dark' }` in the config.
+A dark brief: `palette --look dark --mood electric --theme dark` (three dark options); a bold brief on a
+light field (off-white, black type, one hot accent): `--look light`; a client's or the brief's accent:
+`--accent "#hex"`; a dark-only app also sets `screens: { theme: 'dark' }` in the config.
 Show each board and let the person choose. Done when the person approves `final/brand/brand-board.png`.
 **Mode A starts with the captures:** collect the client's screenshots (or capture the app, Step 2) into
 `raw/<platform>/` FIRST: they are the brand's source. Seed the palette from a flat control in them (a
@@ -140,7 +144,9 @@ sub line, and the proof (screen + card). Check it against `references/policy.md`
 before layout work when copy approval is part of the job.
 
 **Step 4: Layout per panel** (`references/layouts.md`). One `panels[]` entry per image in
-`studio.config.js`: copy plus a stage from a proven recipe (hero orbit, macro lift, window, fan, duo...).
+`studio.config.js`: copy plus a stage from a proven recipe (hero orbit, macro lift, window, fan, duo, giant
+number...). Match the brief's energy and vary the build: a bold brief commits on 2-3 images (strong
+diagonals, a bleed, a `text` numeral), and one image breaks the copy position (`copy: 'bottom'`).
 Iterate one image at a time: `npm run render -- --store appstore --panel 2 --out out/qa/p2` (N is the
 config's panel number, its position in `panels`; a wide target's image 01 may be panel 6). A panorama:
 add `--strip` and read `out/qa/strip/<locale>-<store>.png`, the set as one picture.
@@ -156,8 +162,9 @@ icons, the sheets. Ask the five questions at the end of `references/design.md`. 
 panel, read it again. Every `warn:` line in the render log is a defect: a card within 40 units of an
 edge or a panorama seam, or cut by it (`bleed: true` when the cut is on purpose), a sliver of a screen
 across a seam, the same card twice on an image, a crop outside its capture, a missing image, a screen
-or a line not translated, an empty panorama image, a soft screen. Then go through "The set checklist"
-in `references/design.md`: validate checks the files, the checklist checks the set.
+or a line not translated, an empty panorama image, a soft screen, a device top swung off an edge, an
+accent word or logo accent that vanishes on its field, a Play tagline over 20%. Then tick "The set
+checklist" in `references/design.md`: validate checks the files, the checklist checks the set.
 
 **Step 7: Validate.** `npm run validate` must exit 0 (`--strict` before delivery: every warning fails).
 Read every warning (store content, real UI measured on the renders, the render issues above, untranslated
@@ -193,7 +200,7 @@ person is happy, so the moves move into `studio.config.js`.
 8. Most of every set shows the real app (Apple: more than half; Play: the first three).
 9. Never: rankings, awards, prices, "free", calls to action, emoji, or another store's names and devices.
 10. Lift the card that proves the headline at reading size; never shrink a whole phone to fit more, never
-    cover the proof, and keep cards straight (tilt a fan, or one accent card, on purpose).
+    cover the proof, and keep cards straight (tilt a fan, one accent card, or a bold brief's phones, on purpose).
 11. Prefer named boxes (`data-box`, `.boxes.json`) over crop numbers.
 12. One demo persona, one "today", the same data and the same clean status bar on every screen; re-do
     every sum and every date sum in the mock data.

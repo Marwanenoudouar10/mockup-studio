@@ -1,6 +1,10 @@
-// npm run brand -- palette [--seed "#6C5CE7"] [--mood warm] [--options 3] [--look dark] [--accent "#C6F432"] [--theme dark]
+// npm run brand -- palette [--seed "#6C5CE7"] [--mood warm] [--options 3] [--look dark|light] [--accent "#C6F432"]
+//                          [--theme dark] [--sample screens/_sample.html]
 // Seed: --seed, else the brief's "Seed colour", else the current primary. Mood: --mood, else the brief's.
 // --look dark: three dark directions (night, graphite, deep) instead of drenched, night, paper (a dark brief).
+// --look light: three light directions (chalk, bone, sand): off-white field, near-black type, the seed kept hot as
+//   the ONE accent, black buttons (a bold brief on a light field: sportswear, editorial, food).
+// --sample: the sample page the boards dress (default: screens/_sample.html when it exists, else the kit's).
 // --accent: pin the accent colour (a client's real accent; an electric lime) instead of deriving it.
 // --theme dark: the sample screens in dark mode, on the option's dark app surfaces (a dark-first app);
 //   default: the config's screens.theme.
@@ -13,7 +17,7 @@ import { generate, MOODS } from './lib/generate.js';
 import { normHex } from './lib/color.js';
 import { readBrief, sampleCopy } from './lib/brief.js';
 import { writeJson, currentFonts, paletteTokens, mergeTokens, OUT } from './lib/tokens-io.js';
-import { shootBoard, shootSample } from './lib/shoot.js';
+import { shootBoard, shootSample, samplePage } from './lib/shoot.js';
 import { openSession } from '../lib/session.js';
 
 const val = (v) => (v === undefined || v === true ? null : String(v));
@@ -24,10 +28,11 @@ export async function run(flags, { cfg, tokens, rel }) {
   const mood = (val(flags.mood) || brief.mood || 'balanced').toLowerCase();
   if (!MOODS[mood]) throw new Error(`--mood ${mood}: use ${Object.keys(MOODS).join(', ')}`);
   const count = Number(val(flags.options) || 3);
-  if (!(count >= 1 && count <= 3)) throw new Error('--options takes 1, 2 or 3 (one per direction: drenched, night, paper)');
+  if (!(count >= 1 && count <= 3)) throw new Error('--options takes 1, 2 or 3 (one per direction)');
   const look = val(flags.look);
   const accent = val(flags.accent);
   const theme = val(flags.theme) || (cfg.screens && cfg.screens.theme) || null;
+  const page = samplePage(flags.sample);
   const options = generate(seed, { mood, count, look, accent });
   const dir = `${OUT}/palette`;
   const name = brief.name || cfg.brand.name;
@@ -42,13 +47,16 @@ export async function run(flags, { cfg, tokens, rel }) {
     const bad = o.checks.filter((c) => !c.pass);
     console.log(`  ${o.id}  ${o.name.padEnd(28)} primary ${o.colors.primary}  accent ${o.colors.accent}  field ${o.field.padEnd(9)}`
       + ` ${bad.length ? `watch: ${bad.map((c) => `${c.label} ${c.ratio}`).join(', ')}` : 'all checks pass'}`);
+    const em = o.checks.find((c) => c.label === 'Accent word on field');
+    if (accent && em && em.ratio < 1.6) console.log(`     note: the pinned accent is almost the field colour here (${em.ratio}:1): the accent word vanishes; skip this option or try --look light`);
   }
+  if (page) console.log(`  sample ${page}`);
   const session = await openSession();
   try {
     for (const o of options) {
       const tokensFile = `${dir}/option-${o.id}.tokens.json`;
-      await shootSample(session, `${dir}/sample-${o.id}.png`, { tokens: tokensFile, theme });
-      await shootSample(session, `${dir}/sample-${o.id}-phone.png`, { tokens: tokensFile, hide: 'card', theme });
+      await shootSample(session, `${dir}/sample-${o.id}.png`, { tokens: tokensFile, theme, page });
+      await shootSample(session, `${dir}/sample-${o.id}-phone.png`, { tokens: tokensFile, hide: 'card', theme, page });
     }
     await shootBoard(session, rel, 'palette', { data: `${dir}/palettes.json` }, `${dir}/palette-board.png`);
   } finally {

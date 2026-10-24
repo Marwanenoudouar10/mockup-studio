@@ -22,7 +22,8 @@ out/               scratch: out/qa/<topic>/ renders, out/brand/<topic>/ option b
 
 ## Commands (from the project root, ONE at a time)
 ```bash
-npm run brand -- palette --seed "#6C5CE7" --mood warm          # brand: palettes (then fonts, logos, apply, board)
+npm run brand -- palette --seed "#6C5CE7" --mood warm          # brand: palettes (--look dark|light); then apply
+                                                               #   --palette N BEFORE fonts, logos, apply --logo, board
 npm run brand -- apply --palette 1 --fonts 1 --logo a          # write brand/tokens.json + logo, mark, icon
 npm run brand -- board                                         # final/brand/brand-board.png for approval
 npm run brand -- board --screen today --crop 60,480,1200,700   # Mode A: a client capture as the UI card
@@ -70,10 +71,13 @@ npm run bake -- --dry && npm run bake                          # fold layout.jso
     most, one `<em>` accent word.
 12. Real UI at reading size: lift the card that proves the headline (box or crop) instead of shrinking a
     whole phone until nothing is legible. Prefer named boxes over crop numbers. Cards stay straight (a
-    fan, or one accent card per image, tilts on purpose); no card or badge covers the proof; badges sit
-    in open field (solid or dark, never glass over UI); at most three layers overlap on image 1.
+    fan, or one accent card per image, tilts on purpose); a bold brief commits on 2-3 images (10-15 degree
+    phones, a bleed, a giant number; vary the build, `copy: 'bottom'` once); no card or badge covers the
+    proof; badges sit in open field (solid or dark, never glass over UI); at most three layers overlap on
+    image 1; cards 24+ apart or 60+ overlapped; the sub line claims only what a card shows.
 13. Nothing important within 40 design units of the image edges unless it bleeds on purpose (`bleed: true`
-    on that lift or badge). Feature graphic copy and logo stay inside x 154-872, y 76-424. Never the same
+    on that element). Devices turn around their BOTTOM centre: a strong tilt swings the status bar off the
+    side (the render warns). Feature graphic copy and logo stay inside x 154-872, y 76-424. Never the same
     card twice on one image. A panorama store next to normal ones needs a per-store stage; its seams
     are edges too: no sliver of a screen across one (`bridge: true` only when a real share crosses).
 14. Store rules: no "#1", "best", awards, prices, "free", calls to action or emoji; no Android on App Store

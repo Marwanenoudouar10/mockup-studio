@@ -10,6 +10,7 @@ import { applyColors, loadFonts } from './core/theme.js';
 import { waitImages } from './core/assets.js';
 import { upscaleCheck } from './core/quality.js';
 import { layoutCheck } from './core/checks.js';
+import { accentClash } from './core/clash.js';
 import { issue, issues } from './core/issues.js';
 import { makeCanvas } from './layout/canvas.js';
 import { buildCopy, fitCopy } from './layout/copy.js';
@@ -49,7 +50,7 @@ async function main() {
   document.documentElement.lang = t.locale;
   document.documentElement.dir = t.dir;
   applyColors(t.brand.colors);
-  const cv = makeCanvas({ W: FW, H: FH, designW: FW, field: f.field || t.brand.field, grain: t.brand.grain });
+  const cv = makeCanvas({ W: FW, H: FH, designW: FW, field: f.field || t.brand.field, grain: t.brand.grain, cls: f.class || '' });
   await loadFonts(t.brand, `${plain(f.headline)} ${f.sub || ''}`);
   await addWatermarks(cv, t.brand, { feature: true });
 
@@ -79,6 +80,7 @@ async function main() {
   applyOrnament(ornament, block, cv, { rtl });
   await waitImages();
   safeZoneCheck(block.copy, cv);
+  accentClash(cv, 'feature graphic');
   const upscale = upscaleCheck(cv);
   const { ui } = layoutCheck(cv);
   window.__info = { upscale, ui, issues: issues() };

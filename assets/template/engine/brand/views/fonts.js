@@ -1,15 +1,20 @@
 // Type pairings: one row per pair. Left, the top of a real store image set in the pair (logo
 // wordmark, headline with its ornament, sub line); middle, the display face; right, the text face
-// in a paragraph and a small UI card in the brand colours.
+// in a paragraph and a small UI card in the brand colours: the brief's hero line and one-liner, its button in
+// the palette's UI tint (ui.tint / ui.onTint from the tokens: black buttons on a light sportswear brand).
 import { el, esc, page, face, label } from '../ui.js';
+import { onColor } from '../../../scripts/brand/lib/color.js';
 import { miniPanel } from '../thumb.js';
 
 const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>abcdefghijklmnopqrstuvwxyz<br>0123456789 &amp; ? ! @ $ € £ %';
 
 const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+const plain = (h) => String(h || '').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
 const licence = (l) => (!l ? '' : /OFL/.test(l) ? ` · ${l}, free for commercial use` : ` · ${l}`);
 
-function row(p, s, c) {
+function row(p, s, c, ui) {
+  const tint = (ui && ui.tint) || c.primary;
+  const onTint = (ui && ui.onTint) || onColor(tint, c.ink);
   const card = el('section', 'bb-card bb-font');
   card.innerHTML = `<div class="bb-opt-head"><span class="bb-num">${String(p.id).padStart(2, '0')}</span>`
     + `<div><h2>${esc(p.label)}</h2><p>${esc(cap(p.about.display))} headlines, ${esc(p.about.text)} text${licence(p.about.license)}</p></div></div>`;
@@ -24,9 +29,9 @@ function row(p, s, c) {
       + `<div class="glyphs">${GLYPHS}</div>`),
     el('div', 'bb-spec text', `${label('Text · sub lines, interface').outerHTML}<div class="fam">${esc(p.text.family)}</div>`
       + `<div class="meta">Weights ${tw}</div><p class="para">${esc(s.oneLiner || s.sub || '')} Every word on the store page and in the app is set in these two faces.</p>`
-      + `<div class="bb-ui" style="--tint:${c.primary};--acc:${c.accent}"><div class="t">Your first step is ready</div>`
-      + '<div class="b">Five quiet minutes today keeps your streak going.</div>'
-      + '<div class="r"><span class="btn">Get started</span><span class="chip">5 min</span></div></div>'),
+      + `<div class="bb-ui" style="--tint:${tint};--on-tint:${onTint};--acc:${c.accent}"><div class="t">${esc(plain(s.headline) || 'Your first step is ready')}</div>`
+      + `<div class="b">${esc(s.oneLiner || 'Five quiet minutes today keeps your streak going.')}</div>`
+      + `<div class="r"><span class="btn">Get started</span><span class="chip">${esc(s.name || 'Today')}</span></div></div>`),
   );
   card.append(grid);
   return { card, slot };
@@ -46,7 +51,7 @@ export async function render(cfg, data) {
   main.classList.add('bb-rows');
   for (const p of pairs) {
     const [fd, ft] = [await face(p.display, [600, 700, 800]), await face(p.text, [400, 500, 600])];
-    const { card, slot } = row(p, s, cfg.brand.colors);
+    const { card, slot } = row(p, s, cfg.brand.colors, data.ui);
     card.style.setProperty('--fd', fd);
     card.style.setProperty('--ft', ft);
     card.style.setProperty('--fw', String(p.headlineWeight));

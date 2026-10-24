@@ -17,7 +17,7 @@ async function readConfig(base) {
 }
 
 function rowLabel(st) {
-  const [title, meta] = String(st.label || st.id).split(' - ');
+  const [title, meta] = String(st.label || st.id).split(/ [-·] /); // 'App Store · iPhone 6.9"' (older labels used ' - ')
   if (st.space === 'landscape') return { title, meta: st.id };
   return { title, meta: cap(meta || st.id) };
 }

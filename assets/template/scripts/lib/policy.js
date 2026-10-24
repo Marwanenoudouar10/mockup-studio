@@ -44,7 +44,7 @@ function scan(text, family) {
 
 function texts(p) {
   const out = [['headline', p.headline], ['sub', p.sub]];
-  for (const e of p.stage || []) if (e.type === 'badge') out.push([`badge "${plain(e.text)}"`, e.text]);
+  for (const e of p.stage || []) if (e.type === 'badge' || e.type === 'text') out.push([`${e.type} "${plain(e.text)}"`, e.text]);
   return out;
 }
 

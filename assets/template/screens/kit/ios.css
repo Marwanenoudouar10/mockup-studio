@@ -79,6 +79,8 @@
 
 /* navigation bar: glass buttons on a 54pt row, large title under it */
 .ios .navbar { position: relative; z-index: 20; padding-top: 59px; }
+/* pushed screens (inline title): the first card started about 5 pt under the glass circle buttons */
+.ios .navbar.inline ~ .content { padding-top: 8px; }
 .ios .navbar .bar { position: relative; height: 54px; display: flex; align-items: center; gap: 10px; padding: 0 16px; }
 .ios .navbar .bar .spacer { flex: 1; }
 .ios .navbar .inline-title {

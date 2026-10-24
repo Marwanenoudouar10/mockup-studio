@@ -1,16 +1,18 @@
 // Colour directions: one card per palette option, judged on a real store image (engine field, logo,
 // headline + ornament, watermark, a phone showing the kit's sample screen in that palette), on the
 // screen itself, on its swatches and ramps, and on its WCAG contrast checks.
-import { el, esc, page, swatch, ramp, checkRow } from '../ui.js';
+import { el, esc, page, swatch, swatchKeys, ramp, checkRow } from '../ui.js';
+import { loadFonts } from '../../core/theme.js';
 import { miniPanel } from '../thumb.js';
 import { at } from '../../core/root.js';
-
-const KEYS = ['primary', 'secondary', 'deep', 'accent', 'ink', 'paper'];
 
 export async function render(cfg, data) {
   const s = data.sample || {};
   const opts = data.options || [];
   const failing = opts.map((o) => o.checks.filter((c) => !c.pass).length);
+  // the thumbnails set the headline and the live-text wordmark in the brand faces (else a fallback sans, and
+  // textLength squeezes the wordmark), as the other boards do
+  await loadFonts(cfg.brand, `${s.name || ''} ${s.headline || ''}`);
   const main = page({
     eyebrow: `${s.name || cfg.brand.name} · Brand step 2 of 5`,
     title: 'Colour directions',
@@ -31,7 +33,7 @@ export async function render(cfg, data) {
     pair.append(slot, el('div', 'bb-screen', `<img src="${at(shot)}" alt="">`));
     card.append(pair, el('div', 'bb-caption', '<span>Store image</span><span>App screen</span>'));
     const sw = el('div', 'bb-swatches');
-    for (const k of KEYS) sw.append(swatch(k, o.colors[k]));
+    for (const { key, name } of swatchKeys(o.colors)) sw.append(swatch(name, o.colors[key]));
     const checks = el('div', 'bb-checks');
     for (const c of o.checks) checks.append(checkRow(c));
     card.append(sw, ramp(o.ramp, 'tint'), ramp(o.neutrals, 'neutral'), checks);

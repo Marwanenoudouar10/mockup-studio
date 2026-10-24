@@ -13,6 +13,9 @@ rest after the brand board is approved:
 - **A story map:** which screen proves which store image, and which card each image lifts out. Those
   cards become `data-box` names. One proof per image: a card (a goal ring, a chart) that proves image 4
   is not also the hero's lift, a fan's side phone and the feature graphic's card; that set looks thin.
+  A lifted card comes from a screen that no phone or tile on THAT image shows (else the render warns "is
+  also visible in ..."): give every screen one support box for the hero, and when the art direction says
+  "stats breaking out of the phone", lift a stat from another screen over the phone's edge.
 - Invented names only: no real people, brands or customer data.
 
 ## Files
@@ -26,7 +29,9 @@ screens/
   kit/                                    the kit: kit.css, kit.js, chrome, components, icons, charts, art
   css/<part>.css  js/icons.js              optional: app CSS split by job (app.css only @imports them, so no
                                           file passes 300 lines); extra icons (`ICONS.x = '...'` in a module
-                                          loaded right after kit.js)
+                                          loaded right after kit.js). EVERY part loads on every screen:
+                                          prefix each rule with its screen's own class (`.t-main`, `.w-main`)
+                                          or `.android main.stack { ... }` in today.css restyles all screens
   _sample.html                            optional: the brand boards' sample in this app's words (brand.md)
 ```
 A folder in `screens/` is read as a platform override only when it is a platform name (`ios`, `android`,
@@ -75,7 +80,7 @@ and use it in a panel: `{ type: 'lift', screen: 'settings', box: 'week', w: 600,
 - Buttons `.btn` (`.tonal` `.outline` `.plain` `.light` `.small` `.block` `.icon`)
 - Chips `.chips > .chip.on`, `.chip.tag`; `.segmented > span.on`; `.switch.on`
 - Inputs `.field(.focus) .label .value .placeholder`, `.search`, `.caret`
-- People `.avatar.s|.l|.xl`, `.avatars`, `.badge`, `.pill.good|.bad|.glass`
+- People `.avatar.s|.l|.xl`, `.avatars` (overlap scales with the size; initials stay whole), `.badge`, `.pill.good|.bad|.glass`
 - Data `.progress > i`, `.stat .value .label`; modals `.sheet` `.scrim` `.grabber`; `.section-head .link`, `.divider`
 
 **Drawn by attribute**
@@ -84,9 +89,14 @@ and use it in a panel: `{ type: 'lift', screen: 'settings', box: 'week', w: 600,
 - `.chart[data-chart=bars|line|spark|ring|donut]` with `data-values`, `data-labels`, `data-hl`. A line's
   y range is its data's own range (`data-min` / `data-max` to set it); `data-label-at="0,7,14,25"` ties
   labels to data points; `data-colors` takes `color-mix(...)` and `var(--x, #fff)` (one colour per bar:
-  no fade). The header of `kit/charts.js` lists every attribute.
+  no fade). Zones (heart rate, pace): `data-bands="113,132,151,170"` + `data-band-colors` draw bands
+  behind a line, `data-line-by-band` colours the line by zone, `data-avg` adds a dashed average. On a
+  coloured card set `data-ring` (or `--chart-ring`) to the card's colour, else the end dot gets a white
+  ring. The header of `kit/charts.js` lists every attribute.
 - `.art[data-art=dusk|forest|sea|mountain|city|bloom|map|bowl][data-seed]`: invented photo stand-ins,
-  nothing to license, no real places or faces.
+  nothing to license, no real places or faces. The map takes the brand: `--map-land`, `--map-water`,
+  `--map-park`, `--map-road`, `--map-major`, `--map-route` in app.css, and `data-route="M70 230C..."`
+  (absolute commands, 400 x 300 box) for your own route; km markers in a `kit:ready` script.
 
 **Helpers**
 - Type (HIG sizes on iOS, M3 on Android): `t-hero` `t-large` `t-title` `t-headline` `t-body` `t-callout`
@@ -158,7 +168,11 @@ the list); `data-box-radius="24"` (CSS px) sets it by hand.
 ## Rules for good mock screens
 - Leave the island and punch-hole area empty: the frames draw them.
 - Real-length content in the persona's voice. Charts with believable, uneven data. One "today".
-- Every screen must look like a finished app: no empty states unless the image is about one.
+- Every screen must look like a finished app: no empty states unless the image is about one, and no
+  orphan section head or link at the end of the scroll ("Up next" with nothing under it above the tab
+  bar): show one row, or end the content before it.
+- The same data on both platforms: an avatar stack, a count or a label that differs between the iOS and
+  the Android capture breaks the set (fit a long Android label rather than dropping an avatar).
 - Android's nav bar is opaque: a row it cuts in half (only the top of "Recent" showing) looks like a
   render glitch. End the content above it, or let a row boundary meet its top edge (`data-only="ios"`
   on the last section works: the iOS glass tab bar hides the cut, Android cannot).

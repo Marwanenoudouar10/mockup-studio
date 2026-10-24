@@ -28,6 +28,7 @@ const COLORS = {
 const LAYOUT = {
   headline: 118, headlineShort: 106, sub: 46, subShort: 44, maxLines: 3, subMaxLines: 3,
   top: 210, topShort: 150, gap: 140, gapShort: 100, side: 96, logo: 420, logoShort: 360,
+  bottom: 190, bottomShort: 140, // a panel with copy: 'bottom': the copy block's distance from the bottom edge
 };
 
 // The wide layout (landscape space): design units on a 1200-high canvas.
@@ -127,7 +128,8 @@ export function normalize(raw = {}) {
     feature: raw.feature || null,
     // background: what the App Store icon is flattened onto (an icon with transparent parts)
     icon: { src: 'brand/icon.svg', background: brand.colors.primary, ...(raw.icon || {}) },
-    sheet: { height: 1100, wideWidth: 1040, width: 3840, quality: 94, gap: 44, padding: 96, background: '#E9E8EC', title: true, ...(raw.sheet || {}) },
+    // sheet.background: null = the brand's paper a step darker (engine/gallery.js), so light images still separate
+    sheet: { height: 1100, wideWidth: 1040, width: 3840, quality: 94, gap: 44, padding: 96, background: null, title: true, ...(raw.sheet || {}) },
     // mock screens: theme = the default theme of `npm run screens` ('dark' for an all-dark app)
     screens: { theme: null, ...(raw.screens || {}) },
   };

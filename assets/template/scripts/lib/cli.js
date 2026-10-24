@@ -29,8 +29,10 @@ export function configPath(flags) {
   return String(flags.config || 'studio.config.js').replace(/^\.\//, '');
 }
 
-// draft: the brand step runs before any panel exists, so an empty panel list gets a placeholder.
-export async function loadConfig(flags, { draft = false } = {}) {
+// draft: the brand step runs before any panel exists, so an empty panel list gets a placeholder (and a missing
+// tokens file is fine). noPanels: the same placeholder only, for commands that never read panels (screens: Step 2
+// comes before the layouts of Step 4).
+export async function loadConfig(flags, { draft = false, noPanels = draft } = {}) {
   const rel = configPath(flags);
   const abs = path.resolve(ROOT, rel);
   if (!fs.existsSync(abs)) throw new Error(`Config not found: ${rel}`);
@@ -38,7 +40,7 @@ export async function loadConfig(flags, { draft = false } = {}) {
   const mod = await import(`${pathToFileURL(abs).href}?t=${Date.now()}`);
   const tokens = readTokens(mod.default, { optional: draft });
   const merged = withTokens(mod.default, tokens);
-  if (draft && !(merged.panels && merged.panels.length)) merged.panels = [{ headline: (merged.brand || {}).name, stage: [] }];
+  if (noPanels && !(merged.panels && merged.panels.length)) merged.panels = [{ headline: (merged.brand || {}).name, stage: [] }];
   const relPath = path.relative(ROOT, abs).split(path.sep).join('/');
   const cfg = normalize(merged);
   cfg.overrides = readLayout(relPath);

@@ -20,12 +20,13 @@ brand/
 | # | step | command | output | the client sees |
 |---|---|---|---|---|
 | 1 | brief | fill `briefs/brand-brief.md`, set `brand.name` in `studio.config.js` | name, one-liner, audience, 3 words, seed colour, mood, hero line | - |
-| 2 | colours | `npm run brand -- palette [--seed "#hex"] [--mood warm]` | `out/brand/palette/palette-board.png` | 3 palettes on a real store image and app screen, with WCAG checks |
-| 3 | fonts | `npm run brand -- fonts --pairs "Poppins/Inter,Newsreader/Inter"` | `out/brand/fonts/font-board.png` | each pair on the top of a store image, specimen, UI card |
-|   | apply | `npm run brand -- apply --palette 1 --fonts 1` | `brand/tokens.json` | - |
+| 2 | colours | `npm run brand -- palette [--seed "#hex"] [--mood warm] [--look dark\|light]` | `out/brand/palette/palette-board.png` | 3 palettes on a real store image and app screen, with WCAG checks |
+|   | apply | `npm run brand -- apply --palette 1` | `brand/tokens.json` | - |
+| 3 | fonts | `npm run brand -- fonts --pairs "Poppins/Inter,Big Shoulders Display:800/Inter"` | `out/brand/fonts/font-board.png` | each pair on the top of a store image (in the applied colours), specimen, UI card |
+|   | apply | `npm run brand -- apply --fonts 1` | `brand/tokens.json` | - |
 | 4 | logo + icon | draw `logo-options/`, then `npm run brand -- logos` | `out/brand/logos/logo-board.png` | each lockup on paper, ink, the field, at 16-64 px, as an app icon |
 |   | apply | `npm run brand -- apply --logo a [--icon-style gradient]` | `brand/logo.svg`, `mark.svg`, `icon.svg` | - |
-| 5 | board | `npm run brand -- board` | `final/brand/brand-board.png` + `logo.png`, `logo-white.png`, `mark.png` | one page to approve |
+| 5 | board | `npm run brand -- board [--lift x#box] [--swatches ...] [--reversed solid]` | `final/brand/brand-board.png` + `logo.png`, `logo-white.png`, `mark.png` | one page to approve |
 
 Until `apply --logo` has chosen a logo for this name, the boards set the name as text in the display face.
 
@@ -36,11 +37,15 @@ control, never a gradient), skip the logo board if the client has a logo (save i
 real capture on the board: `npm run brand -- board --screen today --crop x,y,w,h` (or `--box <name>`;
 `--phone <capture>` picks the thumbnail's phone, `--platform android` the folder).
 
-Palette moods: `balanced` (default), `calm`, `bold`, `warm`, `fresh`, `serious`. The three options are
-always three directions from the same seed: **Drenched** (the seed as a gradient field), **Night**
-(near-black field lit by the seed) and **Paper** (warm paper, the seed as ink). Every option is
-checked: headline, accent word and sub line on the field, button labels, text on paper, badge text.
-The accent is nudged until it reads on the field; a check that still fails is shown in red.
+Palette moods: `balanced` (default), `calm`, `bold`, `warm`, `fresh`, `serious`, `electric`. The three
+options are three directions from the same seed: **Drenched** (the seed as a gradient field), **Night**
+(near-black field lit by the seed) and **Paper** (warm paper, the seed as ink); `--look dark` gives three
+dark ones (Night, Graphite, Deep), `--look light` three light ones (Chalk, Bone, Sand: off-white `paper`
+field, near-black type, the seed kept hot as the ONE accent, black buttons). `--accent "#hex"` pins the
+accent. Every option is checked: headline, accent word and sub line on the field, button labels, text on
+paper, badge text (and accent numbers on ink cards for the light look). The accent is nudged until it
+reads on the field; a check that still fails is shown in red. `screens/_sample.html` (the kit's sample in
+this app's words), when it exists, dresses every board instead of the habit-app sample.
 
 ## How a choice reaches every image
 
@@ -58,7 +63,7 @@ logo-options/<id>       --+          |                       |
 |---|---|---|
 | `colors.primary secondary deep` | field gradient, shadows | `--brand-primary` ... |
 | `colors.accent` | `<em>` word, highlight band, accent badge | `--accent` |
-| `colors.ink paper onField` | text on light fields, badges, copy on the field | `--brand-ink` ... |
+| `colors.ink paper onField` | text on light fields, badges, copy on the field (`onField` = ink on a light brand: logo tiles, reversed lockup) | `--brand-ink` ... |
 | `ui.tint tint2 onTint bg` | - | `--tint`, `--tint-2`, `--on-tint`, `--app-bg` |
 | `fonts.display` | headlines, badges, the wordmark | `--font-display`, `--font-app` |
 | `fonts.text` | sub lines | `--font-text` |
@@ -118,9 +123,10 @@ renders right in the store images, and `npm run brand -- board` exports it as `f
 convert the text to outlines in a vector editor.
 
 **The app icon** is derived by `apply --logo <id>`: `mark.svg` centred on a 1024 square in the brand
-colours (`--icon-style gradient | solid | night | paper`, `--icon-scale 0.56` = symbol width / icon
-width). Full-bleed and square: the App Store rounds it and rejects transparency (`npm run icons`
+colours (`--icon-style gradient | solid | night | paper | ink`, `--icon-scale 0.56` = symbol width / icon
+width; `ink` = an ink mark on the primary tile, for a hot primary; accent shapes that match the tile turn
+paper or ink by themselves). Full-bleed and square: the App Store rounds it and rejects transparency (`npm run icons`
 flattens it); Google Play takes a 512 px 32-bit PNG and rounds its corners. Launchers may mask it as
 a circle, so keep what matters inside the centre two thirds (the board shows both masks). To draw
-the icon yourself, save it as `logo-options/<id>.icon.svg`: `apply` copies it and never overwrites
-an icon that was not generated.
+the icon yourself, save it as `logo-options/<id>.icon.svg`: `apply --logo <id>` copies it and derives
+nothing; only `--icon-style` / `--icon-scale` replace a hand-made icon.

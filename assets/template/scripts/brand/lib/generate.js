@@ -6,6 +6,8 @@
 //   paper     warm paper with soft colour light, the seed darkened into an ink accent (editorial)
 // The mood sets chroma, paper warmth and the hue harmony that gives each option its accent.
 // look 'dark' swaps the three directions for three DARK ones (night, graphite, deep) for a dark-first brief;
+// look 'light' for three LIGHT ones (chalk, bone, sand): an off-white field, near-black type and the seed kept HOT
+// as the one accent (accent = primary), nudged only to 3:1 as the accent word; black buttons (ui.tint = ink);
 // accent '#hex' pins the accent (a client's real accent, or a chosen electric lime) instead of deriving it.
 // Every option also carries dark app surfaces (ui.bgDark, surfaceDark, raisedDark) for dark mock screens.
 // Pure ESM (no Node imports).
@@ -72,6 +74,42 @@ const DIRECTIONS = [
   },
 ];
 
+// look 'light': paper + ink pairs; the seed's hue stays hot (the headline accent word only needs 3:1, large text)
+const LIGHT = [
+  { key: 'chalk', label: 'Chalk', paper: [0.962, 0.008, 80], ink: [0.17, 0.004], turn: 6,
+    why: 'Warm chalk, jet-black type and your colour, hot. Energetic and friendly.' },
+  { key: 'bone', label: 'Bone', paper: [0.955, 0.003, 95], ink: [0.13, 0], turn: 0,
+    why: 'Neutral bone white, pure black and your colour at full heat. The sharpest, most athletic option.' },
+  { key: 'sand', label: 'Sand', paper: [0.93, 0.018, 75], ink: [0.2, 0.012], turn: 10,
+    why: 'Warm sand, espresso black and a deeper take on your colour. Outdoor, heritage, the quietest.' },
+];
+
+function hotOn(paper, s, m, d) {
+  const c = Math.min(0.26, Math.max(0.14, s.c * m.chroma));
+  const h = rot(s.h, d.turn);
+  let l = Math.min(0.72, Math.max(0.55, s.l));
+  let hex = oklch(l, c, h);
+  while (contrast(hex, paper) < 3.05 && l > 0.35) {
+    l -= 0.005;
+    hex = oklch(l, c, h);
+  }
+  return hex;
+}
+
+function lightOption(d, s, m, pinned) {
+  const paper = oklch(d.paper[0], d.paper[1], d.paper[2]);
+  const ink = oklch(d.ink[0], d.ink[1], s.h);
+  const primary = hotOn(paper, s, m, d);
+  const p = toOklch(primary);
+  const colors = { primary, secondary: oklch(0.5, p.c * 0.85, rot(p.h, -4)), deep: oklch(0.19, 0.03, p.h),
+    accent: pinned || primary, ink, paper, onField: ink };
+  const ramp = scale(p.c, p.h);
+  const dc = 0.02;
+  const ui = { tint: ink, tint2: ramp[300], onTint: '#FFFFFF', bg: paper,
+    bgDark: oklch(0.15, dc, p.h), surfaceDark: oklch(0.21, dc, p.h), raisedDark: oklch(0.27, dc, p.h) };
+  return { colors, ramp, neutrals: scale(Math.min(0.018, d.paper[1] + 0.004), d.paper[2], false), ui, field: 'paper' };
+}
+
 const nightPrimary = (s, m, h = s.h) => oklch(Math.min(h > 75 && h < 120 ? 0.84 : 0.66, Math.max(0.52, s.l + (m.lift || 0))), s.c * m.chroma * 1.05, h);
 
 // look 'dark': three dark directions, each lit by the seed, with the second glow kept near the seed's hue
@@ -89,8 +127,9 @@ const DARK = [
 function fieldTone(c, field) {
   const night = mix(c.deep, '#07070B', 0.55);
   if (field === 'dark') return { top: mix(night, c.primary, 0.32), text: '#FFFFFF', em: c.accent, sub: mix('#FFFFFF', c.accent, 0.18) };
-  if (field === 'light' || field === 'mesh') {
-    return { top: mix(c.paper, c.primary, field === 'mesh' ? 0.16 : 0.06), text: c.ink, em: c.primary, sub: mix(c.ink, c.paper, 0.34) };
+  if (field === 'light' || field === 'mesh' || field === 'paper') {
+    const glow = field === 'mesh' ? 0.16 : field === 'light' ? 0.06 : 0;
+    return { top: mix(c.paper, c.primary, glow), text: c.ink, em: c.primary, sub: mix(c.ink, c.paper, 0.34) };
   }
   return { top: c.primary, text: c.onField, em: c.accent, sub: mix(c.onField, c.accent, 0.18) };
 }
@@ -106,6 +145,8 @@ export function checks(c, ui, field) {
     ['Body text on paper', c.ink, c.paper, 4.5],
     ['Badge text on accent', c.ink, c.accent, 4.5],
   ];
+  // black buttons and live cards (ui.tint = ink, the light look): the accent's big numbers sit on ink
+  if (ui.tint === c.ink) rows.push(['Accent number on ink card', c.accent, c.ink, 3]);
   // a dark field usually means a dark app: check the accent and the text where the app shows them
   if (field === 'dark' && ui.surfaceDark) {
     rows.push(['Accent on dark app surface', c.accent, ui.surfaceDark, 4.5], ['Text on dark app surface', '#FFFFFF', ui.surfaceDark, 4.5]);
@@ -146,8 +187,8 @@ function uiOf(colors, ramp, m, paperH) {
 export function generate(seedHex, { mood = 'balanced', count = 3, look = null, accent = null } = {}) {
   const m = MOODS[mood];
   if (!m) throw new Error(`unknown mood "${mood}" (use ${Object.keys(MOODS).join(', ')})`);
-  if (look && look !== 'dark') throw new Error(`unknown look "${look}" (use dark, or leave it out for drenched, night, paper)`);
-  const dirs = look === 'dark' ? DARK : DIRECTIONS;
+  if (look && !['dark', 'light'].includes(look)) throw new Error(`unknown look "${look}" (use dark or light, or leave it out for drenched, night, paper)`);
+  const dirs = look === 'dark' ? DARK : look === 'light' ? LIGHT : DIRECTIONS;
   const pinned = accent ? normHex(accent) : null;
   const seed = normHex(seedHex);
   const s = toOklch(seed);
@@ -155,6 +196,11 @@ export function generate(seedHex, { mood = 'balanced', count = 3, look = null, a
   const paper = oklch(0.975, m.paperC, paperH);
   const ink = oklch(0.2, Math.min(0.04, s.c * 0.25), s.h);
   return dirs.slice(0, Math.max(1, Math.min(3, count))).map((d, i) => {
+    if (look === 'light') {
+      const o = lightOption(d, s, m, pinned);
+      return { id: i + 1, key: d.key, name: `${d.label} · ${pinned ? 'your accent' : 'one hot accent'}`, why: d.why, ...o,
+        checks: checks(o.colors, o.ui, o.field) };
+    }
     const a = pinned ? acc('your accent', {}) : m.accents[i];
     const colors = { ...d.build(s, m, seed, paper), accent: null, ink, paper };
     colors.onField = d.field === 'gradient' && contrast('#FFFFFF', colors.primary) < 3 ? ink : '#FFFFFF';

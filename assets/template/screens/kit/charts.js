@@ -10,6 +10,11 @@
 //          data-min? / data-max? (y range; default = the data's own range, so big values never look flat)
 //          data-label-at? ("0,7,14,25": the data index under each label; default = spread evenly). The first
 //          and last labels are anchored inside the plot (start / end), never centred on its edges.
+//          data-bands? ("113,132,151,170": thresholds in data units, e.g. heart-rate zones; one band per zone
+//          behind the line) data-band-colors? (one per zone, low to high) data-band-opacity? (.16)
+//          data-line-by-band? (the line takes each zone's colour) data-avg? (a dashed average line)
+//          data-ring? (the dots' ring colour; default var(--chart-ring, var(--surface)): set it to the card's
+//          own colour on a coloured card, or the end dot gets a white "sticker" ring)
 //   spark  data-values data-color?                       (tiny line, no axes)
 //   ring   data-values (0..1, one per ring, outer first) data-colors? data-stroke?   children = centre label
 //   donut  data-values (any numbers: shares) data-colors? data-stroke?              children = centre label
@@ -77,6 +82,27 @@ function bars(n, w, h, kit) {
   return out;
 }
 
+// zone bands behind a line (data-bands) and, with data-line-by-band, a stroke that takes each zone's colour
+function zones(n, w, lo, hi, Y, id) {
+  const bands = nums(n.dataset.bands).filter((b) => b > lo && b < hi).sort((a, b) => a - b);
+  if (!bands.length) return { out: '' };
+  const given = strs(n.dataset.bandColors);
+  const zone = (i) => given[i] || `color-mix(in oklab, var(--tint) ${Math.round(30 + (70 * i) / bands.length)}%, var(--surface))`;
+  const edge = (i) => (i <= 0 ? lo : i > bands.length ? hi : bands[i - 1]);
+  let out = '';
+  for (let i = 0; i <= bands.length; i++) {
+    const [a, b] = [edge(i), edge(i + 1)];
+    out += `<rect x="0" width="${w}" y="${f1(Y(b))}" height="${f1(Y(a) - Y(b))}" style="fill:${zone(i)}" opacity="${n.dataset.bandOpacity || 0.16}"/>`;
+  }
+  if (n.dataset.lineByBand === undefined) return { out };
+  const [y0, y1] = [Y(hi), Y(lo)];
+  const off = (v) => f1(Math.min(1, Math.max(0, (Y(v) - y0) / ((y1 - y0) || 1))));
+  let stops = '';
+  for (let i = bands.length; i >= 0; i--) stops += `<stop offset="${off(edge(i + 1))}" style="stop-color:${zone(i)}"/><stop offset="${off(edge(i))}" style="stop-color:${zone(i)}"/>`;
+  out += `<defs><linearGradient id="${id}z" gradientUnits="userSpaceOnUse" x1="0" y1="${f1(y0)}" x2="0" y2="${f1(y1)}">${stops}</linearGradient></defs>`;
+  return { out, stroke: `url(#${id}z)` };
+}
+
 function line(n, w, h, kit, spark = false) {
   const v = nums(n.dataset.values);
   const cmp = nums(n.dataset.compare);
@@ -92,6 +118,9 @@ function line(n, w, h, kit, spark = false) {
   const pts = v.map((val, i) => [X(i, v.length), Y(val)]);
   const id = `ch${++uid}`;
   let out = `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:${color}" stop-opacity=".28"/><stop offset="1" style="stop-color:${color}" stop-opacity="0"/></linearGradient></defs>`;
+  const z = spark ? { out: '', stroke: color } : zones(n, w, lo, hi, Y, id);
+  out += z.out;
+  const stroke = z.stroke || color;
   if (n.dataset.grid !== undefined) {
     for (let g = 0; g < 3; g++) {
       const gy = f1(pad + ((h - lh - pad * 2) * g) / 2);
@@ -101,10 +130,15 @@ function line(n, w, h, kit, spark = false) {
   const d = smooth(pts);
   out += `<path d="${d}L${f1(pts[pts.length - 1][0])} ${h - lh}L${f1(pts[0][0])} ${h - lh}Z" fill="url(#${id})"/>`;
   if (cmp.length) out += `<path d="${smooth(cmp.map((val, i) => [X(i, cmp.length), Y(val)]))}" fill="none" style="stroke:var(--text-3)" stroke-width="2" stroke-dasharray="4 5" stroke-linecap="round"/>`;
-  out += `<path d="${d}" fill="none" style="stroke:${color}" stroke-width="${spark ? 2 : 3}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  if (n.dataset.avg !== undefined) {
+    const ay = f1(Y(Number(n.dataset.avg)));
+    out += `<line x1="0" x2="${w}" y1="${ay}" y2="${ay}" style="stroke:var(--text-3)" stroke-width="1.5" stroke-dasharray="5 5"/>`;
+  }
+  out += `<path d="${d}" fill="none" style="stroke:${stroke}" stroke-width="${spark ? 2 : 3}" stroke-linecap="round" stroke-linejoin="round"/>`;
   if (!spark) {
     const dots = n.dataset.dots !== undefined ? pts : [pts[pts.length - 1]];
-    for (const [x, y] of dots) out += `<circle cx="${f1(x)}" cy="${f1(y)}" r="5.5" style="fill:${color};stroke:var(--surface)" stroke-width="3"/>`;
+    const ring = n.dataset.ring || 'var(--chart-ring, var(--surface))';
+    for (const [x, y] of dots) out += `<circle cx="${f1(x)}" cy="${f1(y)}" r="5.5" style="fill:${stroke};stroke:${ring}" stroke-width="3"/>`;
   }
   const fs = kit.family === 'android' ? 12 : 12.5;
   const at = nums(n.dataset.labelAt);

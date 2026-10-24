@@ -1,7 +1,9 @@
 // Layout checks, run after every element is drawn (sharpness is quality.js). Findings are issues
 // (core/issues.js): printed in the render log and listed by `npm run validate`.
-//   edges   lifts, badges and the copy keep EDGE (40) design units from the image edges (SKILL rule 14);
-//           an element with bleed: true is cut on purpose. Devices and tiles may bleed (fans, big phones).
+//   edges   lifts, badges, stage text and the copy keep EDGE (40) design units from the image edges (SKILL
+//           rule 14); an element with bleed: true is cut on purpose. Devices and tiles may bleed (fans, big phones),
+//           but not by their TOP: devices turn around their bottom centre (devices/device.css), so a strong tilt
+//           swings the status bar and the title off the side; tops() flags a top band cut by an edge.
 //           A panorama strip is checked against its outer edges here, and against its seams in seams.js.
 //   doubles a lift whose card is also visible in a phone, tablet or tile of the same image.
 //   ui      per image (each slice of a panorama): does it show the app? A screen drawn over 2% or more of
@@ -28,7 +30,7 @@ const clip = (a, b) => ({ l: Math.max(a.l, b.l), r: Math.min(a.r, b.r), t: Math.
 const what = (n) => n.dataset.what || (n.classList.contains('copy') ? 'the copy' : n.className.split(' ')[0]);
 
 function edges(cv, c, W, H) {
-  const nodes = [...cv.el.querySelectorAll('.lift, .badge, .copy')].filter((n) => n.dataset.bleed !== '1');
+  const nodes = [...cv.el.querySelectorAll('.lift, .badge, .stage-text, .copy')].filter((n) => n.dataset.bleed !== '1');
   for (const n of nodes) {
     const a = rectOf(n, cv, c);
     const slice = Math.max(0, Math.min(cv.slices - 1, Math.floor((a.l + a.r) / 2 / cv.designW)));
@@ -37,6 +39,36 @@ function edges(cv, c, W, H) {
     if (!bad.length) continue;
     const text = bad.map(([side, g]) => (g < 0 ? `cut by the ${side} edge` : `${Math.round(g)} units from the ${side} edge`)).join(', ');
     issue(`${what(n)} is ${text} (keep ${EDGE}, or set bleed: true when the cut is on purpose)`, cv.slices > 1 ? { slice } : {});
+  }
+}
+
+// A device's top band (status bar + title: its top 12%) cut by an image edge, from its own box and rotation:
+// .device turns around its bottom centre, so a tilt of r moves its top sideways by about h x sin(r).
+// Warns when over TOP_CUT of the top edge or of the 12% line lies outside the image (bleed: true = on purpose).
+const TOP_CUT = 0.15;
+function tops(cv, W, H) {
+  for (const n of cv.el.querySelectorAll('.device')) {
+    if (n.dataset.bleed === '1') continue;
+    const [L, T, w, h] = [n.offsetLeft, n.offsetTop, n.offsetWidth, n.offsetHeight];
+    const r = ((parseFloat((n.style.transform.match(/rotate\((-?[\d.]+)deg\)/) || [])[1]) || 0) * Math.PI) / 180;
+    const [px, py] = [L + w / 2, T + h];
+    const at = (x, y) => ({ x: px + (x - px) * Math.cos(r) - (y - py) * Math.sin(r), y: py + (x - px) * Math.sin(r) + (y - py) * Math.cos(r) });
+    const sides = new Set();
+    let worst = 0;
+    for (const y of [T, T + h * 0.12]) {
+      let out = 0;
+      for (let i = 0; i <= 20; i++) {
+        const p = at(L + (w * i) / 20, y);
+        const side = p.x < 0 ? 'left' : p.x > W ? 'right' : p.y < 0 ? 'top' : p.y > H ? 'bottom' : null;
+        if (side) { out++; sides.add(side); }
+      }
+      worst = Math.max(worst, out / 21);
+    }
+    if (worst <= TOP_CUT) continue;
+    const slice = Math.max(0, Math.min(cv.slices - 1, Math.floor(px / cv.designW)));
+    issue(`${what(n)} has ${Math.round(worst * 100)}% of its top (status bar, title) cut by the ${[...sides].join(' + ')} edge: devices turn `
+      + 'around their bottom centre, so a tilt swings the top by about h x sin(r); move x against the lean, or set bleed: true',
+    cv.slices > 1 ? { slice } : {});
   }
 }
 
@@ -113,6 +145,7 @@ export function layoutCheck(cv) {
   const H = cv.DH;
   brokenImages(cv, c);
   edges(cv, c, W, H);
+  tops(cv, W, H);
   if (cv.slices > 1) seamCheck(cv, c, { rectOf, what, EDGE });
   doubles(cv, c);
   const ui = uiPerImage(cv, c, H);

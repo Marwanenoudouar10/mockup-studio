@@ -1,9 +1,14 @@
 // The app icon, derived from the chosen symbol: a full-bleed 1024 square (no rounded corners, no
 // transparency: the App Store and Google Play apply their own mask) with the brand colours behind it
 // and the symbol centred inside the safe area.
-//   style  gradient (default) | solid | night | paper        scale  symbol width / icon width (0.56)
-// The symbol keeps currentColor (white, or the primary on paper) and var(--accent) from the tokens.
+//   style  gradient (default) | solid | night | paper | ink   scale  symbol width / icon width (0.56)
+//   ink: the primary tile with an ink mark (a hot primary that white reads poorly on; a sportswear brand)
+// The symbol keeps currentColor (white, ink, or the primary on paper) and var(--accent) from the tokens; when
+// the accent is (nearly) the tile's own colour (a one-accent brand: accent = primary), the accent shapes would
+// vanish, so they take paper (on an ink mark) or ink (on a white mark) instead.
 // Safe area: keep the symbol inside the centre 66% circle so Android's round mask never cuts it.
+import { contrast } from './color.js';
+
 const parseAttrs = (s) => Object.fromEntries([...s.matchAll(/([\w:-]+)\s*=\s*"([^"]*)"/g)].map((m) => [m[1], m[2]]));
 
 export function readSvg(text) {
@@ -34,9 +39,17 @@ export const titleOf = (text) => {
 
 function background(style, c) {
   if (style === 'paper') return { fill: c.paper, glow: c.primary, glowOpacity: 0.1, mark: c.primary };
+  if (style === 'ink') return { fill: c.primary, glow: '#FFFFFF', glowOpacity: 0.12, mark: c.ink, tile: c.primary };
   if (style === 'solid') return { fill: c.primary, glow: '#FFFFFF', glowOpacity: 0.16, mark: c.onField || '#FFFFFF' };
   if (style === 'night') return { stops: [c.secondary, c.deep, c.deep], glow: c.primary, glowOpacity: 0.5, mark: '#FFFFFF' };
   return { stops: [c.primary, c.primary, c.secondary], glow: '#FFFFFF', glowOpacity: 0.24, mark: c.onField || '#FFFFFF' };
+}
+
+// the colour the accent shapes take on this tile
+function accentOn(bg, c) {
+  const tile = bg.tile || bg.fill || bg.stops[0];
+  if (contrast(c.accent, tile) >= 1.6) return c.accent;
+  return contrast(bg.mark, c.ink) < 2 ? c.paper : c.ink;
 }
 
 export function makeIcon(markText, colors, { style = 'gradient', scale = 0.56 } = {}) {
@@ -60,7 +73,7 @@ export function makeIcon(markText, colors, { style = 'gradient', scale = 0.56 } 
       + `<stop offset="1" stop-color="${bg.glow}" stop-opacity="0"/></radialGradient></defs>`,
     `  <rect width="${S}" height="${S}" fill="${bg.stops ? 'url(#bg)' : bg.fill}"/>`,
     `  <rect width="${S}" height="${S}" fill="url(#glow)"/>`,
-    `  <g style="color: ${bg.mark}; --accent: ${colors.accent}; --primary: ${colors.primary}">`,
+    `  <g style="color: ${bg.mark}; --accent: ${accentOn(bg, colors)}; --primary: ${colors.primary}">`,
     `    <svg x="${((S - w) / 2).toFixed(1)}" y="${((S - h) / 2).toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" viewBox="${vb.join(' ')}"${own}>${ids}</svg>`,
     '  </g>',
     '</svg>',

@@ -104,7 +104,7 @@ function resize(e, f, el) {
   gesture(e, f, el, (ev) => {
     const p = local(ev);
     const k = Math.max(0.1, Math.hypot(p.x - r.cx, p.y - r.cy) / d0);
-    if (el.type === 'badge') return { size: Math.max(12, round(v.size * k)) };
+    if (el.type === 'badge' || el.type === 'text') return { size: Math.max(12, round(v.size * k)) };
     const out = { w: Math.max(40, round(v.w * k)) };
     if (v.h != null) out.h = Math.max(40, round(v.h * k));
     return out;

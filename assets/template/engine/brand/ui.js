@@ -56,6 +56,15 @@ export function page({ eyebrow, title, titleFont, sub, meta = [], foot = [] }) {
   return main;
 }
 
+// the colour keys a board shows: all six, with accent folded into primary when they are the same colour
+// (a one-accent brand), or the brand's own list ([{ key, name }], board --swatches)
+const KEYS = ['primary', 'secondary', 'deep', 'accent', 'ink', 'paper'];
+export function swatchKeys(c, list = null) {
+  if (list && list.length) return list;
+  const same = String(c.accent).toUpperCase() === String(c.primary).toUpperCase();
+  return KEYS.filter((k) => !(same && k === 'accent')).map((key) => ({ key, name: same && key === 'primary' ? 'primary + accent' : key }));
+}
+
 export function swatch(name, hex, note = '') {
   return el('div', 'bb-swatch',
     `<div class="chip" style="background:${hex};color:${onColor(hex)}">${note}</div><div class="name">${esc(name)}</div><div class="hex">${esc(hex)}</div>`);

@@ -1,6 +1,7 @@
 // Fontsource lookup for the brand step: a family name -> the installed package, its weights and
 // category (from the package's metadata.json). A missing family comes back with the exact npm command.
 //   "Poppins/Inter, Newsreader/Inter"  -> pairs of { display, text } (a single name = both roles)
+//   "Big Shoulders Display:800/Inter"   -> the headline weight for that pair (else headlineWeight())
 import fs from 'node:fs';
 import path from 'node:path';
 import { ROOT } from '../../lib/cli.js';
@@ -32,21 +33,24 @@ function weightsFor(have, want) {
 }
 
 // { family, variable, weights } in the shape studio.config.js and brand/tokens.json take
-export function roleSpec(font, role) {
-  const weights = weightsFor(font.weights, role === 'display' ? DISPLAY_W : TEXT_W);
+export function roleSpec(font, role, extra = []) {
+  const weights = weightsFor(font.weights, [...(role === 'display' ? DISPLAY_W : TEXT_W), ...extra]);
   return { family: font.family, ...(font.variable ? { variable: true } : {}), weights };
 }
 
-// Serif and display faces look best a step lighter than the 800 a geometric sans takes.
-export function headlineWeight(font) {
-  const want = font.category === 'sans-serif' ? 800 : 600;
+// Serif and handwriting faces look best a step lighter than the 800 a sans takes; fontsource files condensed
+// sport faces (Big Shoulders, Anton) as "display", and those want their heaviest cut, not 600.
+export function headlineWeight(font, asked = null) {
+  if (asked) return weightsFor(font.weights, [asked])[0];
+  const want = ['serif', 'handwriting'].includes(font.category) ? 600 : 800;
   return weightsFor(font.weights, [want])[0];
 }
 
 export function parsePairs(str) {
   return String(str).split(',').map((s) => s.trim()).filter(Boolean).map((p, i) => {
-    const [display, text] = p.split('/').map((x) => x.trim());
-    return { id: i + 1, display, text: text || display };
+    const [d, text] = p.split('/').map((x) => x.trim());
+    const [display, w] = d.split(':').map((x) => x.trim());
+    return { id: i + 1, display, text: text || display, weight: Number(w) || null };
   });
 }
 
@@ -61,8 +65,8 @@ export function resolvePairs(pairs) {
     if (d.missing || t.missing) return { id: p.id, label, missing: true };
     return {
       id: p.id, label,
-      display: roleSpec(d, 'display'), text: roleSpec(t, 'text'),
-      headlineWeight: headlineWeight(d),
+      display: roleSpec(d, 'display', p.weight ? [p.weight] : []), text: roleSpec(t, 'text'),
+      headlineWeight: headlineWeight(d, p.weight),
       about: { display: d.category, text: t.category, license: [...new Set([d.license, t.license].filter(Boolean))].join(' + ') },
     };
   });

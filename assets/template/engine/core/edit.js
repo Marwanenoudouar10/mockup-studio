@@ -50,10 +50,12 @@ function mapOf(scope, k) {
 }
 
 function valuesOf(e, scope) {
-  const badge = (e.type || e.t) === 'badge';
+  const type = e.type || e.t;
+  const sized = type === 'badge' || type === 'text'; // sized by font size, not w
   return {
     x: e.x ?? scope.ctx.fr.mid ?? 660, y: e.y ?? 0, w: e.w ?? null, h: e.h ?? null, r: e.r || 0,
-    z: e.z ?? (badge ? 45 : 10), radius: typeof e.radius === 'number' ? e.radius : null, size: badge ? (e.size || 40) : null,
+    z: e.z ?? (type === 'badge' ? 45 : type === 'text' ? 5 : 10), radius: typeof e.radius === 'number' ? e.radius : null,
+    size: sized ? (e.size || (type === 'text' ? 600 : 40)) : null,
   };
 }
 

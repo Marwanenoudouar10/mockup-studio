@@ -51,7 +51,8 @@ serves that second.
 
 ## Consistency across the set
 - The same copy position, size and alignment on every image. The engine does this; do not override
-  `layout` per panel without a reason.
+  `layout` per panel without a reason. One deliberate break (`copy: 'bottom'` on the image that leads
+  with a picture or a number) gives the row rhythm; two or three look undecided.
 - Alternate the composition from image to image (straight phone, tilted phone, tile + phone, cards),
   so the row has rhythm, but keep the same scale of devices.
 - The same persona, date and data in every screen (`capture.md`, `mock-screens.md`).
@@ -125,6 +126,8 @@ drawing a raster image larger than its pixels, and from separate hi-res copies f
 - Copy inside the safe zone (the engine's default), vivid field colour, no device imagery if the client
   wants to be featured (use lifts or a tile instead).
 - It shows small and wide: 3 to 6 words, nothing smaller than 20 px.
+- It is never the plainest asset of the set: one bold diagonal (a dark card and a big-number card at -8
+  to -10 degrees, overlapping on purpose) beats two modest cards on a flat field (`layouts.md`).
 
 ## Read every image like a stranger
 Before calling an image done, read it at full size and at 25%:
@@ -134,18 +137,37 @@ Before calling an image done, read it at full size and at 25%:
 4. Is anything cut, covered, doubled, misspelled or untranslated?
 5. Does it look like the other images of the set?
 
-## The set checklist (what a reviewer found on a set that passed every check)
-Validate passing means the files are legal, not that the set is good. Before delivery, check:
+## The set checklist (what reviewers found on sets that passed every check)
+Validate passing means the files are legal, not that the set is good. Before delivery, tick each line:
 - **Hero corner:** no more than three layers overlap anywhere on image 1; no glass badge on live UI.
-- **Rotation:** cards straight; a fan and at most one accent card per image tilt (`layouts.md`).
-- **Proof:** every image's proof card is visible, uncovered and not repeated elsewhere in the set.
+- **Energy fits the brief:** a calm brief keeps cards straight (a fan, one accent card per image); a bold,
+  sport or campaign brief commits on two or three images (10-15 degree phones on opposing diagonals, one
+  bleeding off an edge, a stat over its phone's edge, a giant number, a loud badge: `layouts.md`). At
+  least one image breaks the "headline top left, stack below" build (`copy: 'bottom'`).
+- **Contact:** cards 24+ units apart or overlapping 60+ on purpose (read the 9:16 render: stacks tighten
+  there); devices 60+ units inside an edge or bleeding 10-15% on purpose; no device top (status bar,
+  title) cut by an edge, no lone badge in empty field; no lift or badge that slices a text line of the
+  phone under it ("6 of 28 km" left as "6 o": cover a whole line or none; no check measures this yet).
+- **Proof:** every image's proof card is visible, uncovered and not repeated elsewhere in the set; the
+  sub line promises only what a card on that image shows ("...and what it means for the next run" needs
+  a card that says it: Apple 2.3.1).
+- **Giant numbers** read whole at sheet size: a card covers the foot, never the waist, and never repeats
+  the same number right under it.
 - **Arithmetic:** donut slices add up to the total, budgets left add up, "ready by" dates match the
-  weekly amount times the weeks. A sharp client checks a finance set.
-- **Platform edges:** no row sliced in half by Android's opaque nav bar; no frameless window that
-  starts with a status bar.
+  weekly amount times the weeks, paces match distance and time, projections match the days gone, every
+  count matches what is listed ("6 friends" with five rows plus You is wrong). A sharp client checks.
+- **Both platforms:** the same data on iOS and Android (avatar stacks, counts, labels); no row sliced in
+  half by Android's opaque nav bar; no frameless window that starts with a status bar.
+- **Finished screens:** no orphan heading or link above the tab bar with nothing under it.
 - **Rhythm:** no dead band of 250+ units over or under the stage; cards as big as the room allows.
 - **Panorama:** read the uncut strip (`render --strip`); no text slivers across seams; the thread is a
   hero element or absent.
 - **One brand everywhere:** the brand board, the cover and the icon use the delivered accent and the
-  delivered screens (re-render the board from the real captures; `brand.md`).
-- **The cover:** shows what its sub line claims (both stores, or say which), and the strip flush.
+  delivered screens (re-render the board from the real captures; `brand.md`); the board shows only the
+  real colours (`--swatches`), each card once, and the reversed lockup where the set really uses it.
+- **The feature graphic** is not the plainest asset: one bold diagonal, a big number, no context-free
+  sliver of a card; the accent word and the logo's accent shapes read on its field.
+- **The cover:** fans the strongest images (hero in front, the most distinctive two behind) with every
+  headline readable; shows what its sub line claims (both stores, or say which), a strip flush.
+- **The name** (a concept or portfolio brand) shares no prefix, ending or signature colour with the
+  category leader (`brand.md`, the name check).

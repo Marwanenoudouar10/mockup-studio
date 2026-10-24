@@ -2,7 +2,10 @@
    --primary --secondary --deep --accent --ink --paper, and --onField (copy colour on the
    coloured presets; white unless brand.colors.onField says otherwise, e.g. ink on a light yellow).
    Each preset also sets the text roles: --text (headline), --sub, --em (accent word),
-   --ornament (brush / highlight), --shadow (tint of every drop shadow), --watermark. */
+   --ornament (brush / highlight), --shadow (tint of every drop shadow), --watermark, and --logo-accent (the
+   logo's accent shapes: set it to var(--paper) or var(--ink) on a field painted in the accent itself, where
+   the accent half of a mark would vanish). Light presets take --glow-1 / --glow-2 (strength of the colour
+   light in the corners) so a brand can turn them down in brand/theme.css without a new preset. */
 
 .canvas {
   --text: var(--onField, #ffffff);
@@ -13,7 +16,9 @@
   --shadow-k: 1;
   --watermark: var(--onField, #ffffff);
   --watermark-opacity: .08;
+  --logo-accent: var(--accent);
 }
+.canvas .logo { --accent: var(--logo-accent); }
 
 /* the drenched brand gradient with two radial lights */
 .canvas.field-gradient {
@@ -57,8 +62,25 @@
   --watermark: var(--primary);
   --watermark-opacity: .05;
   background:
-    radial-gradient(1200px 900px at 10% 0%, color-mix(in srgb, var(--primary) 12%, transparent), transparent 70%),
-    radial-gradient(1300px 1100px at 100% 100%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%),
+    radial-gradient(1200px 900px at 10% 0%, color-mix(in srgb, var(--primary) var(--glow-1, 12%), transparent), transparent 70%),
+    radial-gradient(1300px 1100px at 100% 100%, color-mix(in srgb, var(--accent) var(--glow-2, 16%), transparent), transparent 70%),
+    var(--paper);
+}
+
+/* plain paper, ink text, no colour in the corners: a light brand with ONE hot accent (sportswear, editorial).
+   A hot primary in the light preset's corners turns the field pink; this one stays bone white. */
+.canvas.field-paper {
+  --text: var(--ink);
+  --sub: color-mix(in srgb, var(--ink) 66%, var(--paper));
+  --em: var(--primary);
+  --ornament: var(--primary);
+  --shadow: color-mix(in srgb, var(--ink) 85%, var(--paper));
+  --shadow-k: .5;
+  --watermark: var(--ink);
+  --watermark-opacity: .04;
+  background:
+    radial-gradient(1200px 900px at 12% 0%, rgb(255 255 255 / var(--glow-1, .5)), rgb(255 255 255 / 0) 70%),
+    radial-gradient(1400px 1200px at 100% 100%, color-mix(in srgb, var(--ink) var(--glow-2, 6%), transparent), transparent 70%),
     var(--paper);
 }
 
@@ -91,6 +113,7 @@
   z-index: 90;
 }
 .canvas.field-light.grain::after,
+.canvas.field-paper.grain::after,
 .canvas.field-mesh.grain::after { mix-blend-mode: multiply; opacity: .05; filter: invert(1); }
 
 /* the giant faint logo */

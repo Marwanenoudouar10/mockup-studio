@@ -19,7 +19,7 @@ const MB = 1024 * 1024;
 // Upload appstore-6.3 AND appstore; App Store Connect scales them down for the smaller classes.
 const PHONE_STORES = {
   appstore: {
-    label: 'App Store - iPhone 6.9"',
+    label: 'App Store · iPhone 6.9"',
     platform: 'ios',
     device: 'iphone',
     size: [1320, 2868],
@@ -31,7 +31,7 @@ const PHONE_STORES = {
     max: 10,
   },
   'appstore-6.3': {
-    label: 'App Store - iPhone 6.3"',
+    label: 'App Store · iPhone 6.3"',
     platform: 'ios',
     device: 'iphone',
     size: [1206, 2622],
@@ -43,7 +43,7 @@ const PHONE_STORES = {
     max: 10,
   },
   'appstore-6.5': {
-    label: 'App Store - iPhone 6.5"',
+    label: 'App Store · iPhone 6.5"',
     platform: 'ios',
     device: 'iphone',
     size: [1284, 2778],
@@ -55,7 +55,7 @@ const PHONE_STORES = {
     max: 10,
   },
   'ipad-13': {
-    label: 'App Store - iPad 13"',
+    label: 'App Store · iPad 13"',
     platform: 'ipad',
     device: 'ipad',
     size: [2064, 2752],
@@ -67,7 +67,7 @@ const PHONE_STORES = {
     max: 10,
   },
   playstore: {
-    label: 'Google Play - phone',
+    label: 'Google Play · phone',
     platform: 'android',
     device: 'pixel',
     size: [1080, 1920],
@@ -82,7 +82,7 @@ const PHONE_STORES = {
   // Same Play rules, rendered at 2x (2160 x 3840, the 3840 px maximum): crisper on large screens.
   // Upload EITHER playstore or playstore-4k for a listing, not both.
   'playstore-4k': {
-    label: 'Google Play - phone 4K',
+    label: 'Google Play · phone 4K',
     platform: 'android',
     device: 'pixel',
     size: [2160, 3840],

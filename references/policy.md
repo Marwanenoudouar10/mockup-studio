@@ -63,8 +63,10 @@ whether a claim is true or a screen is honest: read every image against the chec
 - "must demonstrate the actual in-app or in-game experience". Use captured footage of the app.
 - No people holding or tapping the device (no fingers).
 - Stylised sets that break UI across several images are allowed, but **put UI in the first three images**.
-- **"Taglines should not take up more than 20% of the image."** On a 1080x1920 image, keep the headline
-  to 2 lines when there is a sub line, or 3 lines without one (the default copy block stays near this).
+- **"Taglines should not take up more than 20% of the image."** Every Play render measures the box of
+  the headline and sub lines and warns above 20% (`the headline and sub line cover 24% of the image`).
+  The default copy block stays near 15%; a bigger `layout.headlineShort` (condensed faces) trips it:
+  shorten, or drop the Play sub line (`sub: { playstore: '', default: '...' }`).
 - Banned words in images: "Best", "#1", "Top", "New", "Discount", "Sale", "Million Downloads", and for the
   feature graphic also "Free". No call to action ("Download now", "Install now", "Play now", "Try now").
 - No small text in large amounts. No time-sensitive copy; rotate seasonal images.
@@ -114,6 +116,7 @@ rules. A warning is a prompt to re-read, not a verdict: "New York" on a travel a
 - [ ] No ranking, award, price, promotion, call to action, emoji or other store's name, in any language.
 - [ ] No real customer data, real people's photos or other brands' logos in the screens.
 - [ ] Status bars clean and full; the same time on every image of a set.
-- [ ] Play headlines take 20% of the image or less; the feature graphic copy sits in the safe zone.
+- [ ] Play headlines take 20% of the image or less (the render warns); the feature graphic copy sits in
+      the safe zone.
 - [ ] Every image is localized; alt text written for Play.
 - [ ] `npm run validate` shows 0 problems, and every warning has been read and answered.

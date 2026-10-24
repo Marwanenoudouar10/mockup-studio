@@ -6,16 +6,17 @@
 // class `panorama` and the variables --slices / --slice-w (design units), so brand/theme.css can style a strip
 // (one glow per image: background-size: calc(100% / var(--slices)) 100%) without matching inline styles.
 // The field presets in engine/styles/field.css are measured on the WHOLE strip (two glows for six images).
+// cls: extra canvas classes (a panel's `class` key, `copy-bottom`), for per-image styles in brand/theme.css.
 import { DESIGN_W } from '../../scripts/lib/config.js';
 import { setPageSize } from '../core/boot.js';
 
-export function makeCanvas({ W, H, slices = 1, field = 'gradient', grain = true, designW = DESIGN_W }) {
+export function makeCanvas({ W, H, slices = 1, field = 'gradient', grain = true, designW = DESIGN_W, cls = '' }) {
   const k = W / designW;
   const DH = H / k;
   const tall = DH > 2600;
   setPageSize(W * slices, H);
   const el = document.createElement('div');
-  el.className = `canvas field-${field}${grain ? ' grain' : ''}${tall ? '' : ' short'}`;
+  el.className = `canvas field-${field}${grain ? ' grain' : ''}${tall ? '' : ' short'}${cls ? ` ${cls}` : ''}`;
   el.id = 'canvas';
   el.style.width = `${designW * slices}px`;
   el.style.height = `${DH}px`;

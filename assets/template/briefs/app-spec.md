@@ -9,7 +9,12 @@
      numbers that add up: re-do every sum, date sums too: $40 every Monday from Nov 2 is $800 by
      Mar 15 and $880 by Mar 29); for each screen, the element a store image will lift out at reading size
      becomes a data-box name. Each store image gets its OWN proof card: never the same card or ring as
-     the proof of two images. Invented names only: no real people, brands or customer data.
+     the proof of two images. A lifted box comes from a screen that NO phone or tile on that image
+     shows (the render warns "is also visible in ..."): plan one support box per screen for the hero, and
+     when the art direction says "stats breaking out of the phone", lift a stat from ANOTHER screen.
+     Same data on iOS and Android (an avatar stack, a count, a label: check both captures). Every number
+     a card shows adds up with the others (a total, a pace, a projection, a date range).
+     Invented names only: no real people, brands or customer data.
      The values below are the demo ("Brimpage", an invented journaling app): replace them. -->
 
 - **App name:** Brimpage

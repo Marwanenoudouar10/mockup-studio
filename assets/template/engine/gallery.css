@@ -1,5 +1,5 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { background: var(--sheet-bg, #E9E8EC); -webkit-font-smoothing: antialiased; }
+html, body { background: var(--sheet-bg, #DAD8D4); -webkit-font-smoothing: antialiased; }
 body {
   display: inline-block;
   padding: var(--pad, 96px);

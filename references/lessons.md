@@ -118,9 +118,12 @@ looks wrong. Add the project's own lessons to the "Project notes" of its `CLAUDE
   as text until `apply --logo` chose a logo for this name; `export` removes stale folders, validate warns.
 
 **Demo names are checked**
-- **Mistake:** the first demo brand was the name of a real journaling app with the same positioning.
-- **Rule:** search both stores and the web before naming a demo or a concept; use reserved domains
-  (`<name>.example`, RFC 2606) in browser bars.
+- **Mistake:** the first demo brand was the name of a real journaling app with the same positioning; a
+  later concept passed the exact-name search, but a red-orange running app named "Str...a" read as a copy
+  of the category leader.
+- **Rule:** search both stores and the web, then compare with the category leaders: no shared prefix or
+  ending, never a sound-alike in their colour (`brand.md`). Use reserved domains (`<name>.example`,
+  RFC 2606) in browser bars.
 
 **Checks that read the config, not the pixels**
 - **Mistake:** a panorama store mixed with normal stores piled every device onto image 1, and the
@@ -170,6 +173,36 @@ These come from a dark finance concept set: every size exact, validate 0 problem
 - **Rule:** re-render the board from the real captures (`--screen --box`), set the specimen on the field,
   make the icon from the field the screenshots use.
 
+## A bold brief that passed every check, then a review
+From a light, sportswear-style fitness concept: sizes, icons and policy all clean, believable data, and
+still "a clean premium template, not the campaign the brief asked for". The checklist that catches these
+is `design.md` ("The set checklist"); the composition rules are in `layouts.md`.
+
+**Safe is a defect when the brief asked for energy**
+- **Mistake:** six images with one build (headline top left, a centred stack), phones at 8 degrees,
+  cards at 3, nothing bleeding, small badges.
+- **Rule:** match the brief: a bold brief commits on 2-3 images (10-15 degree diagonals, one bleed, a
+  stat over its phone's edge, a giant number, a loud badge) and one image moves the copy (`copy: 'bottom'`).
+
+**A giant number cut at the waist**
+- **Mistake:** a card across the middle of a "100" left stumps that read "IOO", with the card's own
+  "100 kg" right under it.
+- **Rule:** the card covers the foot (20-25%) on a diagonal; the numeral bleeds both sides (`type: 'text'`,
+  recipe 12); never the same number twice on one axis.
+
+**Phones turn around their feet**
+- **Mistake:** a phone tilted 15 degrees swung its top 470 units sideways and cut its status bar and title
+  off the left edge; no check said so (devices may bleed).
+- **Rule:** devices turn around their bottom centre; past 8 degrees move `x` against the lean by about
+  h x sin(r) / 2. The render now warns when a device's top band is cut (`bleed: true` = on purpose).
+
+**One accent, many traps**
+- **Mistake:** with accent = primary (one hot colour on bone white) the palette darkened the seed to rust,
+  the board printed twin swatches, the icon's and the feature graphic logo's accent halves vanished on
+  the red, and the `light` field turned pink at the corners.
+- **Rule:** `--look light` (paper field, the seed kept hot), `--icon-style ink` (accent shapes swap by
+  themselves), `--swatches`, `--logo-accent` on accent fields (the render warns), `field: 'paper'`.
+
 ## Symptom -> cause -> fix
 | symptom | likely cause | fix |
 |---|---|---|
@@ -210,3 +243,19 @@ These come from a dark finance concept set: every size exact, validate 0 problem
 | the watermark reads as dirty rings | a cropped giant mark on a glowing dark field | `brand.watermark` per store, a panel's `watermark: false` |
 | the board's field tile is white | (older engine) a per-store `brand.field` object | update the engine; it resolves the field per store now |
 | a lifted Android list has square corners | (older kit) the list's own radius is 0 | update; or `data-box-radius` / `radius: { android: 72 }` |
+| `... has 33% of its top (status bar, title) cut by the right edge` | a tilted device turns around its bottom centre | move `x` against the lean (h x sin r / 2), or `bleed: true` when meant |
+| a badge with `bleed: true` still warns about the edge | (older engine) badges ignored `bleed` | update: `bleed` works on every element |
+| `the accent word is 1.00:1 on this field` | a field painted in the accent (one-accent brand) | another field, or `--em` for it in `brand/theme.css` |
+| `the logo's accent shapes are 1.00:1 on this field` | the logo's accent half is the field's colour | `--logo-accent: var(--paper)` on that field |
+| `the headline and sub line cover 24% of the image` (Play) | a bigger headline (condensed face) plus a sub | `sub: { playstore: '', default: ... }` or a smaller `headlineShort` |
+| `npm run screens`: "studio config has no panels" | (older scripts) screens loaded the panels | update; Step 2 needs no panels |
+| the font board sits on the template's purple | fonts ran before `apply --palette` | apply the palette first, then `fonts` |
+| `apply --logo` replaced a hand-drawn icon | (older apply) | update: it copies `<id>.icon.svg` and keeps it |
+| the brand board shows two identical swatches | accent = primary | update (folded into one), or `--swatches "primary:Name,ink,paper"` |
+| the same card twice on the brand board | (older board) the thumbnail lifted the Interface card | update; `--lift <capture>#<box>` for another card |
+| a light field turns pink at the corners | `light` glows the primary and accent | `field: 'paper'`, or lower `--glow-1` / `--glow-2` |
+| a squeezed wordmark on the palette board | (older engine) the palette view skipped the brand fonts | update |
+| a white ring on a line chart's end dot on a coloured card | the ring is `--surface` | `data-ring` or `--chart-ring` = the card's colour |
+| an avatar stack reads "TI M PI" | (older kit) a fixed -10px overlap | update: the overlap scales with the size |
+| one screen's CSS restyles every other screen | every `css/<part>.css` loads on every screen | prefix each rule with the screen's own class |
+| the overview sheet's background reads lilac | (older default) a fixed cool grey | update (the paper a step darker), or `sheet.background` |

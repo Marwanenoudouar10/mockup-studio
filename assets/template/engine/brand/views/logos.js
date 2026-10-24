@@ -6,6 +6,9 @@ import { graphic } from '../../core/assets.js';
 import { applyColors, loadFonts } from '../../core/theme.js';
 import { el, esc, page, iconShape } from '../ui.js';
 import { at } from '../../core/root.js';
+import { brandFor } from '../../../scripts/lib/config.js';
+
+const LIGHT = ['light', 'paper', 'mesh'];
 
 function checkLockup(node, id) {
   const svg = node.querySelector('svg');
@@ -90,6 +93,7 @@ async function sizesTile(o, colors) {
 
 export async function render(cfg, data) {
   const c = cfg.brand.colors;
+  const fieldName = brandFor(cfg).field; // per-store variants resolved, as the brand board does
   const s = data.sample || {};
   const name = s.name || cfg.brand.name || '';
   await loadFonts(cfg.brand, `${name} ${name.toLowerCase()} ${name.toUpperCase()}`);
@@ -110,7 +114,8 @@ export async function render(cfg, data) {
     const grid = el('div', 'bb-logo-grid');
     const paper = await lockupTile(o.lockup, 'paper', '76%', c, c.ink);
     const ink = await lockupTile(o.lockup, 'ink', '74%', c, '#FFFFFF');
-    const brand = await lockupTile(o.lockup, 'brand', '74%', c, c.onField || '#FFFFFF');
+    // a light field (light, paper, mesh) takes the ink lockup even when onField was left white
+    const brand = await lockupTile(o.lockup, 'brand', '74%', c, LIGHT.includes(fieldName) ? c.ink : c.onField || '#FFFFFF');
     const icon = el('div', 'bb-tile icon');
     if (o.icon) icon.append(iconShape(at(o.icon), 112, 'ios'), iconShape(at(o.icon), 72, 'android'));
     grid.append(paper, ink, brand, await sizesTile(o, c), icon);
@@ -121,7 +126,7 @@ export async function render(cfg, data) {
     paper.style.background = c.paper;
     ink.style.background = c.ink;
     const r = brand.getBoundingClientRect();
-    field(brand, cfg.brand.field, r.width, r.height, cfg.brand.grain);
+    field(brand, fieldName, r.width, r.height, cfg.brand.grain);
     checkLockup(paper, o.id);
   }
   for (const n of document.querySelectorAll('.bb-tile .bb-logo, .bb-tile .bb-mark')) n.style.position = 'relative';

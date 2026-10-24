@@ -6,16 +6,32 @@ Google Play (1080x1920) on the Brimpage demo and looked at. Swap the screen and 
 **Coordinates.** Portrait stage: 1320 x 1900 design units, hung under the copy and scaled to the room
 left. Wide stage: 1600 x 1200. `x` = centre, `y` = top edge, `w` = width (a device's SCREEN width),
 `h` = height (tiles), `r` = degrees, `z` = stacking order. Any value can vary per store:
-`y: { playstore: 200, default: 330 }`.
+`y: { playstore: 200, default: 330 }`. **Pivots:** devices turn around their BOTTOM centre, lifts, tiles,
+badges and text around their centre. A phone h units tall tilted r degrees moves its top sideways by
+about h x sin(r) (a 1300-unit phone at 15 degrees: 336 units): past 8 degrees, move `x` against the lean
+by about half that, or its status bar and title leave the image (the render warns).
 
 **Element types:** `phone` (a capture in a device frame), `lift` (one card of a screen at reading size,
 by `box` name or `crop`), `tile` (a frameless screen or an image as a window), `badge` (a short chip),
-and on wide targets `browser`, `laptop`, `monitor`, `tablet` (`web.md`).
+`text` (display type as a graphic: a giant number), and on wide targets `browser`, `laptop`, `monitor`,
+`tablet` (`web.md`).
 
 **Composition rules** (from a reviewed portfolio set; the render checks the measurable ones):
-- **Rotate on purpose or not at all.** Data cards, windows and stacks stay straight (`r: 0`). Tilt a fan
-  (6-9 degrees) and at most ONE accent card per image (3-5). A 1-2 degree tilt reads as an accident, and
-  three cards at three angles wobble.
+- **Rotate on purpose, to the brief's energy.** Data cards, windows and stacks stay straight (`r: 0`)
+  but for ONE accent card per image (3-6). A calm or premium set: straight phones, a 6-9 degree fan. A
+  bold, sport or campaign brief: commit on two or three images: phones at 10-15 degrees on opposing
+  diagonals, one bleeding off an edge (`bleed: true`, 10-15% of the device past it), a stat card over its
+  phone's edge by about 25% ("breaking out"), a giant number (recipe 12). Gentle 8 and 3 degree tilts on
+  a brief that asked for energy read as a tidy template. A 1-2 degree tilt reads as an accident; three
+  cards at three angles wobble.
+- **Vary the build.** Six images with one build (headline top left, a centred stack below) read as a
+  template, however clean. Alternate the recipes and break the copy position once (`copy: 'bottom'`,
+  recipe 13); the row then has rhythm.
+- **Cards meet on purpose.** Two cards keep a clear gap (24+ units) or overlap on purpose (60+, the top
+  one clearly over the other); a few units of kiss reads as a collision. Stacks get tighter on 9:16:
+  read the Play render too.
+- **Near the edge is a choice.** A device 15-40 units from an edge reads as a near-crop: pull it in to
+  60+ or bleed it 10-15% on purpose.
 - **Badges sit in open field** (the band under the stage, beside the headline), `solid` or `dark`, never
   `glass` over live UI (it blurs the rows into a smudge) and never over a tab bar or a row it half hides.
 - **At most three layers** overlap at any point of image 1 (field, phone, one card). A cluttered corner
@@ -23,7 +39,9 @@ and on wide targets `browser`, `laptop`, `monitor`, `tablet` (`web.md`).
 - **A card never covers the proof:** the amounts, the progress, the label the headline promises. Park
   a lift over the phone's quiet zone (the tab bar, the list end) or beside it.
 - **Fill the canvas:** the stage ends about 150 units above the bottom edge; a 250+ unit dead band
-  between the sub line and the stage, or under it, means: raise the stage, enlarge the cards 8-10%.
+  between the sub line and the stage, or under it, means: raise the stage, enlarge the cards 8-10%. A
+  badge alone in empty field (aligned with nothing, repeating a label the card already shows) is filler:
+  align it with a column or a card corner, or drop it and enlarge the cards.
 - **Windows start below the status bar:** a frameless tile showing 9:41 and a battery is "a phone with
   its bezel missing". Use `from: '<box at the top>'` (or `cropTop: <capture px>`) on the tile.
 
@@ -79,7 +97,7 @@ and on wide targets `browser`, `laptop`, `monitor`, `tablet` (`web.md`).
 { headline: 'See what <em>lifts</em> your mood', stage: [
   // from: 'streak' would start the window at that card, under the status bar and the nav title
   { type: 'tile', screen: 'insights', w: 840, h: 1240, x: 490, y: 0, r: -3, z: 5, radius: 70, pos: 'top' },
-  { type: 'phone', screen: 'entry', w: 600, x: 1010, y: 460, r: 7, z: 20 },
+  { type: 'phone', screen: 'entry', w: 600, x: 1010, y: 460, r: 7, z: 20, bleed: true }, // off the right edge on purpose
   { type: 'lift', screen: 'home', box: 'mood', w: 680, x: 460, y: 1150, r: -3, z: 30 } ] }
 ```
 
@@ -109,8 +127,8 @@ and on wide targets `browser`, `laptop`, `monitor`, `tablet` (`web.md`).
 ```
 ```js
 { headline: 'Everything in <em>one</em> place', stage: [
-  { type: 'phone', screen: 'entry', w: 520, x: 370, y: 320, r: -8, z: 10 },
-  { type: 'phone', screen: 'insights', w: 520, x: 950, y: 320, r: 8, z: 11 },
+  { type: 'phone', screen: 'entry', w: 520, x: 370, y: 320, r: -8, z: 10, bleed: true },
+  { type: 'phone', screen: 'insights', w: 520, x: 950, y: 320, r: 8, z: 11, bleed: true },
   { type: 'phone', screen: 'home', w: 600, x: 660, y: 60, z: 20 } ] }
 ```
 
@@ -145,7 +163,7 @@ and on wide targets `browser`, `laptop`, `monitor`, `tablet` (`web.md`).
 ```
 ```js
 { headline: 'Two screens, <em>one</em> story', stage: [
-  { type: 'phone', screen: 'insights', w: 620, x: 920, y: 0, r: 6, z: 10 },
+  { type: 'phone', screen: 'insights', w: 620, x: 920, y: 0, r: 6, z: 10, bleed: true },
   { type: 'phone', screen: 'home', w: 660, x: 450, y: 330, r: -4, z: 20 } ] }
 ```
 
@@ -248,19 +266,47 @@ two glows. A panorama canvas has the class `panorama` and `--slices` / `--slice-
 repeat one glow per image: `.canvas.field-x.panorama { background-size: calc(100% / var(--slices)) 100%; }`.
 A per-store field (`brand.field: { appstore: 'x-strip', default: 'x' }`) keeps single images unchanged.
 
+## 12. Giant number (a stat that leads)
+```
++------------------+   the number IS the image: bleeding off both sides,
+|1 0 0 0 0 0 0 0 0 |   a card crossing its FOOT on a diagonal. The card
+|1 0  0 0  0 0 0 0 |   proves it (the record, the date, the before).
+|1 0 0 0 0 0 0 0 0 |
+|  [===========]   |   <- lift: pr, r -6
+| Headline         |
++------------------+
+```
+```js
+{ copy: 'bottom', headline: 'A new <em>personal best</em>', stage: [
+  { type: 'text', text: '100', size: 1100, x: 660, y: 40, z: 5, color: 'ink', bleed: true },
+  { type: 'lift', screen: 'progress', box: 'pr', w: 980, x: 660, y: 760, r: -6, z: 30 } ] }
+```
+The card covers the numeral's bottom 20-25% (never its waist: "100" cut at the middle reads "IOO"), and
+the card does not repeat the same number right under it: set the numeral `outline: true` or in paper on
+a dark field when it must. Read it at sheet size: the digits must still read.
+
+## 13. Copy at the foot
+`copy: 'bottom'` on one panel: the copy block sits `layout.bottom` (190; 140 on 9:16) above the bottom
+edge and the stage fills the room above it (`gap` under the top edge to `gap` above the copy). Use it once
+per set, on the image whose visual should be read first (a giant number, a map, a full-bleed phone).
+
 ## Feature graphic (1024 x 500, plain pixel coordinates)
 Copy on the left inside the safe zone (x 154-534 by default), devices in the right third.
 ```js
 // fan of three phones (the demo)
 stage: [ { type: 'phone', screen: 'entry', w: 196, x: 668, y: 120, r: -8, z: 10 },
-         { type: 'phone', screen: 'insights', w: 196, x: 932, y: 120, r: 8, z: 11 },
+         { type: 'phone', screen: 'insights', w: 196, x: 932, y: 120, r: 8, z: 11, bleed: true },
          { type: 'phone', screen: 'home', w: 236, x: 800, y: 52, z: 20 } ]
 // one phone and one card
 stage: [ { type: 'phone', screen: 'home', w: 230, x: 700, y: 50, r: -6, z: 10 },
          { type: 'lift', screen: 'insights', box: 'streak', w: 250, x: 800, y: 300, r: 4, z: 20 } ]
 ```
 Keep every card's right edge at x 872 or less (Google may crop beyond it), and show a card the
-screenshots do not already repeat.
+screenshots do not already repeat. It is the asset Play shows widest: never the plainest one. One bold
+diagonal beats two modest cards on a flat field: a phone or a dark card plus one big-number card at -8
+to -10 degrees, overlapping on purpose, all content inside y 90-410; no sliver of a card that shows only
+a fragment ("13.0 km · with ...") without its context. On a field painted in the accent, the accent word
+and the logo's accent shapes vanish (the render warns): `--logo-accent` and `--em` for that field.
 
 ## Wide recipes (web, social, desktop)
 Wide panels say `space: 'landscape'` and which targets show them (`only`). Copy goes beside the stage
@@ -296,8 +342,10 @@ plus a lift of one KPI card (`examples/web.config.js`).
 **W5. Portfolio cover from the finished set** (`portfolio`, the Upwork / Dribbble thumbnail): a tile
 whose `src` is a rendered image, e.g. the uncut strip copied to `brand/cover-strip.png`, or
 `final/en/appstore/01.png`. Rules: `export` renders targets in `stores` order, so list `portfolio` after
-the store it shows, and run export twice on a fresh project (the first pass has nothing to show; a
-missing `src` is an issue, and validate fails it); show the strip flush (no gaps: it is one panorama)
+the stores it shows (then one export is enough; a second one only when its tiles show hi-res copies or a
+store listed after it; a missing `src` is an issue, and validate fails it). Fan the STRONGEST images:
+the hero in front and the two most distinctive behind it (the dark one, the giant number), spread wide
+enough that every headline stays readable; show a panorama strip flush (no gaps: it is one panorama)
 with a hairline edge and a soft shadow on a backdrop that contrasts with the field; the sub line claims
 only what the cover shows ("App Store panorama for ...", not "App Store and Google Play" with no Play
 image).
@@ -308,6 +356,8 @@ image).
 - Cards, badges and the copy keep 40 units from the edges; the render warns otherwise. A card cut on
   purpose says so: `bleed: true`. Never lift a card that the phone on the same image already shows.
 - Higher `z` draws on top. Lifts 30+, badges 40, phones 10-20, tiles 5.
-- Rotations: see "Composition rules" at the top (straight cards; a fan 6-9; one accent card 3-5).
+- Rotations: see "Composition rules" at the top (straight cards; a fan 6-9; one accent card 3-6; a bold
+  brief 10-15 on phones). Devices turn around their bottom centre: past 8 degrees, move `x` against the
+  lean by about h x sin(r) / 2.
 - A card's `y` that works on the tall iPhone canvas can hide UI on 9:16: give it a per-store value.
 - Moving things by hand is faster in Store Studio (`workspace.md`); `npm run bake` writes the moves back.

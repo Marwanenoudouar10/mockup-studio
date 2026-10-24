@@ -106,7 +106,7 @@ body {
 .bb-ui .t { font-family: var(--fd); font-weight: 700; font-size: 20px; letter-spacing: -.015em; }
 .bb-ui .b { margin-top: 4px; font-family: var(--ft); font-size: 15px; line-height: 1.45; color: var(--bb-mute); }
 .bb-ui .r { display: flex; gap: 10px; align-items: center; margin-top: 14px; font-family: var(--ft); font-size: 14px; font-weight: 600; }
-.bb-ui .btn { padding: 9px 16px; border-radius: 99px; background: var(--tint); color: #fff; }
+.bb-ui .btn { padding: 9px 16px; border-radius: 99px; background: var(--tint); color: var(--on-tint, #fff); }
 .bb-ui .chip { padding: 7px 12px; border-radius: 99px; background: color-mix(in srgb, var(--acc) 35%, #fff); color: var(--bb-ink); }
 
 /* logo directions */
@@ -135,9 +135,9 @@ body {
 .bb-cell-label { position: absolute; left: 24px; top: 22px; z-index: 2; }
 .bb-cell.hero { grid-area: hero; display: grid; place-items: center; }
 .bb-cell.reversed { grid-area: rev; display: grid; place-items: center; }
-.bb-cell.reversed .bb-cell-label, .bb-cell.panel .bb-cell-label { color: rgb(255 255 255 / .8); }
+.bb-cell.reversed .bb-cell-label, .bb-cell.panel .bb-cell-label { color: color-mix(in srgb, var(--rev-ink, #ffffff) 80%, transparent); }
 .bb-cell.icon { grid-area: icon; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding-top: 40px;
-  background: radial-gradient(120% 120% at 0% 0%, color-mix(in srgb, var(--accent) 28%, #F4F1EC), #E4E0EA); }
+  background: var(--icon-cell, radial-gradient(120% 120% at 0% 0%, #F5F4F1, #DCDAD5)); } /* neutral: no tint fights the icon */
 .bb-cell.colour { grid-area: colour; padding: 56px 24px 20px; }
 .bb-cell.type { grid-area: type; padding: 56px 28px 22px; }
 .bb-cell.ui { grid-area: ui; display: grid; place-items: center; padding-top: 30px; background: color-mix(in srgb, var(--paper) 70%, #ECE8E2); }

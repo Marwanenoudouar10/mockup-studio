@@ -7,7 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const MOVABLE = ['x', 'y', 'w', 'h', 'r', 'z', 'radius', 'size'];
-const TYPES = new Set(['phone', 'device', 'tablet', 'browser', 'laptop', 'monitor', 'lift', 'tile', 'badge']);
+const TYPES = new Set(['phone', 'device', 'tablet', 'browser', 'laptop', 'monitor', 'lift', 'tile', 'badge', 'text']);
 const KEY = /^[\w*.-]{1,64}$/;
 const NAME = /^(?!.*\.\.)[\w./-]{1,160}$/;
 const own = new Map(); // abs file -> the text this process wrote last

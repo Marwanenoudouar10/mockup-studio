@@ -125,12 +125,14 @@ Mode B also gets `briefs/app-spec.md`: the description now (name, one-liner, aud
 persona, screens and story map after the brand board is approved.
 
 **Look -> palette.** The palette board shows three directions from the seed: Drenched (gradient field),
-Night (dark field), Paper (soft mesh field), or with `--look dark` three dark ones (Night, Graphite, Deep).
+Night (dark field), Paper (soft mesh field), or with `--look dark` three dark ones (Night, Graphite, Deep),
+or with `--look light` three light ones (Chalk, Bone, Sand: off-white field, black type, one hot accent).
 The look answer picks the flags and the option to recommend first:
 
 | look | `npm run brand -- palette` | recommend | field |
 |---|---|---|---|
 | Bold and bright | `--mood bold` | 1 Drenched | `gradient` |
+| Bold, on a light field (the brief says off-white, black type, one hot accent: sportswear, food) | `--look light --mood bold` | 2 Bone | `paper` |
 | Dark and premium | `--look dark --mood electric` (vivid accent) or `--mood serious` (muted gold) | 1 Night | `dark` |
 | Calm and soft | `--mood calm` | 3 Paper | `mesh` |
 | Clean and light | `--mood fresh` | 3 Paper, then set `brand.field: 'light'` | `light` |

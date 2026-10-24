@@ -11,7 +11,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 
 export function nameOf(el) {
   if (el.type === 'text') return 'headline';
-  const what = el.box || (el.type === 'badge' ? el.text : null) || el.screen || (el.src ? el.src.split('/').pop() : null) || el.id;
+  const what = el.box || (el.type === 'badge' || el.type === 'text' ? el.text : null) || el.screen || (el.src ? el.src.split('/').pop() : null) || el.id;
   return `${el.type} · ${what}${el.crop && !el.box ? ' crop' : ''}`;
 }
 

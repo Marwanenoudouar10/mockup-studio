@@ -112,14 +112,20 @@ Web, social and desktop targets (wide layout; every rule and source URL in `scri
 | `portfolio` | 1600x1200 (4:3 Upwork / Dribbble / Behance cover) | recommended, 10 MB max | 1-10 |
 
 Upload `appstore-6.3` and `appstore`; App Store Connect scales them down for the smaller iPhones.
-Object form: `{ id: 'appstore', panorama: true }`, `{ id: 'mac-appstore', screens: 'web' }` (a web app's
+Object form: `{ id: 'appstore', panorama: true }`, `{ id: 'appstore', label: 'App Store · iPhone 6.9"' }` (the
+overview sheet's label), `{ id: 'mac-appstore', screens: 'web' }` (a web app's
 captures in Mac frames); a custom target: `{ id: 'banner', size: [1500, 500], platform: 'web' }` (wide when
 W > H). Keep each store's own UI: never iPhone frames or iOS screens on Google Play (`policy.md`).
 
 ## Panels and elements
-Each panel = one image: `{ headline, sub?, logo?, align?, field?, ornament?, gap?, lines?, stage: [...] }`.
+Each panel = one image: `{ headline, sub?, logo?, align?, field?, ornament?, gap?, lines?, copy?, class?, stage: [...] }`.
 The stage is 1320 x 1900 design units hung under the copy and scaled to the room left.
 `x` = centre, `y` = top edge, `w`/`h` = size, `r` = rotation (deg), `z` = stacking order.
+`copy: 'bottom'` puts the copy block at the foot (`layout.bottom` 190 / `bottomShort` 140 from the edge)
+and the stage in the room above it (once per set, to break the "headline top, stack below" rhythm);
+`class: 'x'` adds canvas classes for per-image styles in `brand/theme.css`. Devices turn around their
+BOTTOM centre (lifts, tiles, badges and text around their centre): a tilt of r moves a phone's top
+sideways by about h x sin(r), and the render warns when that cuts its status bar or title.
 ```js
 { type: 'phone', screen: 'home', w: 700, x: 660, y: 30, r: 0, z: 20, device: 'pixel', island: false, camera: false }
 { type: 'lift',  screen: 'entry', box: 'photo', w: 460, x: 300, y: 800, r: -5, z: 32 }       // box from entry.boxes.json
@@ -129,14 +135,20 @@ The stage is 1320 x 1900 design units hung under the copy and scaled to the room
 { type: 'tile',  screen: 'insights', w: 840, h: 1100, x: 490, y: 0, from: 'streak' }    // window from a box (or cropTop: px)
 { type: 'tile',  src: 'brand/photo.jpg', w: 1000, h: 1400, x: 560, y: 0, fit: 'cover', shadow: false }
 { type: 'badge', text: { en: 'Works offline', de: 'Funktioniert offline' }, icon: 'offline', x: 330, y: 1340, style: 'solid' }
+{ type: 'text',  text: '100', size: 1100, x: 660, y: 40, z: 5, color: 'accent', bleed: true }   // a giant number
 ```
+Stage text: `color` ink, accent, primary, paper, text (default) or any CSS colour; `outline: true` (or a
+stroke width) draws outlined letters; `weight`, `tracking` (em), `opacity`. Edge-checked like a badge and
+scanned by the copy rules.
 Badge icons: check lock star heart bolt cloud shield flame bell clock sparkle leaf offline (or an image path).
-Badge styles: solid, glass, accent, dark; `iconColor` (or `--badge-icon` in `brand/theme.css`) recolours the icon.
+Badge styles: solid, glass, accent, dark; `weight` (800 for a campaign badge); `iconColor` (or `--badge-icon`
+in `brand/theme.css`) recolours the icon.
 A panel may set `watermark: false`; `bridge: true` marks a panorama seam crossing as intended; a tile
 `src` that does not load draws the magenta placeholder and an issue.
 A pixel `crop` belongs to one capture: give every platform its own key (a missing key or a crop outside the
 capture draws the magenta placeholder and an issue). Lifts, badges and the copy keep 40 design units from
-the edges; `bleed: true` on a lift or badge says the cut is on purpose. Devices and tiles may bleed.
+the edges; `bleed: true` on any element says the cut is on purpose. Devices and tiles may bleed, but a
+device whose top band (status bar, title) is cut by an edge warns unless it has `bleed: true`.
 
 Any text can be per locale (`{ en, de }`); any value can vary by store or platform
 (`w: { playstore: 640, default: 720 }`, `stage: { playstore: [...], default: [...] }`).
@@ -147,7 +159,7 @@ Headlines take `<em>` (accent word or highlight band), `<br>` and `&nbsp;`; they
 `feature: { headline, sub?, logo?, stage: [...] }` renders `final/<locale>/playstore/feature-graphic.png`
 (1024x500). Stage coordinates are plain pixels of that image. Optional keys: `platform` (`android`, the
 captures used), `device`, `side` (copy inset, 154), `copyWidth` (380), `size` (headline, 54), `subSize`
-(22), `logoWidth` (190), `maxLines` (4), `nudge` (moves the copy down), `field`, `ornament`, `align`.
+(22), `logoWidth` (190), `maxLines` (4), `nudge` (moves the copy down), `field`, `class`, `ornament`, `align`.
 Google may crop about 15% per side: the defaults keep the copy inside x 154-534, and the page warns
 (`feature graphic: the copy crosses the ... cutoff zone`) when the copy leaves x 154-872, y 76-424.
 RTL locales mirror the whole graphic.
@@ -169,8 +181,10 @@ placeholder and prints a warning, never a silent blank. A locale other than the 
 same file dresses the mock screens (`<meta name="kit-tokens" content="/brand/tokens.json">`), so one
 `npm run brand -- apply` changes both. A value set in `brand` wins over its token.
 The colours (primary, secondary, deep, accent, ink, paper, onField) drive every field preset:
-`gradient` (default), `solid`, `light`, `dark`, `mesh`, or your own `.canvas.field-<name>` in
-`brand/theme.css`. `brand.fonts` takes fontsource family names (`npm i @fontsource/<name>` or
+`gradient` (default), `solid`, `light`, `paper` (bone white, no colour in the corners: a light brand
+with one hot accent), `dark`, `mesh`, or your own `.canvas.field-<name>` in `brand/theme.css`. Light
+presets take `--glow-1` / `--glow-2` (corner light strength); `--logo-accent` recolours the logo's accent
+shapes on a field painted in the accent (the render warns when the accent word or those shapes vanish). `brand.fonts` takes fontsource family names (`npm i @fontsource/<name>` or
 `@fontsource-variable/<name>`); `extra` adds fallbacks for other scripts. `ornament`: brush,
 highlight, none. `watermark`: the giant faint mark (true, false or `{ src, opacity }`, or per store:
 `{ playstore: false, default: true }`; `feature.watermark` decides for the feature graphic alone).
@@ -292,6 +306,7 @@ reflows at 1100 and 640 px), ready for a responsive trio.
 The method is in the skill's `references/design.md` ("Sharpness"). The switches: `npm run export --
 --scale 2|3` (hi-res copies in `final/portfolio/<locale>/<target>/`, never uploaded), `npm run screens --
 --scale 2` / `npm run capture -- --scale 2` (larger captures, when a render warns `... is upscaled 1.6x`),
-`sheet.width` (3840, a maximum) and `sheet.quality` (94) for the overview sheets, `--png` for a lossless
+`sheet.width` (3840, a maximum), `sheet.quality` (94) and `sheet.background` (default: the brand's paper a
+step darker) for the overview sheets, `--png` for a lossless
 sheet, and the `playstore-4k` target (2160x3840; upload it OR `playstore`). Sheets skip hi-res copies older
 than the upload images (validate warns): re-run `export -- --scale 2` after every change.

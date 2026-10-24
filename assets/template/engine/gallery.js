@@ -65,7 +65,8 @@ async function main() {
     : Math.min(H, Number(q.get('h') || (live ? 760 : S.height))) / H;
   const h = Math.round(H * scale);
   const root = document.documentElement.style;
-  root.setProperty('--sheet-bg', S.background);
+  // default: the brand paper a step darker (a fixed cool grey read lilac next to warm sets)
+  root.setProperty('--sheet-bg', S.background || `color-mix(in oklab, ${cfg.brand.colors.paper || '#F2F1EE'} 88%, #000000)`);
   root.setProperty('--pad', `${S.padding}px`);
   root.setProperty('--gap', `${S.gap}px`);
   root.setProperty('--r', `${Math.round((wide ? H * 0.06 : W * 0.05) * scale)}px`);

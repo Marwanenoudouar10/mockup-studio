@@ -1,4 +1,4 @@
-// npm run brand -- logos [--dir brand/logo-options] [--icon-style gradient|solid|night|paper] [--icon-scale 0.56]
+// npm run brand -- logos [--dir brand/logo-options] [--icon-style gradient|solid|night|paper|ink] [--icon-scale 0.56]
 // Compares every logo direction in the folder: <id>.svg (the lockup: symbol + wordmark), <id>.mark.svg
 // (the symbol alone) and, if you drew one, <id>.icon.svg. Without an icon file the app icon is derived
 // from the symbol with the current token colours (out/brand/logos/<id>.icon.svg), exactly as

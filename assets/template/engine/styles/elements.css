@@ -1,4 +1,4 @@
-/* Stage elements other than devices: lifted cards, tiles, badges, missing-screen placeholders.
+/* Stage elements other than devices: lifted cards, tiles, badges, stage text, missing-screen placeholders.
    Shadows are tinted by --shadow (set by the field preset) and scaled by --shadow-k. */
 
 .lift {
@@ -10,7 +10,7 @@
     0 18px 36px color-mix(in srgb, var(--shadow) calc(28% * var(--shadow-k)), transparent);
 }
 .lift img { position: absolute; max-width: none; display: block; }
-.field-light .lift, .field-mesh .lift { outline: 2px solid rgb(0 0 0 / .04); }
+.field-light .lift, .field-paper .lift, .field-mesh .lift { outline: 2px solid rgb(0 0 0 / .04); }
 
 .tile {
   position: absolute;
@@ -70,6 +70,20 @@
 }
 .badge.dark .badge-icon { color: var(--badge-icon, var(--accent)); }
 .badge.glass .badge-icon, .badge.accent .badge-icon { color: var(--badge-icon, currentColor); }
+
+/* stage text (elements/text.js): display type as a graphic, e.g. a giant number */
+.stage-text {
+  position: absolute;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-weight: var(--headline-weight, 800);
+  font-variant-numeric: lining-nums;
+  line-height: .8;
+  letter-spacing: -0.04em;
+  color: var(--tx);
+  pointer-events: none;
+}
+.stage-text.outline { color: transparent; -webkit-text-stroke: var(--tx-stroke) var(--tx); }
 
 /* a missing screen is never a silent blank */
 .missing {

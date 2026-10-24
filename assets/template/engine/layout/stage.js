@@ -1,5 +1,7 @@
 // The stage: a 1320 x 1900 design-unit box hung under the copy, scaled to the room left.
 //   top = copy bottom + gap          f = min(1.08, (DH - top) / 1900)
+//   copy: 'bottom' (a panel key): the copy sits at the foot, the stage fills the room above it:
+//   top = gap, DH = copy top - gap   (panel.js)
 //   single image: X(x) = 660 + (x - 660) * f   (scales around the centre)
 //   panorama:     X(x) = x                      (global x, 0..N*1320, so seams stay put)
 //   Y(y) = top + y * f

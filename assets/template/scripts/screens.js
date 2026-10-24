@@ -203,7 +203,7 @@ export async function runScreens(session, cfg, flags = {}) {
 if (isMain(import.meta)) {
   (async () => {
     const flags = parseArgs();
-    const { cfg } = await loadConfig(flags);
+    const { cfg } = await loadConfig(flags, { noPanels: true }); // screens come before the panels (Step 2 < Step 4)
     const session = await openSession();
     try {
       console.log('screens');

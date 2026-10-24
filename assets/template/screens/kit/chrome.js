@@ -64,6 +64,8 @@ function navAndroid(h, d) {
 function navBars(kit) {
   for (const h of document.querySelectorAll('.navbar')) {
     h.insertAdjacentHTML('afterbegin', kit.family === 'android' ? navAndroid(h, h.dataset) : navIos(h, h.dataset));
+    // a small (inline-title) bar: ios.css gives the content under it some air below the glass buttons
+    if (isLarge(h.dataset.large, kit.family) === undefined) h.classList.add('inline');
   }
 }
 

@@ -79,7 +79,8 @@ export default {
       stage: [
         // a frameless screen as a window, the phone in front, one card lifted out
         { type: 'tile', screen: 'insights', w: 840, h: 1240, x: 490, y: 0, r: -3, z: 5, radius: 70, pos: 'top' },
-        { type: 'phone', screen: 'entry', w: 600, x: 1010, y: 460, r: 7, z: 20 },
+        // it runs off the right edge on purpose (the top too: devices turn around their bottom centre)
+        { type: 'phone', screen: 'entry', w: 600, x: 1010, y: 460, r: 7, z: 20, bleed: true },
         { type: 'lift', screen: 'home', box: 'mood', w: 680, x: 460, y: 1150, r: -3, z: 30 },
       ],
     },
@@ -163,7 +164,7 @@ export default {
     logo: true,
     stage: [
       { type: 'phone', screen: 'entry', w: 196, x: 668, y: 120, r: -8, z: 10 },
-      { type: 'phone', screen: 'insights', w: 196, x: 932, y: 120, r: 8, z: 11 },
+      { type: 'phone', screen: 'insights', w: 196, x: 932, y: 120, r: 8, z: 11, bleed: true }, // a fan's side phone, cut on purpose
       { type: 'phone', screen: 'home', w: 236, x: 800, y: 52, z: 20 },
     ],
   },
@@ -173,6 +174,6 @@ export default {
   // onto, if the artwork has transparent parts) defaults to the brand's primary colour.
   icon: { src: 'brand/icon.svg' },
 
-  // Overview sheets (final/<locale>/overview-<store>.jpg).
-  sheet: { height: 1100, gap: 44, padding: 96, background: '#E9E8EC', title: true },
+  // Overview sheets (final/<locale>/overview-<store>.jpg). background: default = the brand's paper a step darker.
+  sheet: { height: 1100, gap: 44, padding: 96, title: true },
 };

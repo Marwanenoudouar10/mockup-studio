@@ -91,7 +91,7 @@
 .avatar .art { width: 100%; height: 100%; }
 .avatars { display: flex; }
 .avatars .avatar { box-shadow: 0 0 0 2px var(--surface); }
-.avatars .avatar + .avatar { margin-inline-start: -10px; }
+.avatars .avatar + .avatar { margin-inline-start: calc(var(--size) * -.22); } /* scales with the size: initials stay whole */
 
 /* small labels */
 .badge {

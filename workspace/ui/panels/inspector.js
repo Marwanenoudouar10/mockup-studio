@@ -16,7 +16,7 @@ const HELP = `<div class="help">Drag an element to move it. Corners resize, the 
   <kbd>Space</kbd>+drag pan · pinch or <kbd>⌘</kbd>+scroll zoom · <kbd>⇧1</kbd> fit</div>`;
 
 function source(el) {
-  if (el.type === 'badge') return `text “${el.text || ''}”`;
+  if (el.type === 'badge' || el.type === 'text') return `text “${el.text || ''}”`;
   const file = el.screen ? `${el.screen}.png` : el.src || '';
   if (el.box) return `${file} › box “${el.box}”`;
   return el.crop ? `${file} › crop` : file;
@@ -26,7 +26,7 @@ const fmt = (v) => (v == null ? '' : String(Math.round(v * 100) / 100));
 
 function fields(el) {
   const v = el.values;
-  const badge = el.type === 'badge';
+  const badge = el.type === 'badge' || el.type === 'text'; // sized by font size
   const radius = el.type === 'lift' || el.type === 'tile';
   const f = (k, label, val, off) => `<label class="fld${off ? ' off' : ''}"><span>${label}</span><input data-k="${k}" value="${esc(fmt(val))}"${off ? ' disabled' : ''}`
     + `${k === 'radius' && !off ? ' placeholder="auto"' : ''} inputmode="decimal" aria-label="${label}"></label>`;

@@ -1,15 +1,18 @@
 // Element registry + builder. Every element type is one file; add yours to MAKERS.
 //   phone / device / browser / laptop / monitor / tablet -> device.js (a screen in a CSS frame)
-// Every drawn node carries data-el (the element id, scripts/lib/layout.js) and data-panel (its config panel).
+//   text -> text.js (display type as a graphic: a giant number)
+// Every drawn node carries data-el (the element id, scripts/lib/layout.js) and data-panel (its config panel);
+// bleed: true on ANY element marks a cut by the image edge as intended (core/checks.js skips it).
 import { preloadScreens } from '../core/assets.js';
 import { track } from '../core/edit.js';
 import { device } from './device.js';
 import { lift } from './lift.js';
 import { tile } from './tile.js';
 import { badge } from './badge.js';
+import { text } from './text.js';
 import { platformOf } from './resolve.js';
 
-const MAKERS = { phone: device, device, browser: device, laptop: device, monitor: device, tablet: device, lift, tile, badge };
+const MAKERS = { phone: device, device, browser: device, laptop: device, monitor: device, tablet: device, lift, tile, badge, text };
 
 // ctx: { cv, fr, brand, device, platform, space, locale, icon, mirror? }
 //   mirror(e): the element mirrored for an RTL layout (wide side mode, feature graphic); stage values stay
@@ -36,6 +39,7 @@ export async function buildElements(stage, ctx) {
     if (node && e.id != null) node.dataset.el = e.id;
     if (node && e.$panel != null) node.dataset.panel = e.$panel;
     if (node && e.bridge) node.dataset.bridge = '1'; // a panorama seam crossing on purpose (core/seams.js)
+    if (node && e.bleed) node.dataset.bleed = '1'; // an edge cut on purpose (badges ignored it before)
     return node;
   };
   await load(stage);
