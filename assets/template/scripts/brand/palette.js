@@ -22,6 +22,18 @@ import { openSession } from '../lib/session.js';
 
 const val = (v) => (v === undefined || v === true ? null : String(v));
 
+// the recommended option (1) fails a check: say which option passes, or what to try (brand.md, "When the
+// recommended option fails")
+function failHint(options) {
+  const bad = options[0] && options[0].checks.filter((c) => !c.pass);
+  if (!bad || !bad.length) return null;
+  const good = options.filter((o) => o.checks.every((c) => c.pass)).map((o) => o.id);
+  const what = bad.map((c) => c.label.toLowerCase()).join(', ');
+  return good.length
+    ? `option 1 fails ${what}; option ${good.join(' and ')} pass${good.length > 1 ? '' : 'es'} every check. Recommend ${good.length > 1 ? 'one of them' : 'it'}, or keep 1 and try a darker --seed`
+    : `no option passes every check (option 1: ${what}): try a darker --seed, --look light, or --accent "#hex"`;
+}
+
 export async function run(flags, { cfg, tokens, rel }) {
   const brief = readBrief();
   const seed = normHex(val(flags.seed) || brief.seed || cfg.brand.colors.primary);
@@ -49,7 +61,10 @@ export async function run(flags, { cfg, tokens, rel }) {
       + ` ${bad.length ? `watch: ${bad.map((c) => `${c.label} ${c.ratio}`).join(', ')}` : 'all checks pass'}`);
     const em = o.checks.find((c) => c.label === 'Accent word on field');
     if (accent && em && em.ratio < 1.6) console.log(`     note: the pinned accent is almost the field colour here (${em.ratio}:1): the accent word vanishes; skip this option or try --look light`);
+    if (o.deepened) console.log(`     note: your ${o.deepened} is deepened to ${o.colors.primary} in this option, so the white headline and sub line read (4.5:1)`);
   }
+  const hint = failHint(options);
+  if (hint) console.log(`\n  next: ${hint}`);
   if (page) console.log(`  sample ${page}`);
   const session = await openSession();
   try {

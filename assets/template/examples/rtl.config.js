@@ -25,8 +25,10 @@ export default {
       headline: 'يومك، <em>صفحة واحدة</em> في كل مرة',
       stage: [
         { type: 'phone', screen: 'home', w: 700, x: 660, y: 30, z: 20 },
-        { type: 'lift', screen: 'insights', box: 'streak', w: 500, x: 335, y: 300, r: -5, z: 31 },
-        { type: 'badge', text: 'خاص افتراضيًا', icon: 'lock', x: 990, y: 1250, r: 4, z: 40, style: 'dark' },
+        // over the header and the week strip, clear of the prompt card (the proof); the badge in open field,
+        // under the phone, never on the extended FAB (Android keeps it on the right in Arabic too)
+        { type: 'lift', screen: 'insights', box: 'streak', w: 440, x: 330, y: 140, r: -5, z: 31 },
+        { type: 'badge', text: 'خاص افتراضيًا', icon: 'lock', x: 660, y: 1640, r: -3, z: 40, style: 'dark' },
       ],
     },
     {

@@ -63,8 +63,8 @@ async function sidebars(kit) {
     }
     if (d.user) {
       const [name, plan = '', initials = name.split(' ').map((w) => w[0]).join('').slice(0, 2)] = d.user.split('|');
-      side.insertAdjacentHTML('beforeend', `<div class="side-user"><div class="avatar s">${esc(initials)}</div>`
-        + `<div class="who"><b>${esc(name)}</b><small>${esc(plan)}</small></div>${ico('more')}</div>`);
+      side.insertAdjacentHTML('beforeend', `<div class="side-user"><div class="avatar s" translate="no">${esc(initials)}</div>`
+        + `<div class="who"><b translate="no">${esc(name)}</b><small>${esc(plan)}</small></div>${ico('more')}</div>`);
     }
     // the phone layout: a top bar with the logo, search, avatar and a menu button (hidden on desktop)
     const app = side.closest('.app') || document.body;
@@ -77,10 +77,10 @@ function topbars() {
   for (const bar of document.querySelectorAll('.topbar')) {
     const d = bar.dataset;
     const head = `<div class="tb-title">${d.title ? `<h1>${esc(d.title)}</h1>` : ''}${d.subtitle ? `<small>${esc(d.subtitle)}</small>` : ''}</div>`;
-    const search = d.search ? `<div class="tb-search">${ico('search')}<span>${esc(d.search)}</span><kbd>⌘K</kbd></div>` : '';
+    const search = d.search ? `<div class="tb-search">${ico('search')}<span>${esc(d.search)}</span><kbd translate="no">⌘K</kbd></div>` : '';
     bar.insertAdjacentHTML('afterbegin', `${head}<span class="grow"></span>${search}`);
     const acts = parts(d.actions).map((a) => `<button class="ibtn">${ico(a)}</button>`).join('');
-    bar.insertAdjacentHTML('beforeend', `${acts}${d.avatar ? `<div class="avatar s">${esc(d.avatar)}</div>` : ''}`);
+    bar.insertAdjacentHTML('beforeend', `${acts}${d.avatar ? `<div class="avatar s" translate="no">${esc(d.avatar)}</div>` : ''}`);
   }
 }
 

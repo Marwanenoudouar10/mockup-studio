@@ -25,7 +25,9 @@ export async function buildElements(stage, ctx) {
       || { name, missing: true, platform, w: 1320, h: 2868 },
   };
   const load = async (list) => {
-    const wanted = list.filter((e) => e.screen).map((e) => ({ name: e.screen, platform: platformOf(e, ctx) }));
+    // a lift by box and a tile cut from a box need the screen's boxes (a live screen measures them on demand)
+    const wanted = list.filter((e) => e.screen).map((e) => ({ name: e.screen, platform: platformOf(e, ctx),
+      boxes: (e.type === 'lift' && !!e.box) || (e.type === 'tile' && !!e.from) }));
     for (const [k, v] of await preloadScreens(wanted, ctx)) screens.set(k, v);
   };
   const draw = (e) => {

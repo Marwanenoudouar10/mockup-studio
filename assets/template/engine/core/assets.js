@@ -1,13 +1,16 @@
 // Screens by NAME -> files on disk, with the fallback chain
 //   raw/<platform>/<locale>/<name>.png -> raw/<platform>/<name>.png -> the other platform (same two steps)
 // plus the optional <name>.boxes.json next to the file that was found. Also inline SVG + image waits.
-// The lookup reads ONE listing of raw/ (GET raw/index.json, served by the project server and Store Studio)
+// The lookup reads ONE listing of raw/ (GET raw/index.json, served by the project server and Mockup Studio)
 // instead of probing every candidate with HEAD requests; any other server falls back to probing.
 // A non-default locale that falls back to the default-language capture is an issue (an English screen
 // under a Spanish headline): the render log and validate report it.
+// An editable project (screens.mode 'live', core/live.js) draws a screen that has a page in screens/ live
+// instead; a name with no page (a real capture in raw/) still comes from raw/.
 import { PLATFORMS } from '../../scripts/lib/stores.js';
 import { at } from './root.js';
 import { issue } from './issues.js';
+import { liveMode, liveScreen, liveBoxes } from './live.js';
 
 const EXT = ['png', 'jpg', 'jpeg', 'webp'];
 const heads = new Map();
@@ -66,10 +69,20 @@ async function loadBoxes(rel) {
   }
 }
 
-// -> { name, url, platform, w, h, boxes, fallback, missing }
-export function resolveScreen(name, ctx) {
+// -> { name, url, platform, w, h, boxes, fallback, missing } (+ live, page, css, dpr for a live screen)
+// ctx.boxes: the caller needs the screen's named boxes (a lift by box, a tile with from): a live screen measures
+// them only then (a hidden frame of its own), so a phone alone costs one frame
+export async function resolveScreen(name, ctx) {
+  const s = await screenOf(name, ctx);
+  if (s.live && ctx.boxes) await liveBoxes(s, ctx);
+  return s;
+}
+
+function screenOf(name, ctx) {
   const key = `${name}|${ctx.platform}|${ctx.locale}`;
   if (!screens.has(key)) screens.set(key, (async () => {
+    const live = liveMode() ? await liveScreen(String(name), ctx) : null;
+    if (live) return live;
     const hit = await find(String(name), ctx);
     const cap = (PLATFORMS[ctx.platform] || PLATFORMS.ios).capture;
     if (!hit) {
@@ -89,12 +102,12 @@ export function resolveScreen(name, ctx) {
   return screens.get(key);
 }
 
-// wanted: [{ name, platform }] -> Map('name|platform' -> screen)
+// wanted: [{ name, platform, boxes }] -> Map('name|platform' -> screen)
 export async function preloadScreens(wanted, ctx) {
   const keys = [...new Set(wanted.map((w) => `${w.name}|${w.platform}`))];
   const found = await Promise.all(keys.map((k) => {
     const [name, platform] = k.split('|');
-    return resolveScreen(name, { ...ctx, platform });
+    return resolveScreen(name, { ...ctx, platform, boxes: wanted.some((w) => `${w.name}|${w.platform}` === k && w.boxes) });
   }));
   return new Map(keys.map((k, i) => [k, found[i]]));
 }

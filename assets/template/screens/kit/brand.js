@@ -6,7 +6,7 @@
 // Cascade: kit defaults (tokens.css) < brand tokens (inserted right after kit.css) < screens/app.css,
 // so app.css only holds what is specific to this app (and deliberate overrides).
 // Also fills [data-brand="name"] (or any other top-level token key) with the token's text.
-import { kitVars, fontFiles } from '/scripts/lib/tokens.js';
+import { kitVars, fontFiles } from '../../scripts/lib/tokens.js';
 
 function addSheet(href) {
   return new Promise((resolve) => {

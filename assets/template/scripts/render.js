@@ -1,16 +1,20 @@
 // Renders the store images: final/<locale>/<store>/01.png ... (24-bit RGB, no alpha).
 //   node scripts/render.js [--store appstore,og] [--locale en] [--panel 2] [--out final] [--config file] [--scale 2|3] [--strip]
+//     [--screens raster|live] [--edits 0]
 // Each target renders its own panels (same space, `only` filter) numbered 01, 02 ... in config order.
 // --panel N is the CONFIG panel number (its position in `panels`, as in layout.json), not the image number of
-//   a target: on og, whose one image is panel 4, use --panel 4 (a note says so when N is not on the target).
+//   a target: a one-image target such as og shows one panel (panel 6 in the demo), so use --panel 6 there (a
+//   note says so when N is not on the target).
 // Another --config without --out writes to out/qa/<config name>/, never into final/.
 // Panorama stores render ONE strip per locale and clip it into the images. --strip also writes the uncut strip
 //   to out/qa/strip/<locale>-<store>.png, to judge the panorama as one composition (bridges, the field, the
-//   thread across the seams); the overview sheet adds gaps, the product page shows each image alone.
+//   thread across the seams); the overview sheet adds gaps, the product page shows each image alone. A store
+//   that is not a panorama has no strip: --strip prints a note there and renders the images as usual.
 // --scale N: the hi-res PORTFOLIO export, every image at N x its store size (deviceScaleFactor N) into
 //   final/portfolio/<locale>/<store>/ (never mixed with the upload folders).
 // Every page runs the sharpness and layout checks; findings go to the log and to <out>/render-report.json
-// ({ scale, upscale, ui, issues } per file, read by validate). Untranslated copy is printed per locale.
+// ({ scale, upscale, ui, issues } per file, read by validate). Untranslated copy is printed per locale. A lifted
+// card that dissolves into its field is measured on the PNG itself (scripts/lib/lift-edge.js).
 import fs from 'node:fs';
 import path from 'node:path';
 import { pad2, panelsFor } from './lib/config.js';
@@ -20,6 +24,7 @@ import { ROOT, parseArgs, list, loadConfig, outDir, rel, kb, isMain, fail } from
 import { openSession, capture } from './lib/session.js';
 import { recordQuality } from './lib/report.js';
 import { textFindings } from './lib/locales.js';
+import { liftEdgeIssues } from './lib/lift-edge.js';
 
 export function pick(cfg, flags) {
   const stores = list(flags.store);
@@ -50,6 +55,10 @@ export function printFile(file, buf, ms, warnings = []) {
   console.log(`  ${rel(file).padEnd(44)} ${dims.padEnd(10)} ${kind.padEnd(12)} ${kb(buf.length).padStart(8)}  ${(ms / 1000).toFixed(1)}s`);
   for (const w of warnings) console.log(`      warn: ${w}`);
 }
+
+// --screens raster|live (one run in the other project type) and --edits 0 (without edits.json) reach the pages
+export const pageFlags = (flags) => `${flags.screens && flags.screens !== true ? `&screens=${encodeURIComponent(flags.screens)}` : ''}`
+  + `${flags.edits === '0' ? '&edits=0' : ''}`;
 
 const NOTED = new Set(); // a --panel note is printed once per store, not once per locale
 
@@ -106,16 +115,23 @@ export async function runRender(session, cfg, cfgRel, flags = {}) {
       if (flags.panel) fs.mkdirSync(dir, { recursive: true });
       else cleanDir(dir);
       const [W, H] = st.size;
-      const base = `engine/panel.html?config=${encodeURIComponent(cfgRel)}&store=${st.id}&locale=${locale}`;
+      const base = `engine/panel.html?config=${encodeURIComponent(cfgRel)}&store=${st.id}&locale=${locale}${pageFlags(flags)}`;
       const save = (b, p, ms, warn, info, slice = 0) => {
         const file = path.join(dir, `${pad2(p.n)}.png`);
         const png = flattenPng(b);
         fs.writeFileSync(file, png);
-        printFile(file, png, ms, warn);
+        // a lifted card that dissolves into its field, read on these pixels (engine/core/edges.js gives the points)
+        const lifts = ((info && info.lifts) || []).filter((l) => l.slice === (st.panorama ? slice : 0));
+        const edges = liftEdgeIssues(png, lifts, { scale, x0: st.panorama ? slice * W : 0 });
+        printFile(file, png, ms, [...warn, ...edges]);
         const ui = info && info.ui ? !!info.ui[slice] : null;
-        report[rel(file)] = { scale, f: info && info.f, upscale: (info && info.upscale) || [], ui, issues: issuesFor(info, slice) };
+        report[rel(file)] = { scale, f: info && info.f, upscale: (info && info.upscale) || [], ui, issues: [...issuesFor(info, slice), ...edges] };
         count++;
       };
+      if (flags.strip && !st.panorama && !NOTED.has(`${st.id}|strip`)) {
+        NOTED.add(`${st.id}|strip`);
+        console.log(`  note: ${st.id} is not a panorama: --strip skipped (a panorama store: { id: '${st.id}', panorama: true }, e.g. examples/panorama.config.js)`);
+      }
       if (st.panorama) {
         const t0 = Date.now();
         const all = panelsFor(cfg, st);

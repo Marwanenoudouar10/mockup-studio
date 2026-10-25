@@ -24,7 +24,9 @@ A config can mix phone stores and wide targets (the demo does). With no phone st
 wide by default (`examples/web.config.js`).
 
 ## Mode A: capture a live site
-The same Chrome captures the page; no screenshot tool needed.
+The same Chrome captures the page; no screenshot tool needed. Captures are pictures: a site-only project
+is a screenshots project (`screens: { mode: 'raster' }`); in an editable project the captures sit next to
+the live mock screens, drawn from `raw/` (`editable.md`).
 ```bash
 npm run capture -- --url https://example.com --name home            # raw/web/home.png, 1440x900 @2x = 2880x1800
 npm run capture -- --url https://example.com/pricing --name pricing --full   # + raw/web/pricing-full.png
@@ -51,7 +53,9 @@ npm run capture -- --url https://example.com --name home --box "intro=body p"   
 - Read every capture: no half-loaded images, no hover states, no personal data.
 
 ## Mode B: build the pages with the web kit
-Desktop pages live in `screens/web/<name>.html` and are captured at 1440x900 @2x into `raw/web/`.
+Desktop pages live in `screens/web/<name>.html`. In an editable project the browser, laptop and monitor
+frames draw them live at 1440x900 CSS px (sharp at any size, editable in Mockup Studio, real layers in
+the SVG export); `npm run screens` also captures them at 1440x900 @2x into `raw/web/`.
 ```html
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="kit-sizes" content="web,ipad,ios">      <!-- also capture at tablet and phone width -->
@@ -126,7 +130,8 @@ The same page on a laptop, a tablet and a phone: one stage, three captures of on
 npm run screens -- --platform web --screen journal    # kit-sizes web,ipad,ios -> raw/web, raw/ipad, raw/ios
 npm run capture -- --url https://example.com --name home --mobile --tablet   # or a live site
 ```
-`--platform web` captures each page at every size its `kit-sizes` lists. Read the phone capture of a
+`--platform web` captures each page at every size its `kit-sizes` lists; an editable project draws the
+same page live at each of those sizes, with no capture needed. Read the phone capture of a
 dashboard in particular: at 640 px the grid becomes two columns (KPI tiles side by side, every other card
 full width), and cards marked `hide-phone` drop out.
 ```js
@@ -152,5 +157,6 @@ Small devices on a 1200 px image lose fine text in the downscale; that is fine f
 ```bash
 npm run render -- --store og,producthunt --out out/qa/web       # wide targets only, while iterating
 npm run render -- --config examples/web.config.js --out out/qa/web-only
+npm run vector -- --store og                                    # editable: og as layered SVG + PDF
 npm run export                                                  # everything, then read every image
 ```

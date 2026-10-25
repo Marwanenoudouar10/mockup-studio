@@ -8,8 +8,10 @@ import { target, normWatermark } from '../scripts/lib/config.js';
 import { q, loadConfig, ready, fail, plain } from './core/boot.js';
 import { applyColors, loadFonts } from './core/theme.js';
 import { waitImages } from './core/assets.js';
+import { waitLive } from './core/live.js';
 import { upscaleCheck } from './core/quality.js';
 import { layoutCheck } from './core/checks.js';
+import { liftSamples } from './core/edges.js';
 import { accentClash } from './core/clash.js';
 import { issue, issues } from './core/issues.js';
 import { makeCanvas } from './layout/canvas.js';
@@ -100,17 +102,21 @@ async function main() {
     ? await composeWide(t, panels[0], { icon })
     : await portrait(t, panels, strip, icon);
   await waitImages();
+  await waitLive(); // live screens (editable projects): every page in its frame ready
   await document.fonts.ready;
   const upscale = upscaleCheck(cv);
   const { ui } = layoutCheck(cv);
   if (t.store.space !== 'landscape') accentClash(cv);
   // ui and issues per image (a panorama strip: one entry per slice); render.js writes them to render-report.json
   window.__info = { k: +cv.k.toFixed(4), DW: Math.round(cv.designW), DH: Math.round(cv.DH), tall: cv.tall, mode,
-    top: Math.round(fr.top), f: +fr.f.toFixed(3), upscale, ui, issues: issues() };
-  // Store Studio (?edit=1): element boxes to the workspace; a wide stack layout reflows when its top element moves
+    top: Math.round(fr.top), f: +fr.f.toFixed(3), upscale, ui, issues: issues(), lifts: liftSamples(cv) };
+  // Mockup Studio (?edit=1): element boxes to the workspace; a wide stack layout reflows when its top element moves
   startBridge({ cv, kind: 'panel', store: t.store.id, panels: panels.map((p) => ({ id: p.id, n: p.n })),
     copies: blocks.map((b) => ({ panel: panels[b.slice].id, node: b.copy })), reflow: mode === 'stack' });
   ready();
 }
+
+// npm run vector (scripts/vector.js): this page as a layered SVG (engine/vector/), loaded only when asked
+window.__vector = (o) => import('./vector/index.js').then((m) => m.toSvg(o));
 
 main().catch(fail);

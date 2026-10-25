@@ -1,8 +1,15 @@
 // Brand colours -> CSS variables, fontsource stylesheets -> loaded faces (before anything is measured).
+// --accent-on-paper: the accent deepened to 3:1 on paper when the accent itself is too pale to read there
+// (scripts/brand/lib/color.js accentOnPaper); the light field presets draw the logo's accent shapes in it
+// (engine/styles/field.css), as the brand board's paper lockup does.
 import { at } from './root.js';
+import { accentOnPaper } from '../../scripts/brand/lib/color.js';
 
 export function applyColors(colors, root = document.documentElement) {
   for (const [k, v] of Object.entries(colors || {})) root.style.setProperty(`--${k}`, v);
+  let lit = null;
+  try { lit = colors && colors.accent && colors.paper ? accentOnPaper(colors) : null; } catch { /* not a hex colour */ }
+  if (lit) root.style.setProperty('--accent-on-paper', lit); else root.style.removeProperty('--accent-on-paper');
 }
 
 function addSheet(href) {

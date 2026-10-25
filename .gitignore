@@ -6,11 +6,13 @@ assets/template/final/
 assets/template/out/
 # the demo's captures: generated from assets/template/screens/ by `npm run screens` (about 18 MB of PNGs)
 assets/template/raw/
-# moves and notes made in Store Studio while testing the template (a project keeps its own)
+# moves, notes and edits made in Mockup Studio while testing the template (a project keeps its own)
 assets/template/layout.json
 assets/template/notes.json
+assets/template/edits.json
 assets/template/examples/*.layout.json
-# the workspace's list of local project paths (older versions kept it here; it now lives in ~/.config/store-studio/)
+assets/template/examples/*.edits.json
+# the workspace's list of local project paths (older versions kept it here; it now lives in ~/.config/mockup-studio/)
 workspace/workspace.json
 # login files for npm run capture
 cookies*.json

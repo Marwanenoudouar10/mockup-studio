@@ -1,4 +1,4 @@
-// layout.json: position overrides made in Store Studio (workspace/) by dragging, or written by hand.
+// layout.json: position overrides made in Mockup Studio (workspace/) by dragging, or written by hand.
 // Applied right after the config is resolved for one target, by the live pages and by every render,
 // so the final PNGs match what the workspace shows. Pure ESM (imported by Node scripts and pages).
 //

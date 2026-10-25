@@ -1,9 +1,9 @@
 {
-  "name": "store-studio",
+  "name": "mockup-studio-workspace",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Store Studio: a local workspace that shows every store-screenshots project live, for preview and drag.",
+  "description": "Mockup Studio: a local workspace that shows every mockup-studio project live, for preview, drag and editing.",
   "license": "MIT",
   "engines": {
     "node": ">=18"

@@ -1,6 +1,7 @@
 // Charts for mock screens, drawn as inline SVG at the box's real size (so text and strokes stay crisp).
 //   <div class="chart" data-chart="bars" data-values="3,4,6,5" data-labels="M,T,W,T" style="height:150px"></div>
-// Labels and notes go through the screen's strings.json (kit.t), e.g. "M,T,W": "L,M,X".
+// Labels and notes go through the screen's strings.json (kit.t): data-labels is looked up as ONE key first
+// ("M,T,W,T,F": "L,M,X,J,V"), else each label on its own ("Mon": "Lun"); data-note is one key.
 // Types and their attributes:
 //   bars   data-values data-labels? data-colors? (one colour or one per bar) data-hl? (index, the rest fade) data-note? (bubble on hl)
 //          data-min? / data-max? (value range; a min above 0 makes small differences visible)
@@ -35,6 +36,14 @@ function strs(s) {
   return out;
 }
 const f1 = (n) => Number(n.toFixed(1));
+// the labels in this language: the whole string when strings.json has it, else label by label (an empty piece
+// stays empty: "Mon,,,Thu" is a sparse axis)
+function labelsOf(n, kit) {
+  const raw = n.dataset.labels || '';
+  if (!raw) return [];
+  if (kit.has && !kit.has(raw)) return strs(raw).map((l) => (l ? kit.t(l) : ''));
+  return strs(kit.t(raw));
+}
 let uid = 0;
 
 function smooth(pts) {
@@ -51,7 +60,7 @@ function smooth(pts) {
 
 function bars(n, w, h, kit) {
   const v = nums(n.dataset.values);
-  const labels = strs(kit.t(n.dataset.labels || ''));
+  const labels = labelsOf(n, kit);
   const note = n.dataset.note ? kit.t(n.dataset.note) : '';
   const colors = strs(n.dataset.colors);
   const own = colors.length > 1 && colors.length >= v.length; // one colour per bar: the colours carry the highlight
@@ -106,7 +115,7 @@ function zones(n, w, lo, hi, Y, id) {
 function line(n, w, h, kit, spark = false) {
   const v = nums(n.dataset.values);
   const cmp = nums(n.dataset.compare);
-  const labels = spark ? [] : strs(kit.t(n.dataset.labels || ''));
+  const labels = spark ? [] : labelsOf(n, kit);
   const color = n.dataset.color || 'var(--tint)';
   const all = [...v, ...cmp];
   const lo = n.dataset.min !== undefined ? Number(n.dataset.min) : Math.min(...all);
@@ -143,6 +152,7 @@ function line(n, w, h, kit, spark = false) {
   const fs = kit.family === 'android' ? 12 : 12.5;
   const at = nums(n.dataset.labelAt);
   labels.forEach((t, i) => {
+    if (!t) return; // a sparse axis ("Mon,,,Thu"): no empty <text> (data-label-at places fewer labels instead)
     const x = at.length === labels.length ? X(Math.min(at[i], v.length - 1), v.length) : X(i, labels.length);
     const anchor = labels.length > 1 && i === 0 ? 'start' : labels.length > 1 && i === labels.length - 1 ? 'end' : 'middle';
     const ax = anchor === 'start' ? Math.max(0, x - pad) : anchor === 'end' ? Math.min(w, x + pad) : x;

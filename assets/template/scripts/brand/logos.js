@@ -11,6 +11,7 @@ import { readBrief, sampleCopy } from './lib/brief.js';
 import { makeIcon, svgProblems, titleOf } from './lib/icon.js';
 import { writeJson, OUT } from './lib/tokens-io.js';
 import { shootBoard } from './lib/shoot.js';
+import { accentOnPaper, contrast } from './lib/color.js';
 import { openSession } from '../lib/session.js';
 
 const val = (v) => (v === undefined || v === true ? null : String(v));
@@ -52,5 +53,8 @@ export async function run(flags, { cfg, tokens, rel }) {
   } finally {
     await session.close();
   }
+  const c = cfg.brand.colors;
+  const onPaper = accentOnPaper(c);
+  if (onPaper) console.log(`  note: the accent ${c.accent} is ${contrast(c.accent, c.paper).toFixed(2)}:1 on paper: the "On paper" lockups draw its shapes in ${onPaper} (3:1)`);
   console.log(`\n  next: look at ${out}/logo-board.png, then  npm run brand -- apply --logo <id>\n`);
 }

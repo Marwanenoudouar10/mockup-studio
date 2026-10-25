@@ -1,21 +1,25 @@
-// Store Studio end to end, on a real project (default: the template's Brimpage demo), with ONE Chrome at a time
-// and renders run one after another:
-//   node test/e2e.js [--project ../assets/template]
+// Mockup Studio end to end, with ONE Chrome at a time and renders run one after another:
+//   node test/e2e.js                      on a temporary copy of the template's Brimpage demo (an editable project)
+//   node test/e2e.js --project <path>     on that project (its layout.json, notes.json, edits.json are put back)
 // 1 baseline render  2 drag a lift -> layout.json + the frame moved, undo / redo  3 screenshot of the workspace
 // 4 an outside edit of layout.json reloads the frame live  5 drop a screen onto an image (add), undo
-// 6 a note for Claude  7 npm run render shows the move  8 Reset to config. The project's own layout.json and
-// notes.json are put back exactly as they were.
+// 6 a note for Claude  7 npm run render shows the move  8 Reset to config
+// 9-17 (editable projects, test/e2e-edit.js): editing inside a screen and the headlines, through to the render
+// and the SVG export. The server runs on a free port with its own temporary project list (never port 4400).
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { start } from '../server/index.js';
-import { projectTools, until } from './lib/project.js';
+import { projectTools, tempCopy, until } from './lib/project.js';
+import { editSteps } from './e2e-edit.js';
 import { framesReady, find, point, rectInFrame, drag, sel, clickButton, waitFrameReload, frameSrc } from './lib/page.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const arg = (k, d) => { const i = process.argv.indexOf(`--${k}`); return i > 0 ? process.argv[i + 1] : d; };
-const root = path.resolve(process.cwd(), arg('project', path.join(HERE, '..', '..', 'assets', 'template')));
+const TEMPLATE = path.join(HERE, '..', '..', 'assets', 'template');
+const copy = arg('project') ? null : tempCopy(TEMPLATE);
+const root = copy ? copy.root : path.resolve(process.cwd(), arg('project'));
 const T = projectTools(root);
 const QA = 'out/qa/workspace';
 const SHOT = `${QA}/workspace.png`;
@@ -43,7 +47,7 @@ const key = async (page, combo) => {
 };
 
 async function main() {
-  const state = path.join(os.tmpdir(), `store-studio-test-${process.pid}.json`);
+  const state = path.join(os.tmpdir(), `mockup-studio-test-${process.pid}.json`);
   T.backup();
   let app = null;
   let s = null;
@@ -53,7 +57,7 @@ async function main() {
     T.clean(QA);
     T.render(`${QA}/before`, ['--store', 'appstore', '--panel', '1', '--locale', 'en']);
 
-    console.log('2. Store Studio: drag a lift');
+    console.log('2. Mockup Studio: drag a lift');
     app = await start([root, '--port', '0', '--state', state], { log: () => {} });
     const bad = await fetch(`${app.url}api/layout`, { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: 'http://evil.example' }, body: '{}' });
     ok(bad.status === 403, 'a POST from another origin is refused (403)');
@@ -165,14 +169,21 @@ async function main() {
     const rr = await rectInFrame(s.page, lift.key, lift.id);
     ok(rr.left === r0.left && rr.top === r0.top, 'Reset to config: entry removed, the lift is back where the config puts it');
     ok(s.errors.length === 0, 'no page errors');
-    console.log(`\n  ${passed} checks passed. Screenshot: ${path.join(path.relative(process.cwd(), root) || '.', SHOT)}\n`);
-    T.clean(`${QA}/before`);
-    T.clean(`${QA}/after`);
+    await s.browser.close();
+    s = null;
+    const live = await import(`${pathToFileURL(path.join(root, 'studio.config.js')).href}?t=${Date.now()}`).then((m) => m.default.screens && m.default.screens.mode === 'live');
+    if (live) await editSteps({ app, T, open, ok, key, QA, slug: app.registry.live()[0].slug });
+    else console.log('9-17. screen editing: skipped (a screenshots project; the demo is editable)');
+    const shots = copy ? path.join(TEMPLATE, QA) : path.join(root, QA);
+    if (copy) for (const f of ['workspace.png', 'editing.png']) if (fs.existsSync(path.join(root, QA, f))) { fs.mkdirSync(shots, { recursive: true }); fs.copyFileSync(path.join(root, QA, f), path.join(shots, f)); }
+    console.log(`\n  ${passed} checks passed. Screenshots: ${path.relative(process.cwd(), shots) || '.'}/{workspace,editing}.png\n`);
+    for (const d of ['before', 'after', 'edited', 'vec']) T.clean(`${QA}/${d}`);
   } finally {
     if (s) await s.browser.close().catch(() => {});
     if (app) await app.close();
     T.restore();
     fs.rmSync(state, { force: true });
+    if (copy) copy.rm();
   }
 }
 

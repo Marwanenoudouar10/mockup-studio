@@ -2,9 +2,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { normalize } from './config.js';
+import { normalize, normScreens } from './config.js';
 import { withTokens } from './tokens.js';
 import { layoutFile, parseLayout } from './layout.js';
+import { editsFile, parseEdits } from './edits.js';
+import { applyCopy } from './edit-copy.js';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
@@ -44,10 +46,27 @@ export async function loadConfig(flags, { draft = false, noPanels = draft } = {}
   const relPath = path.relative(ROOT, abs).split(path.sep).join('/');
   const cfg = normalize(merged);
   cfg.overrides = readLayout(relPath);
+  cfg.configRel = relPath;
+  // --screens raster|live: one run in the other project type (parity checks, debugging); --edits 0: without edits
+  if (flags.screens && flags.screens !== true) cfg.screens.mode = normScreens({ mode: String(flags.screens) }).mode;
+  cfg.edits = flags.edits === '0' ? null : readEdits(relPath);
+  for (const n of applyCopy(cfg, cfg.edits)) console.warn(`  warn: ${n}`);
   return { cfg, raw: mod.default, tokens, rel: relPath };
 }
 
-// layout.json next to the config (scripts/lib/layout.js): position overrides from Store Studio, or null
+// edits.json next to the config (scripts/lib/edits.js): copy edits are applied above, screen edits by the kit
+export function readEdits(cfgRel) {
+  const file = path.join(ROOT, editsFile(cfgRel));
+  if (!fs.existsSync(file)) return null;
+  try {
+    return parseEdits(fs.readFileSync(file, 'utf8'));
+  } catch (err) {
+    console.warn(`  warn: ${editsFile(cfgRel)} is not valid JSON (${err.message}): ignored`);
+    return null;
+  }
+}
+
+// layout.json next to the config (scripts/lib/layout.js): position overrides from Mockup Studio, or null
 export function readLayout(cfgRel) {
   const file = path.join(ROOT, layoutFile(cfgRel));
   if (!fs.existsSync(file)) return null;

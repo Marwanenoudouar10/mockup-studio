@@ -132,10 +132,11 @@ looks wrong. Add the project's own lessons to the "Project notes" of its `CLAUDE
   carries it to validate.
 
 **Tests against a live project**
-- **Mistake:** the workspace test was run on a project the person had open in Store Studio. Both wrote
+- **Mistake:** the workspace test was run on a project the person had open in Mockup Studio. Both wrote
   `layout.json`, and the test restores its own backup of that file at the end, which drops any move the
   person made during the run.
-- **Rule:** test on a copy of the project, never on one open in the workspace.
+- **Rule:** test on a copy of the project, never on one open in the workspace (the same for `edits.json`).
+  A Mockup Studio the person started stays running: checks start their own on another port.
 
 **A test that read the disk too early**
 - **Mistake:** the workspace test pressed Ctrl+Z as soon as `layout.json` changed on disk, but the page
@@ -145,6 +146,32 @@ looks wrong. Add the project's own lessons to the "Project notes" of its `CLAUDE
   Compare redrawn positions with 1 px of tolerance: a redo redraws from the stored (rounded) numbers.
   Read a dragged element only once it stops moving (two equal reads): the frame paints the drag's last
   step after the pointer, so an early read failed the redo check on a busy machine.
+
+## Editable projects and vector files
+**An edit that outlived its element**
+- **Mistake:** a screen text was rewritten in the HTML while `edits.json` still held the person's edit for
+  it: with an explicit id the old edit kept winning, so the change "did nothing"; with an automatic id the
+  edit could have landed on whatever element took its place.
+- **Rule:** read `edits.json` before changing a screen; fold an edit into the HTML and delete it when you
+  rewrite its element. Edits carry a fingerprint (`of`), so a changed element gets its edit skipped with a
+  warning, never applied to the wrong one; give texts people edit a `data-id`.
+
+**What Figma drops**
+- **Mistake:** the usual HTML-to-SVG shortcut wraps the page in `<foreignObject>`: a browser draws it,
+  but Figma drops it, so the file arrives without its editable layers.
+- **Rule:** the SVG is plain SVG only (validate fails a `<foreignObject>`); text as `<text>`, fonts embedded,
+  effects Figma has no equal for (grain, backdrop blur) left out and listed per file (`editable.md`).
+
+**A shadow cast by the text**
+- **Mistake:** a CSS box shadow on a box with no fill was written as an SVG filter on the box's group, so
+  the text inside cast the shadow too (a doubled "Month" on the feature graphic).
+- **Rule:** a shadow of a box without a fill is its own shape, clipped to outside the box, as CSS draws it.
+  Compare every SVG with its PNG (the repo's vector test does it with a blurred pixel diff).
+
+**A setup line that did nothing in zsh**
+- **Mistake:** `rm -rf ... examples/*.edits.json` in a setup block: in zsh a glob that matches nothing
+  aborts the whole command, so none of the listed leftovers were removed.
+- **Rule:** in command blocks people paste, remove optional files with `find ... -delete`, not a glob.
 
 ## A set that passed every check, then a review
 These come from a dark finance concept set: every size exact, validate 0 problems, and still a list of
@@ -259,3 +286,10 @@ is `design.md` ("The set checklist"); the composition rules are in `layouts.md`.
 | an avatar stack reads "TI M PI" | (older kit) a fixed -10px overlap | update: the overlap scales with the size |
 | one screen's CSS restyles every other screen | every `css/<part>.css` loads on every screen | prefix each rule with the screen's own class |
 | the overview sheet's background reads lilac | (older default) a fixed cool grey | update (the paper a step darker), or `sheet.background` |
+| `edits.json: home › ... no longer matches (...): skipped` | the screen changed under an automatic id | fold the edit into the HTML, or redo it in Mockup Studio; `data-id` on edited texts |
+| a headline or screen text changed in the files does nothing | `edits.json` overrides it | `npm run bake` (copy), or fold the edit in and delete it (screens) |
+| `live screen "home" (...): not ready after 30 s` | the page never set `window.__ready`, or a script error | open the URL in the message; fix the page |
+| a double-click on a phone in Mockup Studio only explains | a screenshots project, or a screen that is a capture | as designed: editing needs `screens.mode: 'live'` and a page in `screens/` |
+| `... .svg: older than the PNG of the same image` | vector files from before the last change | `npm run vector` (or `npm run export -- --vector`) |
+| Figma shows a text in another font | Figma lacks that family (it ignores fonts embedded in an SVG) | install the font on the computer, or `npm run vector -- --outline-text` |
+| a glass tab bar looks see-through in the SVG | backdrop blur has no SVG or Figma equivalent | expected (`editable.md`, "Limits"); the PDF keeps it |

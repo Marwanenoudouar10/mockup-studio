@@ -1,8 +1,10 @@
 // The screen-space layer over the canvas: hover outline, the selected element's blue box with resize and
 // rotate handles, its live "x · y · r" tooltip, the selected image outline, the drop target and note pins.
+// In screen mode the entered screen's marks instead (ui/screen/marks.js).
 // Redrawn (once per animation frame at most) whenever the view, the boxes or the selection change.
 import { state, frames, selected, on } from '../state.js';
 import { screenRect, frameScreenRect } from './geometry.js';
+import { drawScreen, drawCopyTyping } from '../screen/marks.js';
 
 let layer;
 let queued = false;
@@ -16,7 +18,7 @@ export function tipText(el) {
   return `x ${fmt(v.x)} · y ${fmt(v.y)} · r ${fmt(v.r)}°`;
 }
 
-function box(cls, r, inner = '') {
+export function box(cls, r, inner = '') {
   const d = document.createElement('div');
   d.className = cls;
   Object.assign(d.style, {
@@ -32,6 +34,13 @@ function draw() {
   layer.textContent = '';
   const { frame, el } = selected();
   const h = state.hover;
+  if (state.screen) drawScreen(layer, box);
+  else if (state.copyTyping) drawCopyTyping(layer, box);
+  else drawSelection(frame, el, h);
+  drawRest();
+}
+
+function drawSelection(frame, el, h) {
   if (h && h.frame) {
     const f = frames.get(h.frame);
     const hel = f && f.boxes && f.boxes.elements.find((e) => e.panel === h.panel && String(e.id) === String(h.id));
@@ -59,6 +68,9 @@ function draw() {
       layer.appendChild(tip);
     }
   }
+}
+
+function drawRest() {
   if (ui.ghost) {
     const g = ui.ghost;
     const r = frameScreenRect(g.frame);
@@ -87,5 +99,5 @@ export function redraw() {
 
 export function initOverlay(els) {
   layer = els.overlay;
-  for (const ev of ['view', 'boxes', 'select', 'rows', 'hover', 'notes', 'resized']) on(ev, redraw);
+  for (const ev of ['view', 'boxes', 'select', 'rows', 'hover', 'notes', 'resized', 'screen', 'screen-layers', 'screen-sel', 'screen-hover']) on(ev, redraw);
 }

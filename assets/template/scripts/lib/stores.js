@@ -107,6 +107,15 @@ export const ASSETS = {
   'playstore-icon': { label: 'Google Play icon', size: [512, 512], formats: ['png'], alpha: true, needsAlpha: true, maxBytes: 1024 * 1024 },
 };
 
+// The store icons a config needs (scripts/icons.js writes them, validate expects them, stale.js removes the
+// others): App Store 1024 for an App Store target (iPhone, iPad, Mac App Store), Play 512 for a Google Play
+// target or the feature graphic. A web-only project needs none.
+export const ICONS = [
+  { file: 'appstore-1024.png', key: 'appstore-icon', size: 1024, alpha: false, for: (id) => /^(appstore|ipad|mac-appstore)/.test(id) },
+  { file: 'playstore-512.png', key: 'playstore-icon', size: 512, alpha: true, for: (id) => /^playstore/.test(id) },
+];
+export const iconsFor = (cfg) => ICONS.filter((i) => cfg.stores.some((s) => i.for(s.id)) || (i.key === 'playstore-icon' && !!cfg.feature));
+
 // How screens are captured for each platform (scripts/screens.js, scripts/capture.js) and which frame suits them.
 // css x dpr = capture size. iOS: iPhone 6.9" (440 x 956 pt @3x). Android: 360 x 800 dp @3x = 1080 x 2400.
 // web: a 1440 x 900 desktop viewport @2x = 2880 x 1800 (16:10). mac: a Mac app window, same size.

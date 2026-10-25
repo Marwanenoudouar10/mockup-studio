@@ -1,10 +1,14 @@
 // Keyboard: arrows nudge the selected element (Shift = 10), Cmd/Ctrl+Z undo, Shift+Cmd/Ctrl+Z (or Ctrl+Y)
 // redo, Delete removes an element added in the workspace, Esc deselects, Space holds the pan hand,
-// Shift+1 fit, Cmd/Ctrl+0 = 100 %, + and - zoom. Nothing fires while typing in a field.
+// Shift+1 fit, Cmd/Ctrl+0 = 100 %, + and - zoom. Enter on a device, lift or tile edits its screen (editable
+// projects), on a headline types it; in screen mode ui/screen/keys.js. Nothing fires while typing in a field.
 import { state, selected, emit } from '../state.js';
 import { fit, zoomBy } from './viewport.js';
 import { keys, select } from './pointer.js';
 import { commit, undo, redo, remove } from '../edits.js';
+import { screenKey, flushNudge } from '../screen/keys.js';
+import { enter, canEnter } from '../screen/enter.js';
+import { startCopy, bufferKey } from '../screen/text.js';
 
 let canvas;
 let nudge = null; // { frame, el, before, values, timer }
@@ -31,6 +35,7 @@ function doNudge(e) {
 
 function down(e) {
   if (typing(e)) return;
+  if (bufferKey(e)) { e.preventDefault(); return; } // an inline edit is starting: the frame gets these keys
   const mod = e.metaKey || e.ctrlKey;
   if (e.key === ' ' && !keys.space) {
     keys.space = true;
@@ -38,9 +43,16 @@ function down(e) {
     e.preventDefault();
     return;
   }
-  if (mod && (e.key === 'z' || e.key === 'Z')) { e.preventDefault(); (e.shiftKey ? redo : undo)(); return; }
-  if (mod && (e.key === 'y' || e.key === 'Y')) { e.preventDefault(); redo(); return; }
+  // a nudge still waiting to be saved is saved first, so undo takes it back
+  if (mod && (e.key === 'z' || e.key === 'Z')) { e.preventDefault(); flushNudge().then(() => (e.shiftKey ? redo : undo)()); return; }
+  if (mod && (e.key === 'y' || e.key === 'Y')) { e.preventDefault(); flushNudge().then(redo); return; }
   if (mod && e.key === '0') { e.preventDefault(); zoomBy(1 / state.view.z); return; }
+  if (state.screen && screenKey(e)) { e.preventDefault(); return; }
+  if (e.key === 'Enter' && !mod) {
+    const { frame, el } = selected();
+    if (frame && el && el.id === 'copy') { e.preventDefault(); startCopy(frame, el.panel, 'headline'); return; }
+    if (frame && el && canEnter(el)) { e.preventDefault(); enter(frame, el); return; }
+  }
   if (e.key.startsWith('Arrow') && !mod) { if (doNudge(e)) e.preventDefault(); return; }
   if (e.key === 'Escape') { select(null); return; }
   if ((e.key === 'Delete' || e.key === 'Backspace') && !mod) {

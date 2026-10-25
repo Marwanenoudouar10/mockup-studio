@@ -1,5 +1,6 @@
 // Static files: the workspace UI (ui/) and each project's root (/p/<slug>/...). Never outside the root:
-// the decoded path is resolved and must stay inside it (403 otherwise). No caching, so edits show at once.
+// the decoded path is resolved and must stay inside it (403 otherwise). No caching, so edits show at once
+// (node_modules/ excepted: font files, cached for an hour).
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -33,7 +34,7 @@ export function serveFile(req, res, root, rel) {
   if (inside.startsWith('..') || path.isAbsolute(inside)) return send(res, 403, 'forbidden');
   if (/^(cookies|headers)[^/]*\.json$/i.test(path.basename(file))) return send(res, 403, 'forbidden: login file');
   fs.stat(file, (err, st) => {
-    if ((err || !st.isFile()) && /(^|[/.])layout\.json$/.test(decoded)) { // no moves yet: empty, not a 404
+    if ((err || !st.isFile()) && /(^|[/.])(layout|edits)\.json$/.test(decoded)) { // no moves or edits yet: empty, not a 404
       res.writeHead(204, { 'Cache-Control': 'no-store' });
       return res.end();
     }
@@ -41,7 +42,8 @@ export function serveFile(req, res, root, rel) {
     res.writeHead(200, {
       'Content-Type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream',
       'Content-Length': st.size,
-      'Cache-Control': 'no-store',
+      // fonts: every live screen is its own page, so a set loads the same files many times
+      'Cache-Control': /^\/node_modules\//.test(decoded) ? 'max-age=3600' : 'no-store',
       'X-Content-Type-Options': 'nosniff',
     });
     if (req.method === 'HEAD') return res.end();
@@ -56,6 +58,29 @@ export function rawFiles(root, dir = 'raw', depth = 3) {
   if (!depth || !fs.existsSync(abs)) return [];
   return fs.readdirSync(abs, { withFileTypes: true }).filter((d) => !d.name.startsWith('.')).flatMap((d) => (d.isDirectory()
     ? rawFiles(root, `${dir}/${d.name}`, depth - 1) : [`${dir}/${d.name}`]));
+}
+
+// the mock screen pages of a project (GET /p/<slug>/screens/index.json): the live screens of an editable project
+// look pages up here (the template's scripts/lib/pages.js rules). A copy of the template's screenPages(), because
+// Mockup Studio also serves projects made from older templates.
+export function screenPages(root) {
+  const dir = path.join(root, 'screens');
+  const files = [];
+  const sizes = {};
+  if (!fs.existsSync(dir)) return { files, sizes };
+  for (const d of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (d.name.startsWith('.') || d.name === 'kit') continue;
+    if (d.isFile() && d.name.endsWith('.html')) files.push(`screens/${d.name}`);
+    if (!d.isDirectory()) continue;
+    for (const f of fs.readdirSync(path.join(dir, d.name))) {
+      if (!f.endsWith('.html') || f.startsWith('.')) continue;
+      const rel = `screens/${d.name}/${f}`;
+      files.push(rel);
+      const m = fs.readFileSync(path.join(root, rel), 'utf8').match(/<meta\s+name="kit-sizes"\s+content="([^"]*)"/);
+      if (m) sizes[rel] = m[1].split(/[\s,]+/).filter(Boolean);
+    }
+  }
+  return { files: files.sort(), sizes };
 }
 
 // the captures a project has: raw/<platform>/<name>.<ext> (top level of each platform folder)

@@ -4,6 +4,8 @@
 //   --fonts N     pair N of out/brand/fonts/fonts.json           (display + text, headline weight)
 //   --logo id     brand/logo-options/<id>.svg -> brand/logo.svg, <id>.mark.svg -> brand/mark.svg
 //                 (the old files are kept in out/brand/previous/)
+//   --logo wordmark  the quick logo when there is no logo step: the name in the display font + an accent dot, and
+//                 its initial as the symbol (lib/wordmark.js writes logo-options/wordmark*.svg, then as above)
 //   brand/icon.svg is (re)derived from brand/mark.svg with the token colours whenever it was generated
 //   by this tool (or is missing); a hand-made icon (<id>.icon.svg, or no "generated" note) is left alone:
 //   --logo <id> copies <id>.icon.svg when it exists and then derives nothing (only --icon-style / --icon-scale
@@ -15,6 +17,7 @@ import { ROOT } from '../lib/cli.js';
 import { overrides } from '../lib/tokens.js';
 import { readBrief } from './lib/brief.js';
 import { makeIcon } from './lib/icon.js';
+import { writeWordmark } from './lib/wordmark.js';
 import { TOKENS, OUT, readJson, writeJson, paletteTokens, fontTokens, mergeTokens, today } from './lib/tokens-io.js';
 
 const val = (v) => (v === undefined || v === true ? null : String(v));
@@ -91,7 +94,14 @@ export async function run(flags, { cfg, raw, tokens }) {
   writeJson(TOKENS, next);
   console.log(`apply -> ${TOKENS}   (name ${next.name})`);
   console.log(`  colours  ${next.source.palette || '(unchanged)'}   fonts  ${next.source.fonts || '(config)'}   field ${next.field}`);
-  const copied = logo ? copyLogo(logo, val(flags.dir) || 'brand/logo-options') : [];
+  const dirRel = val(flags.dir) || 'brand/logo-options';
+  if (logo === 'wordmark') {
+    const display = (next.fonts && next.fonts.display) || cfg.brand.fonts.display;
+    for (const line of writeWordmark(dirRel, { name: next.name, family: display.family.replace(/ Variable$/, ''), weight: next.headlineWeight || cfg.brand.headlineWeight || 700 })) {
+      console.log(`  logo     ${line}`);
+    }
+  }
+  const copied = logo ? copyLogo(logo, dirRel) : [];
   for (const line of copied) console.log(`  logo     ${line}`);
   if (foreign) console.log(`  logo     brand/logo.svg was made for "${base.name}": the boards show "${next.name}" as text until apply --logo <id>`);
   // a hand-drawn <id>.icon.svg was just copied: keep it (a new mark without one re-derives the icon)

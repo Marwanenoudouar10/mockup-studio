@@ -33,6 +33,7 @@ import path from 'node:path';
 import { ROOT } from '../lib/cli.js';
 import { readBrief, sampleCopy, logoReady } from './lib/brief.js';
 import { writeJson, OUT } from './lib/tokens-io.js';
+import { accentOnPaper, contrast } from './lib/color.js';
 import { shootBoard, shootSample, shootAsset, samplePage } from './lib/shoot.js';
 import { openSession } from '../lib/session.js';
 
@@ -119,6 +120,12 @@ export async function run(flags, { cfg, raw, tokens, rel }) {
     await shootBoard(session, rel, 'board', { data: `${dir}/board.json` }, 'final/brand/brand-board.png');
     const c = cfg.brand.colors;
     if (!logoReady(cfg, tokens, brief.name || cfg.brand.name)) console.log('  note: no logo chosen yet (npm run brand -- apply --logo <id>): the board sets the name as text');
+    const onPaper = accentOnPaper(c);
+    if (onPaper) {
+      console.log(`  note: the accent ${c.accent} is ${contrast(c.accent, c.paper).toFixed(2)}:1 on paper (a graphic needs 3:1): the logo's accent shapes`
+        + ` on paper (Primary lockup, logo.png) and on the light field presets of the store images are drawn in ${onPaper}`
+        + ' (another colour there: --logo-accent on that field in brand/theme.css)');
+    }
     else {
       await shootAsset(session, rel, cfg.brand.logo, c.ink, 1600, 'final/brand/logo.png');
       await shootAsset(session, rel, cfg.brand.logo, '#FFFFFF', 1600, 'final/brand/logo-white.png');

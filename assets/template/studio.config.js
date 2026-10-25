@@ -29,6 +29,14 @@ export default {
 
   locales: ['en', 'es'],
 
+  // Project type. 'live' = EDITABLE (vector): the mock screens in screens/ are drawn live in every device, lift
+  // and tile, so they stay sharp at any --scale, Mockup Studio can edit their text and colours (edits.json) and
+  // `npm run vector` exports layered SVG + PDF for Figma. 'raster' = SCREENSHOTS: every screen is a PNG in raw/
+  // (required for real captures of an existing app, and the default when this key is missing; see
+  // examples/raster.config.js). A screen with no page in screens/ (a real capture) is drawn from raw/ either way.
+  // theme: 'dark' for an all-dark app (the default theme of the mock screens).
+  screens: { mode: 'live' },
+
   // Phone stores: appstore (iPhone 6.9" 1320x2868), appstore-6.3 (1206x2622, the slot App Store Connect marks
   // required), appstore-6.5 (1284x2778), ipad-13 (2064x2752), playstore (1080x1920), playstore-4k (2160x3840).
   // Wide targets: og (1200x630), x (1600x900), x-card, linkedin, square, portrait, producthunt (1270x760),
@@ -44,7 +52,8 @@ export default {
   // One entry per store image, in store order: hero, three features, trust (5 is the default set).
   // stage: a 1320 x 1900 box hung under the copy and scaled to the room left.
   //   x = centre, y = top edge, w/h = size, r = rotation (deg), z = stacking order.
-  // Screens are referenced by NAME: raw/<platform>/<locale>/<name>.png, else raw/<platform>/<name>.png.
+  // Screens are referenced by NAME: screens/<name>.html in an editable project (live), else
+  // raw/<platform>/<locale>/<name>.png, then raw/<platform>/<name>.png (the captures).
   panels: [
     {
       logo: true,

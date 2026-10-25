@@ -6,6 +6,8 @@
 import { state, emit } from '../state.js';
 
 let version = 0;
+// the screen editing replies of the edit bridge (engine/core/edit-screen.js): handled by ui/screen/
+const SCREEN = new Set(['layers', 'picked', 'text-commit', 'text-cancel', 'copy-commit', 'copy-cancel', 'text-started', 'copy-started']);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 export class Frame {
@@ -102,6 +104,10 @@ export class Frame {
     const fromNext = this.next && source === this.next.contentWindow;
     const fromCur = this.iframe && source === this.iframe.contentWindow;
     if (!fromNext && !fromCur) return;
+    if (SCREEN.has(m.ss)) {
+      if (fromCur) emit('screen-msg', { frame: this, m, source });
+      return;
+    }
     if (m.ss === 'boxes') {
       if (fromNext) this.pendingBoxes = m;
       else { this.boxes = m; emit('boxes', this); }

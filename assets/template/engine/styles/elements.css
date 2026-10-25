@@ -96,3 +96,8 @@
   text-align: center;
   word-break: break-word;
 }
+
+/* live screens (engine/core/live.js, editable projects): the mock screen page in an iframe at its CSS viewport,
+   scaled from its top left corner by the device, lift or tile that shows it */
+.live-screen { position: absolute; left: 0; top: 0; border: 0; transform-origin: 0 0; pointer-events: none; }
+.live-host { position: absolute; inset: 0; overflow: hidden; }

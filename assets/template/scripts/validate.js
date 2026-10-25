@@ -13,9 +13,14 @@
 // Copy: lines not translated for a locale the config renders (scripts/lib/locales.js) -> warnings.
 // Store content (scripts/lib/policy.js): rankings, prices, calls to action, other stores' names in the copy,
 //   too few images with real UI (measured on the renders) -> warnings. Play sets under 4 images get a note.
+// Vector files <out>/vector/ (npm run vector, scripts/lib/vector-check.js): well-formed SVG without
+//   <foreignObject>, one-page PDFs, the target size, not older than the PNGs; what the SVG leaves out is a note.
+// edits.json: a skipped or re-anchored screen edit is a warning (the renders' issues in an editable project;
+//   raw/screens-report.json, written by npm run screens, in a screenshots project, with the strings a capture
+//   in another language left untranslated).
 import fs from 'node:fs';
 import path from 'node:path';
-import { STORES, ASSETS } from './lib/stores.js';
+import { STORES, ASSETS, iconsFor } from './lib/stores.js';
 import { panelsFor, pad2 } from './lib/config.js';
 import { pngInfo } from './lib/png.js';
 import { jpegInfo } from './lib/jpeg.js';
@@ -23,10 +28,11 @@ import { readQuality } from './lib/report.js';
 import { policyFindings } from './lib/policy.js';
 import { textFindings } from './lib/locales.js';
 import { staleOutputs, staleHires } from './lib/stale.js';
-import { parseArgs, list, loadConfig, outDir, rel, kb, isMain, fail } from './lib/cli.js';
+import { checkVectors } from './lib/vector-check.js';
+import { ROOT, parseArgs, list, loadConfig, outDir, rel, kb, isMain, fail } from './lib/cli.js';
 
 const IMG = /\.(png|jpe?g)$/i;
-const SKIP = new Set(['icons', 'brand', 'portfolio']);
+const SKIP = new Set(['icons', 'brand', 'portfolio', 'vector']);
 
 function inspect(file) {
   const buf = fs.readFileSync(file);
@@ -109,7 +115,7 @@ export function runValidate(cfg, flags = {}) {
       if (!fs.statSync(sdir).isDirectory() || stale.has(sdir)) continue;
       const r = cfg.stores.find((s) => s.id === sid) || STORES[sid];
       if (!r) { warn(rel(sdir), 'unknown target folder: skipped'); continue; }
-      const imgs = fs.readdirSync(sdir).filter((f) => IMG.test(f)).sort();
+      const imgs = fs.readdirSync(sdir).filter((f) => IMG.test(f) && !stale.has(path.join(sdir, f))).sort();
       const feature = imgs.filter((f) => /^feature-graphic\./.test(f));
       const shots = imgs.filter((f) => !feature.includes(f));
       for (const f of shots) one(path.join(sdir, f), r, opts);
@@ -140,9 +146,22 @@ export function runValidate(cfg, flags = {}) {
       }
     }
   }
+  const vec = checkVectors(cfg, out, {
+    rel, stale, ok: (l, t) => line('ok', l, t), note: (l, t) => line('note', l, t), warn,
+    fail: (l, t) => { problems++; line('FAIL', l, t); },
+  });
+  files += vec;
+  if (cfg.screens.mode !== 'live') {
+    let er = {};
+    for (const f of ['edits-report.json', 'screens-report.json']) { // (the first: its name in older projects)
+      try { Object.assign(er, JSON.parse(fs.readFileSync(path.join(ROOT, 'raw', f), 'utf8'))); } catch { /* nothing to report */ }
+    }
+    for (const [cap, list] of Object.entries(er)) for (const t of list) warn(cap, t);
+  }
   const icons = path.join(out, 'icons');
-  for (const [f, key] of [['appstore-1024.png', 'appstore-icon'], ['playstore-512.png', 'playstore-icon']]) {
+  for (const { file: f, key } of iconsFor(cfg)) {
     const file = path.join(icons, f);
+    if (stale.has(file)) continue;
     if (fs.existsSync(file)) one(file, ASSETS[key]);
     else warn(rel(file), 'missing (npm run icons)');
   }

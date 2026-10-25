@@ -1,16 +1,23 @@
 // Right inspector: what is selected (element, panel, source), its X / Y / W / R / Z / Radius (typing a value
 // is a move like any other), Reset to config, Apply to all stores, and the notes for Claude on that image.
-// It never edits copy, colours or layouts: the violet note says so.
+// A headline block: its words (ui/screen/copy.js). Screen mode (editable projects): the screen element's text,
+// colours, size and nudge (ui/screen/inspector.js). New layouts are Claude's: the violet note says so.
 import { state, selected, on } from '../state.js';
 import { panelName } from '../model.js';
 import { commit, reset, applyAll, sourceOf, addOf } from '../edits.js';
 import { nameOf } from './sidebar.js';
 import { notesFor, numberOf, addNote, setDone, deleteNote } from './notes.js';
+import { paintScreen, initScreenInspector } from '../screen/inspector.js';
+import { copyHtml, initCopyInspector } from '../screen/copy.js';
+import { canEnter, enter, RASTER_NOTE } from '../screen/enter.js';
 
 let box;
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const kv = (k, v) => `<div class="kv"><span>${esc(k)}</span><b title="${esc(v)}">${esc(v)}</b></div>`;
-const NOTE = '<div class="note"><b>Text, colours, new layouts:</b> ask Claude. This board only previews and moves things. It refreshes by itself when Claude edits files.</div>';
+const live = () => !!(state.project && state.project.mode === 'live');
+const note = () => (live()
+  ? '<div class="note"><b>Editable project:</b> double-click a screen to edit its text and colours, or a headline to retype it. New layouts: ask Claude. The board refreshes when Claude edits files.</div>'
+  : '<div class="note"><b>Text, colours, new layouts:</b> ask Claude. This board previews and moves things, and retypes headlines. It refreshes by itself when Claude edits files.</div>');
 const HELP = `<div class="help">Drag an element to move it. Corners resize, the round knob rotates.<br>
   <kbd>←↑→↓</kbd> nudge (<kbd>Shift</kbd> ×10) · <kbd>⌘Z</kbd> undo · <kbd>⇧⌘Z</kbd> redo<br>
   <kbd>Space</kbd>+drag pan · pinch or <kbd>⌘</kbd>+scroll zoom · <kbd>⇧1</kbd> fit</div>`;
@@ -38,7 +45,7 @@ function status(f, el) {
   const s = sourceOf(f, el);
   if (s === 'added') {
     const a = addOf(el.id);
-    return `Added in Store Studio${a && a.store === '*' ? ' for <b>every store</b>' : ''} · layout.json`;
+    return `Added in Mockup Studio${a && a.store === '*' ? ' for <b>every store</b>' : ''} · layout.json`;
   }
   if (s === 'store') return `Moved for <b>${esc(panelName(state.project, f, el.panel).replace(/ \d+$/, ''))}</b> · layout.json`;
   if (s === 'all') return 'Moved for <b>all stores</b> · layout.json';
@@ -54,7 +61,9 @@ function notesHtml(f, panel) {
     <button class="btn" data-act="add-note">Pin note to this ${state.selection.id != null ? 'element' : 'image'}</button></div>`;
 }
 
-function render() {
+// passive: a refresh (new boxes, layers, edits) waits while a field of the inspector is being typed in
+function render(passive = false) {
+  if (passive === true && box.contains(document.activeElement) && document.activeElement.matches('input, textarea, select')) return;
   const draft = box.querySelector('#note-text');
   const keep = draft ? draft.value : '';
   paint();
@@ -65,9 +74,11 @@ function render() {
 function paint() {
   const { frame: f, el } = selected();
   const p = state.project;
-  if (!p) { box.innerHTML = `<div class="h">Selected</div>${NOTE}`; return; }
+  if (!p) { box.innerHTML = `<div class="h">Selected</div>${note()}`; return; }
+  if (state.screen) { paintScreen(box); return; }
   if (!f) {
-    box.innerHTML = `<div class="h">Project</div>${kv('Name', p.name)}${kv('Locales', p.locales.join(', '))}${kv('Images', p.rows.reduce((n, r) => n + r.frames.length, 0))}${NOTE}${HELP}`;
+    box.innerHTML = `<div class="h">Project</div>${kv('Name', p.name)}${kv('Type', live() ? 'Editable (vector)' : 'Screenshots (raster)')}${kv('Locales', p.locales.join(', '))}`
+      + `${kv('Images', p.rows.reduce((n, r) => n + r.frames.length, 0))}${note()}${HELP}`;
     return;
   }
   const panel = state.selection.panel;
@@ -78,12 +89,11 @@ function paint() {
     const file = f.kind === 'feature' ? `final/${state.locale}/playstore/feature-graphic.png`
       : f.editable && n ? `final/${state.locale}/${f.store}/${String(n.n).padStart(2, '0')}.png` : '';
     box.innerHTML = `<div class="h">Selected</div>${kv('Image', name || 'Brand board')}${kv('Size', `${Math.round(W)}×${Math.round(H)}`)}${file ? kv('File', file) : ''}`
-      + `${f.editable ? '' : '<div class="status">Preview only: the brand board is made by npm run brand -- board.</div>'}${NOTE}${notesHtml(f, panel)}`;
+      + `${f.editable ? '' : '<div class="status">Preview only: the brand board is made by npm run brand -- board.</div>'}${note()}${notesHtml(f, panel)}`;
     return;
   }
   if (el.type === 'text') {
-    box.innerHTML = `<div class="h">Selected</div>${kv('Element', 'headline')}${kv('Panel', name)}${kv('Source', 'studio.config.js')}`
-      + `<div class="status">The headline and sub line are text: ask Claude to change them.</div>${NOTE}${notesHtml(f, panel)}`;
+    box.innerHTML = `<div class="h">Selected</div>${kv('Element', 'headline · sub line')}${kv('Panel', name)}${copyHtml(f, panel)}${notesHtml(f, panel)}`;
     return;
   }
   const src = sourceOf(f, el);
@@ -91,7 +101,9 @@ function paint() {
   box.innerHTML = `<div class="h">Selected</div>${kv('Element', nameOf(el))}${kv('Panel', name)}${kv('Source', source(el))}${fields(el)}`
     + `<div class="status">${status(f, el)}</div>`
     + `<button class="btn" data-act="reset"${src === 'config' ? ' disabled' : ''}>${el.added ? 'Remove added element' : 'Reset to config'}</button>`
-    + `<button class="btn" data-act="all"${canAll ? '' : ' disabled'}>Apply to all stores</button>${NOTE}${notesHtml(f, panel)}`;
+    + `<button class="btn" data-act="all"${canAll ? '' : ' disabled'}>Apply to all stores</button>`
+    + `${canEnter(el) ? (live() ? '<button class="btn primary" data-act="enter">Edit screen <kbd>↵</kbd></button>' : `<div class="note">${RASTER_NOTE}</div>`) : ''}`
+    + `${canEnter(el) && !live() ? '' : note()}${notesHtml(f, panel)}`;
 }
 
 function typed(input) {
@@ -116,6 +128,7 @@ export function initInspector(el) {
     const { frame: f, el: sel } = selected();
     const act = b.dataset.act;
     if (act === 'reset' && f && sel) reset(f, sel);
+    else if (act === 'enter' && f && sel) enter(f, sel);
     else if (act === 'all' && f && sel) applyAll(f, sel);
     else if (act === 'add-note' && f) {
       const text = box.querySelector('#note-text').value.trim();
@@ -130,11 +143,13 @@ export function initInspector(el) {
       if (note && act === 'del') deleteNote(note);
     }
   });
-  for (const ev of ['select', 'project', 'layout', 'notes']) on(ev, render);
+  initScreenInspector(box);
+  initCopyInspector(box);
+  for (const ev of ['select', 'project', 'layout', 'notes', 'screen']) on(ev, () => render());
+  for (const ev of ['screen-layers', 'screen-sel', 'edits']) on(ev, () => render(true));
   // live values while dragging, without stealing focus from a field being typed in
   on('boxes', (f) => {
-    if (!state.selection || f.key !== state.selection.frame) return;
-    if (box.contains(document.activeElement) && document.activeElement.matches('input, textarea')) return;
-    render();
+    if (!state.selection || f.key !== state.selection.frame || state.screen) return;
+    render(true);
   });
 }

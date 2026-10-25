@@ -77,7 +77,7 @@ export function createEditor(src, keys) {
     return out;
   }
 
-  return { setProp, literal, append, apply, count: () => edits.length };
+  return { setProp, literal, append, apply, replaceNode: replace, insertProp, count: () => edits.length };
 }
 
 // the stage array of a panel (or the feature), picking a variant stage by the candidate keys

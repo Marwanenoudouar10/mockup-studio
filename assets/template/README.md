@@ -1,27 +1,31 @@
-# Store screenshots studio (template)
+# Mockup Studio project (template)
 
 App Store and Google Play screenshot sets, the Play feature graphic and both store icons, plus web,
 social and desktop images (Open Graph, X, LinkedIn, Product Hunt, Chrome Web Store, Mac App Store,
-landing-page heroes, portfolio covers), built from HTML/CSS and rendered by your installed Chrome.
-One file to edit: `studio.config.js`. The demo is "Brimpage", an invented journaling app with a small
-web app (its site is the reserved `brimpage.example`): replace its brand, screens and copy.
+landing-page heroes, portfolio covers), built from HTML/CSS and rendered by your installed Chrome, as
+PNG and, on request, as layered SVG and PDF. One file to edit: `studio.config.js`. The demo is
+"Brimpage", an invented journaling app with a small web app (its site is the reserved
+`brimpage.example`), made as an **editable** project: replace its brand, screens and copy.
 
 ## Start a project
 ```bash
-mkdir -p ~/store-projects && cp -R ~/.claude/skills/store-screenshots/assets/template ~/store-projects/my-app
+mkdir -p ~/store-projects && cp -R ~/.claude/skills/mockup-studio/assets/template ~/store-projects/my-app
 cd ~/store-projects/my-app
-rm -rf node_modules final out raw layout.json notes.json   # leftovers, if the skill folder was used to test
+rm -rf node_modules final out raw layout.json notes.json edits.json   # leftovers, if the skill folder was used to test
+find examples -name '*.layout.json' -delete -o -name '*.edits.json' -delete
 npm install                    # Node 18+. Uses your Chrome/Chromium/Edge (CHROME_PATH=... to override);
                                # its audit notes are in unused download code (the skill README, "What you need")
-npm run screens && npm run export   # the demo: captures -> final/ (render, feature, icons, validate, sheets)
+npm run export                 # the demo -> final/ (render, feature, icons, validate, sheets); its screens are live
 # then start clean, so no demo file reaches a client (SKILL.md "Set up the project"):
 rm -rf final out raw screens/web brand/logo-options brand/logo.svg brand/mark.svg brand/icon.svg brand/tokens.json
 find screens -maxdepth 1 -name '*.html' -delete && echo '{}' > screens/strings.json
 mv CLAUDE.template.md CLAUDE.md
 npm run preview                # live gallery: edit studio.config.js, reload the page
 ```
-The skill's `SKILL.md` and `references/` explain the method; this file is the config reference (keys,
-elements, flags). The demo ships no captures: `npm run screens` makes them from `screens/`.
+The skill's `SKILL.md` and `references/` explain the method (`references/editable.md`: live screens,
+`edits.json`, SVG/PDF); this file is the config reference (keys, elements, flags). The demo ships no
+captures: `npm run screens` makes them from `screens/` (the brand board and Mockup Studio's Screens list
+use them; an editable project's renders do not need them).
 
 ## The order (both ways in)
 0. **Intake**: the answers (mode, targets, languages, images, brand, look, tone) go into
@@ -29,17 +33,19 @@ elements, flags). The demo ships no captures: `npm run screens` makes them from 
 1. **Brand first**: `briefs/brand-brief.md`, then `npm run brand -- palette`, `fonts`, `apply`,
    `logos`, `apply --logo`, `board` -> `final/brand/brand-board.png` for approval (`brand/README.md`).
 2. **Screens**: Mode A, from screenshots: `briefs/capture-plan.md` -> `raw/<platform>/`
-   (websites: `npm run capture -- --url https://...`). Mode B, from a description:
-   `briefs/app-spec.md` -> `screens/<name>.html` (web pages: `screens/web/<name>.html`) -> `npm run screens`.
+   (websites: `npm run capture -- --url https://...`), `screens: { mode: 'raster' }`. Mode B, from a
+   description: `briefs/app-spec.md` -> `screens/<name>.html` (web pages: `screens/web/<name>.html`) ->
+   `npm run screens`, `screens: { mode: 'live' }` (editable).
 3. **Story and copy**: `briefs/copy.md`, one benefit per image.
 4. **Layout**: one `panels[]` entry per image in `studio.config.js`.
-5. **Render**: `npm run export`.  6. **Look and fix**: read every image.
+5. **Render**: `npm run export` (`--vector` for SVG + PDF).  6. **Look and fix**: read every image.
 7. **Validate**: `npm run validate` exits 0.  8. **Deliver**: the `final/` folders, overview sheets first.
 
 ## Folder map
 ```
 studio.config.js     brand, locales, stores, panels, feature graphic, icon, sheet  (the only file you edit)
-layout.json          moves made in Store Studio (applied after the config); notes.json: notes for Claude
+layout.json          moves made in Mockup Studio (applied after the config); notes.json: notes for Claude
+edits.json           edits made in Mockup Studio: text and colours inside screens, headlines, badge texts
 briefs/              brand-brief.md, app-spec.md (Mode B), capture-plan.md (Mode A), copy.md
 brand/               tokens.json (colours + fonts, from npm run brand -- apply), logo.svg (inlined,
                      currentColor), mark.svg (watermark), icon.svg (store icon), theme.css, logo-options/
@@ -47,13 +53,15 @@ raw/ios/ raw/android/ raw/ipad/ raw/web/   captures: <name>.png (+ <name>.boxes.
                      (the demo's come from npm run screens; served to the pages with a listing, raw/index.json)
 screens/             mock screens: <name>.html (phones) + web/<name>.html (desktop pages) + kit/ -> raw/
 examples/            panorama.config.js (devices bridging images), rtl.config.js (Arabic, light field),
-                     web.config.js (web-only: X, LinkedIn, Chrome Web Store, Mac App Store, hero, square)
+                     web.config.js (web-only: X, LinkedIn, Chrome Web Store, Mac App Store, hero, square),
+                     raster.config.js (the demo's first three images as a screenshots project: App Store, Play)
 engine/              runs in Chrome: panel, feature, icon, gallery pages; layout/ elements/ devices/ ornaments/
-                     styles/; brand/ (the brand boards)
+                     styles/; brand/ (the brand boards); core/live.js (live screens); vector/ (the SVG writer)
 scripts/             runs in Node: brand, render, feature, icons, validate, sheet, preview, export, screens,
-                     capture; brand/ (palette, fonts, logos, apply, board + lib/), lib/ (stores.js, targets.js ...)
-final/               output (git-ignored): <locale>/<target>/, portfolio/ (hi-res), icons/, brand/,
-                     render-report.json         out/brand/  option boards      out/qa/  scratch renders
+                     capture, vector, bake; brand/ (palette, fonts, logos, apply, board + lib/), lib/ (stores.js,
+                     targets.js, pages.js, edits.js ...)
+final/               output (git-ignored): <locale>/<target>/, portfolio/ (hi-res), vector/ (SVG + PDF),
+                     icons/, brand/, render-report.json    out/brand/  option boards    out/qa/  scratch renders
                      out/bake/  config backups from npm run bake
 ```
 
@@ -61,24 +69,28 @@ final/               output (git-ignored): <locale>/<target>/, portfolio/ (hi-re
 | command | what it does |
 |---|---|
 | `npm run brand -- <step>` | the brand step: `palette`, `fonts`, `logos`, `apply`, `board` (see `brand/README.md`) |
-| `npm run screens` | `screens/<name>.html` -> `raw/ios/` + `raw/android/`, `screens/web/<name>.html` -> `raw/web/` (and the sizes in its `kit-sizes`), `<name>.png` + `<name>.boxes.json` from `data-box` |
+| `npm run screens` | `screens/<name>.html` -> `raw/ios/` + `raw/android/`, `screens/web/<name>.html` -> `raw/web/` (and the sizes in its `kit-sizes`), `<name>.png` + `<name>.boxes.json` from `data-box`, with `edits.json` applied; box warnings |
 | `npm run capture` | Mode A for websites: a live URL -> `raw/web/<name>.png` (+ `--mobile`, `--tablet`, `--full`) |
-| `npm run render` | `final/<locale>/<store>/01.png ...` (24-bit RGB, no alpha) |
+| `npm run render` | `final/<locale>/<store>/01.png ...` (24-bit RGB, no alpha); an editable project draws its mock screens live |
 | `npm run feature` | `final/<locale>/playstore/feature-graphic.png` (1024x500) |
 | `npm run icons` | `final/icons/appstore-1024.png` (RGB) + `final/icons/playstore-512.png` (RGBA) |
-| `npm run validate` | checks every file in `final/` against the target rules (size, 24-bit, alpha, bytes, counts), the render report (soft screens, cut or doubled cards, bad crops, screens not localized), untranslated copy, stale folders and the store content rules (copy words, real UI measured on the renders); exits 1 on a problem |
+| `npm run validate` | checks every file in `final/` against the target rules (size, 24-bit, alpha, bytes, counts), the render report (soft screens, cut or doubled cards, bad crops, screens not localized, skipped edits), untranslated copy, stale folders, the store content rules (copy words, real UI measured on the renders) and `final/vector/` (well-formed SVG without `<foreignObject>`, one-page PDFs, not older than the PNGs); exits 1 on a problem |
 | `npm run sheet` | `final/<locale>/overview-<store>.jpg`, up to 3840 px wide, JPEG quality 94 (`--png` too) |
 | `npm run preview` | serves the project, prints the live gallery URL |
-| `npm run export` | removes stale output (a locale or target no longer in the config), then render + feature + icons (+ portfolio with `--scale`) + validate + sheet with one Chrome |
-| `npm run bake` | folds `layout.json` (moves made in Store Studio) into `studio.config.js`, then empties it (`--dry` to check first) |
+| `npm run vector` | `final/vector/<locale>/<target>/01.svg` + `01.pdf` (and the feature graphic): layered SVG for Figma, PDF for print (`references/editable.md`) |
+| `npm run export` | removes stale output (a locale or target no longer in the config), then render + feature + icons (+ portfolio with `--scale`, + vector with `--vector`) + validate + sheet with one Chrome |
+| `npm run bake` | folds `layout.json` (moves made in Mockup Studio) and the copy edits of `edits.json` into `studio.config.js`, then removes what it folded (`--dry` to check first); screen edits stay |
 
 Flags (after `--`, e.g. `npm run render -- --store playstore --panel 2`; `--key=value` works too):
 `--store a,b` `--locale en,de` `--out dir` `--config file`;
-`--panel N` (render only): N is the CONFIG panel number (its position in `panels`, the number `layout.json`
+`--panel N` (render, vector): N is the CONFIG panel number (its position in `panels`, the number `layout.json`
 uses), not a target's image number: og shows one image, e.g. panel 6, so `--store og --panel 6` (a note
 says which panels a target shows when N is not one of them);
 `--config other.js` without `--out` writes to `out/qa/<name>/`, never into `final/`;
 `--scale 2|3` (render, feature, export: the hi-res portfolio copies); `--strict` (validate, export: warnings fail);
+`--screens raster|live` (render, export, vector: one run in the other project type); `--edits 0` (render,
+export, vector, screens: without `edits.json`); `--vector` (export); vector: `--svg-only` `--pdf-only`
+`--fonts embed|none` `--shadows filter|none` `--outline-text`;
 `--png` (sheet); `--strip` (render: a panorama's uncut strip to `out/qa/strip/`); screens: `--platform
 ios,web` (web also captures each page's kit-sizes) `--screen home` `--locale de|all` `--theme dark`
 (default: `screens: { theme }` in the config) `--scale 2`; capture: see "Websites" below; preview: `--port 5178`.
@@ -161,11 +173,20 @@ Headlines take `<em>` (accent word or highlight band), `<br>` and `&nbsp;`; they
 captures used), `device`, `side` (copy inset, 154), `copyWidth` (380), `size` (headline, 54), `subSize`
 (22), `logoWidth` (190), `maxLines` (4), `nudge` (moves the copy down), `field`, `class`, `ornament`, `align`.
 Google may crop about 15% per side: the defaults keep the copy inside x 154-534, and the page warns
-(`feature graphic: the copy crosses the ... cutoff zone`) when the copy leaves x 154-872, y 76-424.
+(`feature graphic: the copy crosses the ... cutoff zone`) when the copy leaves x 154-872, y 76-424, and the same
+for a lifted card, a badge or a stage text (`bleed: true` = a cut on purpose; devices and tiles may bleed).
 RTL locales mirror the whole graphic.
 
 ## How screens are found
-A screen NAME resolves, first hit wins: `raw/<platform>/<locale>/<name>.png` ->
+**Editable project** (`screens: { mode: 'live' }`): a NAME first resolves to its mock screen page, by the
+rules `npm run screens` captures with (`scripts/lib/pages.js`): `screens/<platform>/<name>.html` ->
+`screens/<name>.html` (phones), or a `screens/web/` page whose `kit-sizes` lists the platform (it wins a
+shared name, as in the capture, which warns) -> the same on the other platform. The page is drawn live at the capture's CSS size (iOS 440x956, Android 360x800, iPad
+1032x1376, web 1440x900), its boxes measured live, `edits.json` applied. A name with no page falls through
+to the captures below, as in a screenshots project.
+
+**Screenshots project** (`screens: { mode: 'raster' }`, the default when the key is missing): a screen
+NAME resolves, first hit wins: `raw/<platform>/<locale>/<name>.png` ->
 `raw/<platform>/<name>.png` -> the same two in the other platform (drawn in that platform's frame,
 with a warning). `.jpg`/`.webp` work too; a value with a `/` or `.` is a path from the project root.
 `<name>.boxes.json` next to the file found holds named crops in capture pixels:
@@ -200,14 +221,15 @@ Without it every device piles onto image 1; the render warns `panorama image 2 s
 Seams are checked like edges (cards 40 units away, no sliver of a screen on the next image); `render
 --strip` writes the uncut strip. The canvas has the class `panorama` and `--slices` for strip styles.
 
-## Store Studio: preview and drag (layout.json)
-The skill ships a local workspace app, Store Studio (`~/.claude/skills/store-screenshots/workspace/`),
-that shows every image of every project live on one canvas (App Store, Google Play + feature graphic, web
+## Mockup Studio: layout.json, edits.json, notes.json
+The skill ships a local workspace app, Mockup Studio (`~/.claude/skills/mockup-studio/workspace/`), that
+shows every image of every project live on one canvas (App Store, Google Play + feature graphic, web
 targets, the brand board). There you can drag, rotate and resize stage elements, nudge them with the arrow
-keys, drop a capture onto an image, and pin a note for Claude. Text, colours and new layouts are still
-changed by Claude in the project files; the board refreshes by itself within a second when they change.
+keys, drop a capture onto an image, retype headlines, pin a note for Claude and, in an editable project,
+double-click a device to edit the text and colours inside its screen. New layouts, screens and brand
+changes are made by Claude in the project files; the board refreshes by itself within a second.
 ```bash
-cd ~/.claude/skills/store-screenshots/workspace && npm install && npm start -- ~/store-projects/my-app   # prints the URL
+cd ~/.claude/skills/mockup-studio/workspace && npm install && npm start -- ~/store-projects/my-app   # prints the URL
 ```
 Every move is saved to `layout.json` in the project root. The pages apply it right after the config is
 resolved, for the live preview and for every render, so `final/` matches what the workspace shows:
@@ -227,15 +249,50 @@ resolved, for the live preview and for every render, so `final/` matches what th
   something else, the override is skipped with a warning instead of moving the wrong element. Give elements an
   explicit `id: 'hero'` when you plan to reorder a stage that has overrides.
 - `add` holds elements added in the workspace (a capture dropped onto an image); `"store": "*"` = every store.
-- `/engine/panel.html?...&layout=0` shows the config alone. Another config file has its own file:
+- `/engine/panel.html?...&layout=0` shows the config alone (`&edits=0`: without `edits.json`). Another config file has its own file:
   `examples/web.config.js` -> `examples/web.layout.json`.
 - `npm run bake` writes the moves into `studio.config.js` (numbers changed in place, comments and formatting
   kept; a per-store move becomes `{ appstore: 980, default: 1000 }`; added elements are appended with their id),
   checks that every element of every store and locale lands exactly where it did, keeps a backup in
   `out/bake/`, and empties `layout.json`. Anything it cannot write safely stays in `layout.json` and is listed.
+  It folds the copy edits of `edits.json` the same way (below).
 - `notes.json` holds the notes pinned in the workspace:
   `{ "notes": [{ "id", "store", "panel", "locale", "element", "x", "y", "text", "done", "created" }] }`
   (`x`, `y` = position on the image, 0..1).
+
+## Editable projects: edits.json and vector files
+`screens: { mode: 'live' }` makes a project editable (the demo is; `examples/raster.config.js` holds the
+demo's first three images, App Store and Play, as a screenshots project). `edits.json` sits next to the config like `layout.json` (`examples/web.config.js` ->
+`examples/web.edits.json`); Mockup Studio writes it, and so may Claude:
+```json
+{
+  "version": 1,
+  "screens": { "home": { "nav:title": { "text": { "en": "Good evening, Sam" } },
+                         "@prompt/p.q:1": { "color": "accent", "size": 26, "of": "9c1e2a07" },
+                         "entry": { "hidden": true } } },
+  "copy":    { "2": { "headline": { "en": "Write it down in <em>a minute</em>" } }, "feature": { "sub": { "es": "..." } } },
+  "stage":   { "1": { "4": { "text": { "en": "Yours alone" } } } }
+}
+```
+- `screens.<screen>.<element id>`: `text` (per locale), `color` / `bg` (a token name such as `tint`, `accent`,
+  `text-2`, `brand-primary`, or `#hex` / `rgb()`; `bg` also `none`), `size` (CSS px, 6-200), `weight`
+  (100-900), `hidden`, `dx` / `dy` (CSS px, -500..500), `only` (one platform), `of` (fingerprint).
+- Element ids: `data-id`, else the `data-box` name, else an automatic path (`@prompt/p.q:1`); kit chrome:
+  `nav:title`, `nav:subtitle`, `tabs:1..n`, `status:time`, `fab:label`. An automatic id whose element changed
+  re-anchors to the element with the same fingerprint, or is skipped with a warning (render log,
+  `render-report.json`, validate; `raw/screens-report.json` for captures).
+- `copy.<panel>` (config panel number, or `feature`): `headline` (`<em>`, `<br>`, `&nbsp;` only) and `sub`, per
+  locale. `stage.<panel>.<element id>`: a badge's or a text element's `text` (ids as in `layout.json`).
+- The kit applies screen edits in every capture and live screen; copy and stage edits apply right after the
+  config loads (renders, Mockup Studio, validate, bake). `npm run bake` folds copy and stage edits into the
+  config; screen edits stay. The rules: `scripts/lib/edits.js`.
+
+`npm run vector` (or `npm run export -- --vector`) writes `final/vector/<locale>/<target>/01.svg` + `01.pdf`,
+`final/vector/<locale>/playstore/feature-graphic.{svg,pdf}` and `final/vector/vector-report.json`. The SVG has
+named layers (`phone-home`, `screen-home`, `card-streak`, `headline`), text as `<text>` with its fonts
+embedded, and no `<foreignObject>`: drag it into Figma. The PDF is Chrome's print (vector text and shapes).
+Live screens become real layers; captures stay embedded images. What Figma keeps and drops:
+the skill's `references/editable.md`.
 
 ## Wide layout (web, social, desktop targets)
 Wide targets use their own design space: a canvas 1200 units HIGH (`og` is 2286 x 1200 units, 16:10 is
@@ -303,7 +360,9 @@ web kit (sidebar app shell, top bar, dashboard grid + charts, tables, hero, pric
 reflows at 1100 and 640 px), ready for a responsive trio.
 
 ## Sharpness
-The method is in the skill's `references/design.md` ("Sharpness"). The switches: `npm run export --
+The method is in the skill's `references/design.md` ("Sharpness"). An editable project's mock screens are
+drawn live at the image's size, so `npm run export -- --scale 2` needs no larger capture. The switches for
+captures and the rest: `npm run export --
 --scale 2|3` (hi-res copies in `final/portfolio/<locale>/<target>/`, never uploaded), `npm run screens --
 --scale 2` / `npm run capture -- --scale 2` (larger captures, when a render warns `... is upscaled 1.6x`),
 `sheet.width` (3840, a maximum), `sheet.quality` (94) and `sheet.background` (default: the brand's paper a

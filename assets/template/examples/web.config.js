@@ -28,7 +28,8 @@ export default {
       sub: 'Streaks, moods and what lifts them.',
       stage: [
         { type: 'monitor', screen: 'dashboard', w: 1340, x: 760, y: 60, z: 10 },
-        { type: 'lift', screen: 'dashboard', box: 'kpiMood', w: 400, x: 1340, y: 800, r: 3, z: 30 },
+        // a card from ANOTHER screen than the monitor's (the same card twice on one image is a defect)
+        { type: 'lift', screen: 'journal', box: 'week', w: 420, x: 1300, y: 760, r: 3, z: 30 },
       ],
     },
   ],

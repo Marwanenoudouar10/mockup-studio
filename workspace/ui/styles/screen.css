@@ -1,0 +1,104 @@
+/* Screen mode (editable projects) and the copy inspector: the breadcrumb bar, the canvas marks, the screen's layer
+   tree, and the inspector's text, colour, type and nudge controls. Same dark look, the one blue for selection. */
+
+/* breadcrumb bar, top centre of the canvas */
+.scr-bar {
+  position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 6; max-width: calc(100% - 32px);
+  display: flex; align-items: center; gap: 10px; padding: 5px 5px 5px 14px; border-radius: 10px;
+  background: rgb(35 36 40 / .94); border: 1px solid var(--line-2); box-shadow: 0 10px 28px rgb(0 0 0 / .4);
+  font-size: 12px; color: var(--text-2); white-space: nowrap;
+}
+.scr-bar[hidden] { display: none; }
+.scr-bar .path { overflow: hidden; text-overflow: ellipsis; }
+.scr-bar .path b { color: var(--white); font-weight: 600; }
+.scr-bar .path i { font-style: normal; color: #5f626a; margin: 0 8px; }
+.scr-bar .path em { font-style: normal; color: var(--white); }
+.scr-bar kbd { font: 11px ui-monospace, Menlo, monospace; color: var(--muted); border: 1px solid var(--line-2); border-radius: 4px; padding: 1px 5px; }
+.scr-bar button { background: var(--sel); color: #fff; font-weight: 600; padding: 5px 13px; border-radius: 7px; }
+.scr-bar button:hover { background: #5d89ff; }
+
+/* canvas marks */
+.scr-focus { position: absolute; border-radius: 3px; box-shadow: 0 0 0 100vmax rgb(14 15 18 / .58); outline: 1px solid rgb(77 125 255 / .5); }
+.scr-hover { position: absolute; border: 1px solid var(--sel); border-radius: 1px; }
+.scr-sel { position: absolute; border: 1.5px solid var(--sel); border-radius: 1px; box-shadow: 0 0 0 1px rgb(255 255 255 / .1); }
+.scr-sel.typing { box-shadow: 0 0 0 3px rgb(77 125 255 / .28); }
+.scr-dim {
+  position: absolute; left: 50%; top: 100%; transform: translate(-50%, 7px); background: var(--sel); color: #fff;
+  font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 4px; white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+
+/* the screen's layer tree */
+.layer.back { padding-left: 8px; margin-bottom: 4px; color: var(--muted); }
+.layer.back:hover { color: var(--white); }
+.slayer { justify-content: flex-start; gap: 6px; padding: 4px 8px 4px calc(4px + var(--d, 0) * 13px); font-size: 12px; }
+.caret { width: 12px; height: 16px; flex: none; display: inline-flex; align-items: center; justify-content: center; color: #6f727a; cursor: pointer; }
+.caret::before { content: ""; width: 0; height: 0; border-left: 4px solid currentColor; border-top: 3.5px solid transparent; border-bottom: 3.5px solid transparent; transition: transform .12s; }
+.caret.open::before { transform: rotate(90deg); }
+.caret.none::before { display: none; }
+.caret:hover { color: var(--white); }
+.slayer span { flex: 1; min-width: 0; }
+.slayer.hov:not(.on) { background: #2b2c31; }
+.slayer.off span { opacity: .45; }
+.slayer small { font-size: 11px; color: #6f727a; }
+.slayer.edited span::after { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--sel); margin-left: 7px; vertical-align: 2px; }
+.k { width: 12px; height: 12px; flex: none; display: inline-flex; align-items: center; justify-content: center; color: var(--muted); font-style: normal; }
+.k::before { content: ""; display: block; }
+.k-text::before { content: "T"; font: 700 11px/1 -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif; }
+.k-box::before { width: 9px; height: 9px; border: 1.3px solid currentColor; border-radius: 2px; }
+.k-icon::before { width: 7px; height: 7px; border: 1.3px solid currentColor; transform: rotate(45deg); }
+.k-chrome::before { width: 11px; height: 7px; border: 1.3px solid currentColor; border-radius: 2px; border-top-width: 2.5px; }
+.slayer.on .k { color: var(--white); }
+
+/* inspector: layer head, sections */
+.lhead { display: flex; gap: 10px; align-items: center; margin: 2px 2px 4px; }
+.lhead .k { width: 30px; height: 30px; border-radius: 8px; background: var(--field); border: 1px solid var(--field-line); color: var(--text); }
+.lhead .k-text::before { font-size: 14px; }
+.lhead div { min-width: 0; }
+.lhead b { display: block; color: var(--white); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lhead small { display: block; color: var(--muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sec { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.sh { display: flex; justify-content: space-between; align-items: baseline; margin: 0 2px 8px; }
+.sh span { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+.sh small { font-size: 11px; color: var(--faint); }
+.sec .fields { margin: 0; }
+.insp textarea[data-sk], .insp textarea[data-ck] {
+  display: block; width: 100%; min-height: 50px; resize: vertical; background: var(--field); border: 1px solid var(--field-line);
+  border-radius: 7px; padding: 8px 9px; color: var(--white); font: inherit; line-height: 1.4; outline: none;
+}
+.insp textarea[data-sk]:focus, .insp textarea[data-ck]:focus { border-color: var(--sel); }
+.row2 { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 7px; font-size: 11px; color: var(--faint); }
+.row2 code { font: 11px ui-monospace, Menlo, monospace; color: var(--text-2); }
+.mini { flex: none; white-space: nowrap; color: var(--text-2); font-size: 12px; padding: 4px 9px; border-radius: 6px; border: 1px solid var(--line-2); }
+.row2 span { text-align: right; }
+.mini:hover { color: var(--white); background: #2b2c31; }
+
+/* colour swatches: the screen's tokens, then any colour */
+.swatches { display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px; }
+.swatch { position: relative; aspect-ratio: 1; border-radius: 6px; box-shadow: inset 0 0 0 1px rgb(255 255 255 / .14);
+  background: linear-gradient(var(--c), var(--c)), repeating-conic-gradient(#d9dade 0 25%, #a9abb1 0 50%) 0 0 / 8px 8px; }
+.swatch:hover { box-shadow: inset 0 0 0 1px rgb(255 255 255 / .4); }
+.swatch.on { box-shadow: 0 0 0 2px var(--panel), 0 0 0 3.5px var(--sel); }
+.swatch.none { background: linear-gradient(to top right, transparent calc(50% - .8px), #ff6b6b calc(50% - .8px), #ff6b6b calc(50% + .8px), transparent calc(50% + .8px)), var(--field); }
+.swatch.pick { overflow: hidden; cursor: pointer; background: conic-gradient(from 200deg, #ff6b6b, #ffcf5a, #3ddc84, #4dc3ff, #4d7dff, #c86bff, #ff6b6b); }
+.swatch.pick input { position: absolute; inset: -4px; width: calc(100% + 8px); height: calc(100% + 8px); opacity: 0; cursor: pointer; }
+.cval { display: flex; align-items: center; gap: 8px; height: 32px; margin-top: 8px; padding: 0 9px; background: var(--field); border: 1px solid var(--field-line); border-radius: 7px; }
+.cval:focus-within { border-color: var(--sel); }
+.cval i { width: 16px; height: 16px; flex: none; border-radius: 4px; box-shadow: inset 0 0 0 1px rgb(255 255 255 / .16);
+  background: linear-gradient(var(--c), var(--c)), repeating-conic-gradient(#d9dade 0 25%, #a9abb1 0 50%) 0 0 / 8px 8px; }
+.cval input { flex: 1; min-width: 0; background: transparent; border: 0; outline: none; color: var(--white); font: 12px ui-monospace, Menlo, monospace; }
+.cval input::placeholder { color: var(--muted); }
+.cval button { color: var(--muted); font-size: 15px; line-height: 1; padding: 0 2px; }
+.cval button:hover { color: var(--white); }
+.fld select { width: 100%; min-width: 0; background: transparent; border: 0; outline: none; color: var(--white); text-align: right; text-align-last: right; appearance: none; cursor: pointer; }
+.fld select option { background: var(--panel); }
+
+.acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; }
+.acts .btn { margin-top: 0; }
+.btn.quiet { border-color: transparent; color: var(--muted); }
+.btn.quiet:hover:not(:disabled) { color: var(--white); }
+.btn.primary { background: var(--sel); border-color: var(--sel); color: #fff; font-weight: 600; }
+.btn.primary:hover:not(:disabled) { background: #5d89ff; color: #fff; }
+.btn kbd { font: 11px ui-monospace, Menlo, monospace; opacity: .75; margin-left: 4px; }
+.warn { margin-top: 12px; padding: 9px 11px; border-radius: 9px; background: #352d1b; border: 1px solid #6b5526; color: #ffdf94; font-size: 12px; line-height: 1.45; word-break: break-word; }
+.warn b { display: block; color: #ffe8b3; font-weight: 600; margin-bottom: 3px; }
+.warn p + p { margin-top: 5px; }

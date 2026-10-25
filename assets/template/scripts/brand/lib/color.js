@@ -102,3 +102,24 @@ export const onColor = (bg, ink = '#111111') => (contrast('#FFFFFF', bg) >= cont
 export const rot = (h, d) => (((h + d) % 360) + 360) % 360;
 // signed shortest turn from hue a to hue b (-180..180)
 export const turn = (a, b) => ((((b - a) % 360) + 540) % 360) - 180;
+
+// fg nudged in OKLCH lightness (same hue and chroma) until it reaches `need`:1 on bg: darker on a light bg,
+// lighter on a dark one -> the nudged hex, or null when no lightness gets there (graphics need 3:1)
+export function readableOn(fg, bg, need = 3) {
+  if (contrast(fg, bg) >= need) return normHex(fg);
+  const { l, c, h } = toOklch(fg);
+  const dir = luminance(bg) > 0.18 ? -1 : 1;
+  for (let x = l; x > 0.05 && x < 0.98; x += dir * 0.01) {
+    const hex = oklch(x, c, h);
+    if (contrast(hex, bg) >= need) return hex;
+  }
+  return null;
+}
+
+// the colour a logo's accent shapes take on a light ground (paper): null when the accent reads there (3:1, a
+// graphic), else the accent deepened until it does (same hue), else the primary, else the ink. The brand board,
+// the logo options board and the dark logo PNG use it, as the app icon swaps an accent its tile would hide.
+export function accentOnPaper(c, bg = c.paper) {
+  if (!c.accent || !bg || contrast(c.accent, bg) >= 3) return null;
+  return readableOn(c.accent, bg, 3) || (contrast(c.primary, bg) >= 3 ? normHex(c.primary) : normHex(c.ink));
+}

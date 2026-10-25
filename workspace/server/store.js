@@ -1,5 +1,6 @@
-// Writes layout.json and notes.json inside a registered project: read, change, write atomically.
-// Only these two files, only known keys, only finite numbers; the caller already resolved the project.
+// Writes layout.json and notes.json inside a registered project: read, change, write atomically
+// (edits.json: server/edits-store.js, with the same writer). Only these files, only known keys, only finite
+// numbers; the caller already resolved the project.
 //   layout patch:  { entries: [{ store, panel, id, value | null }], adds: [{ id, value | null }] }
 //   notes patch:   { op: 'put' | 'delete', note: { id, store, panel, locale, element, x, y, text, done } }
 // The shape of layout.json is documented in the template: scripts/lib/layout.js.
@@ -12,10 +13,10 @@ const KEY = /^[\w*.-]{1,64}$/;
 const NAME = /^(?!.*\.\.)[\w./-]{1,160}$/;
 const own = new Map(); // abs file -> the text this process wrote last
 
-const isObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
-const bad = (msg) => Object.assign(new Error(msg), { status: 400 });
+export const isObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
+export const bad = (msg) => Object.assign(new Error(msg), { status: 400 });
 
-function readJson(file, fallback) {
+export function readJson(file, fallback) {
   try {
     const v = JSON.parse(fs.readFileSync(file, 'utf8'));
     return isObj(v) ? v : fallback;
@@ -24,7 +25,8 @@ function readJson(file, fallback) {
   }
 }
 
-function writeJson(file, data) {
+// atomic: a reader (a render, the engine) never sees half a file; isOwnWrite() knows the text
+export function writeJson(file, data) {
   const text = `${JSON.stringify(data, null, 2)}\n`;
   const tmp = `${file}.${process.pid}.tmp`;
   fs.writeFileSync(tmp, text);

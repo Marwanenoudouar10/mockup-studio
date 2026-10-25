@@ -1,6 +1,6 @@
 # Working for a client (freelance)
 
-How to run a store-screenshots job for a paying client, from the first message to the final zip. The
+How to run a mockup-studio job for a paying client, from the first message to the final zip. The
 Step 0 questions (`intake.md`) are for the person in the chat. This page is what that person asks THEIR
 client, and how they deliver.
 
@@ -19,8 +19,8 @@ questions that change the price:
 |---|---|
 | Basic | one store, one language, 5 images, the client's screenshots and brand, 1 revision round |
 | Standard | both stores (iPhone 6.3" + 6.9", Play + feature graphic), up to 2 languages, copy written, icons, 2 revision rounds |
-| Premium | the brand designed (palette, fonts, logo, icon, brand board), mock screens from a description (Mode B), web and social images, hi-res portfolio copies, 3 revision rounds |
-| Add-ons | another language (copy translated by a native speaker or supplied), iPad set, extra images, Product Hunt or Chrome Web Store set |
+| Premium | the brand designed (palette, fonts, logo, icon, brand board), mock screens from a description (Mode B, an editable project), web and social images, hi-res portfolio copies, layered SVG files for Figma and PDF for print (import one SVG into Figma yourself before you sell this: `editable.md`), 3 revision rounds |
+| Add-ons | another language (copy translated by a native speaker or supplied), iPad set, extra images, Product Hunt or Chrome Web Store set, layered SVG for Figma + PDF for print of every image (editable projects only; check one Figma import first, `editable.md` lists what it may drop) |
 
 ## What to request from the client
 - **Access:** a TestFlight invite or simulator build, an APK or internal-testing invite, and a demo
@@ -47,8 +47,9 @@ Write all of it into `briefs/brand-brief.md`, `briefs/copy.md` and `briefs/captu
 
 **What counts as a revision:** changes to copy, order, composition or emphasis on existing images. New
 images, a new language, new screens or a brand change after approval are new work. Say this in the
-offer. Let the client mark changes as notes in Store Studio (`workspace.md`) during a screen share, or
-as numbered points on the overview sheet.
+offer. Let the client mark changes as notes in Mockup Studio (`workspace.md`) during a screen share, or
+as numbered points on the overview sheet. In an editable project the client can also retype a headline or
+a screen text themselves there; their edits land in `edits.json` and count as part of the round.
 
 ## Presenting the work
 - Send the overview sheets first (`final/<locale>/overview-<store>.jpg`), one message per store, with one
@@ -71,6 +72,7 @@ Brimpage-store-images-2026-10-24/
   icons/app-store-1024.png  google-play-512.png
   brand/brand-board.png  logo.png  logo-white.png  mark.png  logo.svg  mark.svg
   overview/en-app-store.jpg  en-google-play.jpg
+  figma/en/iphone-6.9/01.svg  01.pdf ...     editable projects, when Figma files are part of the job
 ```
 The project's `final/` already holds every file (`final/<locale>/<target>/01.png ...`). Build the
 delivery folder from it with plain copies, never re-saving an image (re-saving can add alpha or
@@ -78,10 +80,13 @@ recompress). A simple zip of `final/` works too, without `render-report.json`, r
 `npm run export` (it removes folders of languages or targets the config no longer makes; `npm run
 validate` warns about any that remain):
 ```bash
-cd final && zip -r ../Brimpage-store-images.zip . -x "render-report.json" -x "*.DS_Store" && cd ..
+cd final && zip -r ../Brimpage-store-images.zip . -x "render-report.json" -x "vector/vector-report.json" -x "portfolio/*" -x "*.DS_Store" && cd ..
 ```
-Hi-res portfolio copies (`final/portfolio/`) are for the portfolio, not the client; leave them out unless
-the client asked for print or press sizes.
+Add `-x "vector/*"` when Figma files are not part of the job. When they are, export them fresh
+(`npm run export -- --vector`; validate warns about vector files older than their PNGs, or left over
+from images the set no longer has).
+Hi-res portfolio copies (`final/portfolio/`) are for the portfolio, not the client: the command leaves
+them out. Drop `-x "portfolio/*"` when the client asked for print or press sizes.
 
 ## The README.txt for the client
 - Which folder goes to which slot in App Store Connect and the Play Console.
@@ -91,6 +96,10 @@ the client asked for print or press sizes.
   scaled from them automatically."
 - For Play: "4 or more images make the listing eligible for promotion."
 - Fonts used and their licence (fontsource fonts are open-licensed).
+- Figma files, only after you imported one SVG into Figma yourself and compared it with the PNG: "Drag an
+  SVG onto a Figma canvas: layers are named, text stays editable when Figma has the font. Glass blur and
+  grain are left out of the SVG, and shadows or fades may come out differently in Figma; the PNG is the
+  reference and the PDF (for print, Illustrator or Affinity) keeps them" (the full list: `editable.md`).
 
 ## Handover and after
 - Keep the project folder: a new app version means new captures and `npm run export`, not a new job

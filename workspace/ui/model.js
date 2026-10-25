@@ -1,5 +1,6 @@
 // A project as the board sees it: its config (imported from the project itself, so the workspace always
-// agrees with the engine), the rows of images per target, its captures, layout.json and notes.json.
+// agrees with the engine), the rows of images per target, its captures, layout.json, notes.json, edits.json and
+// its type (mode 'live' = editable: the mock screens are live pages, editable in place; 'raster' = screenshots).
 import { api } from './api.js';
 
 const pad2 = (n) => String(n).padStart(2, '0');
@@ -95,6 +96,8 @@ export async function loadProject(slug) {
     screens: info.screens,
     layout: info.layout || {},
     notes: info.notes || [],
+    edits: info.edits || {},
+    mode: cfg.screens && cfg.screens.mode === 'live' ? 'live' : 'raster',
   };
 }
 
@@ -115,3 +118,19 @@ export function panelName(project, frame, panelId) {
 
 // a signature of the board's structure: rebuild the rows only when this changes
 export const shape = (project) => JSON.stringify(project.rows.map((r) => [r.id, r.frames.map((f) => [f.key, f.kind, f.W, f.H])]));
+
+// the frames a layout.json change can move: the stores and panels whose entries changed ("*" = every store,
+// an added element = every frame). -> a filter for reloadAll, so one moved badge reloads one image, not the board
+export function layoutTargets(before = {}, after = {}) {
+  const keys = [];
+  const same = (x, y) => JSON.stringify(x ?? null) === JSON.stringify(y ?? null);
+  for (const S of new Set([...Object.keys(before || {}), ...Object.keys(after || {})])) {
+    if (same(before[S], after[S])) continue;
+    if (S === 'add') { keys.push(['*', '*']); continue; }
+    for (const P of new Set([...Object.keys(before[S] || {}), ...Object.keys(after[S] || {})])) {
+      if (!same((before[S] || {})[P], (after[S] || {})[P])) keys.push([S, P]);
+    }
+  }
+  return (f) => f.editable && keys.some(([S, P]) => (S === '*' || S === f.store)
+    && (P === '*' || (f.panels || []).some((x) => String(x.id) === P)));
+}

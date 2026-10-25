@@ -1,6 +1,7 @@
-/* Store Studio: dark UI, one accent (blue) for selection, green for live and drop targets. */
+/* Mockup Studio: dark UI, one accent (blue) for selection, green for live and drop targets. */
 @import url("./base.css");
 @import url("./topbar.css");
 @import url("./sidebar.css");
 @import url("./canvas.css");
 @import url("./inspector.css");
+@import url("./screen.css");

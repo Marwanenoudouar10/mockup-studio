@@ -1,9 +1,12 @@
 # Step 2, Mode B: build the screens with the kit
 
 Use this when there is no app build: a pre-launch idea, a description without designs, or a portfolio
-concept. You build each key screen as one HTML file with the mock-screen kit, and `npm run screens`
-captures it for iOS and Android into `raw/`, exactly where Mode A captures go. From there, both modes
-are the same. Web pages use the web kit: see `web.md`.
+concept. You build each key screen as one HTML file with the mock-screen kit. In an **editable** project
+(`screens: { mode: 'live' }`, the Mode B default) every device, lift and tile draws that page live, so the
+screen stays sharp at any size and the person can edit its text and colours in Mockup Studio
+(`editable.md`). `npm run screens` still captures each page for iOS and Android into `raw/` (where Mode A
+captures go): for its box warnings, the brand board and Mockup Studio's Screens list, and, in a
+screenshots project, as the pictures the images show. Web pages use the web kit: see `web.md`.
 
 ## Start from the app spec
 `briefs/app-spec.md` (the demo version shows the shape) gets the intake description at Step 0; write the
@@ -55,7 +58,7 @@ Prefix the app's own classes (`.s-meter`, `.goal-bar`) or scope them (`.card .me
 <main class="content pad stack">
   <div class="list icons" data-box="prefs">
     <div class="item"><span class="lead-icon" style="background:var(--orange)"><i data-icon="bell"></i></span>
-      <div class="body"><div class="title">Reminders</div><div class="sub">Daily at 9:00</div></div><span class="switch on"></span></div>
+      <div class="body"><div class="title">Reminders</div><div class="sub" data-id="reminder-time">Daily at 9:00</div></div><span class="switch on"></span></div>
   </div>
   <section class="card" data-box="week"><h3 class="t-headline">This week</h3>
     <div class="chart mt-m" data-chart="bars" data-values="3,5,4,6,7" data-labels="M,T,W,T,F" data-hl="4" style="height:120px"></div></section>
@@ -68,6 +71,20 @@ Then:
 npm run screens -- --screen settings          # raw/ios/settings.png + raw/android/settings.png + boxes
 ```
 and use it in a panel: `{ type: 'lift', screen: 'settings', box: 'week', w: 600, x: 660, y: 900 }`.
+
+## Editable screens: ids and edits.json
+Every element gets a stable id the person's edits are keyed by (`edits.json`, `editable.md`): its
+`data-id`, else its `data-box` name, else an automatic path such as `@prompt/p.q:1`; the kit's own chrome
+is `nav:title`, `nav:subtitle`, `tabs:1`..`tabs:N`, `status:time`, `fab:label`. Put `data-id` on the texts
+a person is likely to change (a greeting, a price, a name, a date): an explicit id survives any later
+rewrite of the screen, while an automatic one is tied to the element's position and words (a changed
+element gets its edit skipped with a warning, never applied to the wrong one).
+- Read `edits.json` before changing a screen; when you rewrite an element that has an edit, put the edit's
+  words or token colour into the HTML and delete the entry.
+- Colours in edits are token names (`tint`, `accent`, `text-2`, `brand-primary`) or hex; the inspector offers
+  the screen's tokens first.
+- A page opened from `npm run preview` (`/screens/home.html?platform=ios`) shows every id as `data-eid`;
+  add `&edits=none` to see it without the edits.
 
 ## What the kit gives you
 **System parts (built from attributes)**
@@ -88,7 +105,8 @@ and use it in a panel: `{ type: 'lift', screen: 'settings', box: 'week', w: 600,
   faceid, fingerprint, target, coffee); selected tabs use the filled form.
 - `.chart[data-chart=bars|line|spark|ring|donut]` with `data-values`, `data-labels`, `data-hl`. A line's
   y range is its data's own range (`data-min` / `data-max` to set it); `data-label-at="0,7,14,25"` ties
-  labels to data points; `data-colors` takes `color-mix(...)` and `var(--x, #fff)` (one colour per bar:
+  labels to data points (the way to label a few points of a long line: `data-labels="Mon,Thu,Sun,Tue"`
+  plus `data-label-at`, rather than empty pieces like `"Mon,,,Thu"`, which only space the labels evenly); `data-colors` takes `color-mix(...)` and `var(--x, #fff)` (one colour per bar:
   no fade). Zones (heart rate, pace): `data-bands="113,132,151,170"` + `data-band-colors` draw bands
   behind a line, `data-line-by-band` colours the line by zone, `data-avg` adds a dashed average. On a
   coloured card set `data-ring` (or `--chart-ring`) to the card's colour, else the end dot gets a white
@@ -149,6 +167,16 @@ the list); `data-box-radius="24"` (CSS px) sets it by hand.
 - **Languages:** UI strings go in `screens/strings.json` (the English text is the key). The default locale
   writes to `raw/<platform>/`, every other config locale that `strings.json` translates to
   `raw/<platform>/<locale>/`. `--locale es` captures one, `--locale all` every one.
+- **Chart labels:** `data-labels` is looked up as ONE key first (`"M,T,W,T,F": "L,M,X,J,V"`), then each
+  label on its own (`"Mon": "Lun"`); `data-note` is one key.
+- **What is left untranslated is flagged.** In every language but the default one, the capture
+  (`npm run screens`) and the live screens of an editable project print `screen "home" (es): 3 strings not
+  translated: "Water today", ...` (render log, `render-report.json` or `raw/screens-report.json`, and
+  `npm run validate`): every visible text, placeholder and chart label the language's entry lacks. Not
+  counted: strings with no letter (`9:41`, `18°`), anything inside `translate="no"` (put it on a person's
+  name or the brand: the kit does on avatars and the web sidebar's user), and words listed once for every
+  language in `"_same": ["Sam", "Brimpage", "km"]` at the top of `strings.json`. A word that stays the
+  same in one language only goes in that language's entry as itself (`"Total": "Total"`).
 - **Long translations:** use the short form a real app would use ("Dom, 12 de mayo", not the full date),
   and look at every language's captures for truncation.
 - **Right to left:** `ar`, `he`, `fa` and `ur` set `dir="rtl"`; the kit mirrors the layout.
@@ -162,8 +190,9 @@ the list); `data-box-radius="24"` (CSS px) sets it by hand.
   to a lime brand otherwise). Set them in `screens/app.css` under `.dark { ... }`, derived from the
   brand: `--app-glass-dark: color-mix(in oklab, var(--brand-deep) 70%, transparent)`.
 - **Dark pills:** `.pill.good` / `.pill.bad` have dark variants; read every dark capture anyway.
-- **Sharpness:** `npm run screens -- --scale 2` captures at 2x the pixel ratio (iOS 2640x5736) for
-  hi-res portfolio exports, so no screen is upscaled (`design.md`, "Sharpness").
+- **Sharpness:** an editable project is sharp at any `--scale` with no recapture. A screenshots project
+  needs `npm run screens -- --scale 2` (2x the pixel ratio, iOS 2640x5736) before hi-res portfolio
+  exports, so no screen is upscaled (`design.md`, "Sharpness").
 
 ## Rules for good mock screens
 - Leave the island and punch-hole area empty: the frames draw them.
@@ -177,6 +206,7 @@ the list); `data-box-radius="24"` (CSS px) sets it by hand.
   render glitch. End the content above it, or let a row boundary meet its top edge (`data-only="ios"`
   on the last section works: the iOS glass tab bar hides the cut, Android cannot).
 - After every edit: `npm run screens`, then read the changed captures in `raw/ios/` and `raw/android/`
-  before any render. The capture is what the store image shows.
+  before any render. A capture shows exactly what a live screen shows (same page, same size, same
+  edits), so it is the quickest way to read every screen, and fix every box warning it prints.
 - Brand colours and fonts come only from `brand/tokens.json` (`npm run brand -- apply`). `app.css` holds
   only what is specific to this app, such as an editorial serif for entry titles.

@@ -13,6 +13,7 @@ import { place } from '../layout/stage.js';
 import { FRAMES } from './frames.js';
 import { barHtml, mobileUi, splitUrl } from './browserbar.js';
 import { deviceOf, ownsDevice, platformOf } from './resolve.js';
+import { liveFrame } from '../core/live.js';
 
 export function missingHtml(s, label = 'missing screen') {
   return `<div class="missing">${esc(label)}<br>"${esc(s.name)}"<br>raw/${esc(s.platform)}/</div>`;
@@ -67,8 +68,19 @@ export function device(e, ctx) {
   if (!s.missing) Object.assign(node.dataset, { src: s.url, ui: '1' });
   node.style.setProperty('--pw', `${e.w * ctx.fr.f}px`);
   node.style.setProperty('--ar', String(s.w / s.h));
-  const img = s.missing ? missingHtml(s) : `<img src="${s.url}" alt="">`;
+  const img = s.missing ? missingHtml(s) : s.live ? '<div class="live-host"></div>' : `<img src="${s.url}" alt="">`;
   node.innerHTML = inner(name, o, img);
+  if (s.live) {
+    // the page at the capture's CSS width, scaled to the screen's width (object-fit: cover, top; core/live.js)
+    const f = liveFrame(s, ctx);
+    const pw = e.w * ctx.fr.f;
+    f.dataset.fitW = String(pw);
+    f.style.transform = `scale(${pw / s.css[0]})`;
+    node.querySelector('.live-host').appendChild(f);
+    // the part of the screen it shows (core/checks.js doubles); a window with a browser bar is left to the
+    // same rule as a capture there (its favicon is the first image: a macro lift of its page is a recipe)
+    if (!node.querySelector('.bar')) node.dataset.view = `0,0,${s.w},${s.h}`;
+  }
   place(node, e, ctx.fr, e.w);
   ctx.cv.el.appendChild(node);
   return node;

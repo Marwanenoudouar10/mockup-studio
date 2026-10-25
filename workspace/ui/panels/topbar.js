@@ -8,7 +8,7 @@ let els;
 function render() {
   const p = state.project;
   els.crumb.textContent = p ? p.name : '…';
-  document.title = p ? `${p.name} · Store Studio` : 'Store Studio';
+  document.title = p ? `${p.name} · Mockup Studio` : 'Mockup Studio';
   const groups = new Set(p ? p.rows.map((r) => r.group) : []);
   els.tabs.innerHTML = TABS.map(([id, label]) => `<button class="tab${state.tab === id ? ' on' : ''}" data-tab="${id}"${id === 'all' || groups.has(id) ? '' : ' disabled'}>${label}</button>`).join('');
   els.locale.innerHTML = (p ? p.locales : []).map((l) => `<option value="${l}"${l === state.locale ? ' selected' : ''}>${l}</option>`).join('');

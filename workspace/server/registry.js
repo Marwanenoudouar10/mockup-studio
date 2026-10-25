@@ -1,4 +1,4 @@
-// The projects Store Studio shows, remembered in a per-user workspace.json (server/index.js: defaultState):
+// The projects Mockup Studio shows, remembered in a per-user workspace.json (server/index.js: defaultState):
 // it holds local paths, so it never lives in the skill folder.
 // A project is a folder with a studio.config.js. A path given on the command line is either a project or a
 // folder of projects (searched two levels deep, so a repo with assets/template/ is found too). A folder of

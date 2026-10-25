@@ -1,10 +1,12 @@
-// Bake: fold layout.json (positions from Store Studio, see scripts/lib/layout.js) into studio.config.js,
-// then empty layout.json. Comments, variants and formatting in the config are kept; only numbers change
-// and added elements are appended to their panel's stage (with their id, so nothing else shifts).
+// Bake: fold layout.json (positions from Mockup Studio, see scripts/lib/layout.js) and the copy edits of
+// edits.json (headlines, subs, stage texts: scripts/lib/bake/copy.js) into studio.config.js, then empty what was
+// folded. Comments, variants and formatting in the config are kept; only numbers and those texts change, and
+// added elements are appended to their panel's stage (with their id, so nothing else shifts).
 //   node scripts/bake.js [--dry] [--config studio.config.js]
 // Safety: the patched config is imported and every element of every store, locale and panel must land
-// exactly where it did before; otherwise nothing is written. A backup goes to out/bake/.
-// Entries bake cannot express (a computed value, a spread, a per-store radius) stay in layout.json.
+// exactly where it did before, with the same words; otherwise nothing is written. A backup goes to out/bake/.
+// Entries bake cannot express (a computed value, a spread, a per-store radius, a store-variant headline) stay.
+// Screen edits (edits.json "screens") always stay: the kit applies them on every capture and live screen.
 import fs from 'node:fs';
 import path from 'node:path';
 import { ROOT, parseArgs, loadConfig, rel, fail } from './lib/cli.js';
@@ -12,7 +14,10 @@ import { keySet, panelsFor } from './lib/config.js';
 import { layoutFile, FEATURE, cleanValues } from './lib/layout.js';
 import { readConfig, prop } from './lib/bake/scan.js';
 import { createEditor, stageArray, findElement } from './lib/bake/patch.js';
-import { placements, diff, loadPatched } from './lib/bake/verify.js';
+import { placements, texts, diff, loadPatched } from './lib/bake/verify.js';
+import { foldCopy } from './lib/bake/copy.js';
+import { editsFile } from './lib/edits.js';
+import { applyCopy } from './lib/edit-copy.js';
 
 const clone = (v) => JSON.parse(JSON.stringify(v));
 
@@ -84,19 +89,24 @@ const clone = (v) => JSON.parse(JSON.stringify(v));
     done.push(`added ${a.id} (${el.type} ${el.screen || ''}) to panel ${panel}${store !== '*' ? ` (${store} only)` : ''}`);
   }
   if (keepAdds.length) left.add = keepAdds;
+  const layoutDone = done.length;
+  const editsRel = editsFile(cfgRel);
+  const copy = foldCopy({ root, cfg, edits: cfg.edits, ed, src });
+  done.push(...copy.done);
 
-  if (!done.length) {
-    console.log(`bake: nothing to bake in ${layoutRel}`);
+  if (!layoutDone && !copy.folded) {
+    console.log(`bake: nothing to bake in ${layoutRel} or ${editsRel}${copy.done.length ? `\n  ${copy.done.join('\n  ')}` : ''}`);
     return;
   }
   const text = ed.apply();
   const after = await loadPatched(abs, text, tokens, Object.keys(left).length ? left : null);
-  const problems = diff(placements(cfg), placements(after));
+  applyCopy(after, copy.left);
+  const problems = [...diff(placements(cfg), placements(after)), ...diff(texts(cfg), texts(after))];
   if (problems.length) {
     console.log(problems.slice(0, 20).map((r) => `  mismatch ${r}`).join('\n'));
     throw new Error(`bake would move ${problems.length} element value(s) differently: nothing written`);
   }
-  console.log(`bake (${cfgRel} + ${layoutRel})`);
+  console.log(`bake (${cfgRel} + ${layoutRel} + ${editsRel})`);
   for (const d of done) console.log(`  ${d}`);
   if (flags.dry) {
     console.log('\n  --dry: nothing written (verified: every element lands where it did)\n');
@@ -107,8 +117,11 @@ const clone = (v) => JSON.parse(JSON.stringify(v));
   fs.mkdirSync(path.dirname(backup), { recursive: true });
   fs.writeFileSync(backup, src);
   fs.writeFileSync(abs, text);
-  fs.writeFileSync(path.join(ROOT, layoutRel), `${JSON.stringify(clone(left), null, 2)}\n`);
+  if (layoutDone) fs.writeFileSync(path.join(ROOT, layoutRel), `${JSON.stringify(clone(left), null, 2)}\n`);
+  if (copy.folded) fs.writeFileSync(path.join(ROOT, editsRel), `${JSON.stringify(copy.left, null, 2)}\n`);
   const n = panelsFor(cfg, cfg.stores[0]).length;
-  console.log(`\n  verified and written: ${cfgRel} (backup ${rel(backup)}), ${layoutRel} ${Object.keys(left).length ? 'keeps the entries above' : 'is empty'}`);
+  const what = [layoutDone && `${layoutRel} ${Object.keys(left).length ? 'keeps the entries above' : 'is empty'}`,
+    copy.folded && `${editsRel} keeps its screen edits${copy.left.copy || copy.left.stage ? ' and the copy above' : ''}`].filter(Boolean);
+  console.log(`\n  verified and written: ${cfgRel} (backup ${rel(backup)}), ${what.join(', ')}`);
   console.log(`  ${n} panel(s) in ${cfg.stores[0].id}; re-render to check: npm run render -- --out out/qa/bake\n`);
 })().catch(fail);

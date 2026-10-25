@@ -1,4 +1,4 @@
-// The workspace server: project listing, layout.json / notes.json writes, live change events (SSE).
+// The workspace server: project listing, layout.json / notes.json / edits.json writes, live change events (SSE).
 async function json(url, opts) {
   const r = await fetch(url, { cache: 'no-store', ...opts });
   const body = await r.json().catch(() => ({}));
@@ -13,6 +13,7 @@ export const api = {
   project: (slug) => json(`/api/project/${encodeURIComponent(slug)}`),
   layout: (slug, patch) => post('/api/layout', { slug, ...patch }).then((r) => r.layout),
   notes: (slug, op, note) => post('/api/notes', { slug, op, note }).then((r) => r.notes),
+  edits: (slug, patch) => post('/api/edits', { slug, ...patch }).then((r) => r.edits),
 };
 
 // onChange({ slug, kinds, files }); onStatus(true | false)

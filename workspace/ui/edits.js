@@ -1,5 +1,7 @@
-// Every change the workspace makes is a layout.json patch (server/store.js) with its inverse, so it can be
-// undone and redone. Moves update the page live through the edit bridge; resets and "all stores" changes
+// Every change the workspace makes is a patch with its inverse, so it can be undone and redone, in ONE history
+// for both files: layout.json (moves; server/store.js) and edits.json (text and colours inside screens, headlines;
+// ui/screen/patches.js, server/edits-store.js). A record: { file: 'layout' | 'edits', slug, what, do, undo,
+// live | apply(dir) }. Moves update the page live through the edit bridge; resets and "all stores" changes
 // reload the frames that show that panel. layout.json format: the template's scripts/lib/layout.js.
 import { state, frames, emit } from './state.js';
 import { api } from './api.js';
@@ -31,12 +33,18 @@ function framesFor(store, panel) {
     && (store === 'feature' ? f.store === 'feature' : f.store !== 'feature' && (store === '*' || f.store === store)));
 }
 
-async function write(patch) {
+async function write(rec, patch) {
+  if (rec.file === 'edits') {
+    state.project.edits = await api.edits(state.project.slug, patch);
+    emit('edits', state.project.edits);
+    return;
+  }
   state.project.layout = await api.layout(state.project.slug, patch);
   emit('layout', state.project.layout);
 }
 
 function refresh(rec, dir) {
+  if (rec.apply) return rec.apply(dir);
   const live = rec.live && rec.live[dir];
   if (live) {
     const f = frames.get(rec.live.frame);
@@ -47,9 +55,9 @@ function refresh(rec, dir) {
   for (const f of framesFor(rec.store, rec.panel)) f.reload();
 }
 
-async function run(rec, msg) {
+export async function run(rec, msg) {
   try {
-    await write(rec.do);
+    await write(rec, rec.do);
     undos.push(rec);
     redos.length = 0;
     refresh(rec, 'after');
@@ -64,7 +72,7 @@ export async function undo() {
   const rec = undos.pop();
   if (!rec) return toast('Nothing to undo');
   if (rec.slug !== state.project.slug) { undos.push(rec); return toast('Undo: switch back to that project first'); }
-  await write(rec.undo);
+  await write(rec, rec.undo);
   redos.push(rec);
   refresh(rec, 'before');
   toast(`Undone: ${rec.what}`);
@@ -74,7 +82,7 @@ export async function redo() {
   const rec = redos.pop();
   if (!rec) return toast('Nothing to redo');
   if (rec.slug !== state.project.slug) { redos.push(rec); return toast('Redo: switch back to that project first'); }
-  await write(rec.do);
+  await write(rec, rec.do);
   undos.push(rec);
   refresh(rec, 'after');
   toast(`Redone: ${rec.what}`);

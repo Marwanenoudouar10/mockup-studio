@@ -11,6 +11,7 @@ import { issue } from '../core/issues.js';
 import { place } from '../layout/stage.js';
 import { missingHtml } from './device.js';
 import { platformOf } from './resolve.js';
+import { liveFrame } from '../core/live.js';
 
 const isPlain = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 const label = (e) => `lift "${e.box || 'crop'}" (${e.screen})`;
@@ -47,6 +48,8 @@ export function lift(e, ctx) {
   // a panorama strip: the finding belongs to the image the card sits on
   const slice = ctx.cv.slices > 1 ? { slice: Math.max(0, Math.min(ctx.cv.slices - 1, Math.floor(ctx.fr.X(e.x ?? 660) / ctx.cv.designW))) } : {};
   if (found && found.error) issue(`${label(e)}: ${found.error}`, slice);
+  // a live screen's box warnings about this card (cut by the screen edge, a tab bar or FAB over it)
+  if (e.box && s.boxWarnings) for (const w of s.boxWarnings.filter((x) => x.includes(`box "${e.box}" `))) issue(`${label(e)}: ${w}`, slice);
   const ok = found && !found.error;
   const crop = ok ? found.crop : [0, 0, s.w, s.h * 0.3];
   const [cx, cy, cw, ch] = crop;
@@ -58,9 +61,16 @@ export function lift(e, ctx) {
   if (e.bleed) node.dataset.bleed = '1';
   node.style.borderRadius = `${radius * zoom}px`;
   if (e.bg) node.style.setProperty('--lift-bg', e.bg);
-  node.innerHTML = ok
-    ? `<img src="${s.url}" alt="" style="width:${s.w * zoom}px;left:${-cx * zoom}px;top:${-cy * zoom}px">`
-    : missingHtml({ ...s, name: `${e.screen}${e.box ? ` #${e.box}` : ''}` }, s.missing ? 'missing screen' : 'bad crop');
+  if (ok && s.live) {
+    // the live page, moved so the card's corner sits at the lift's corner (capture px -> canvas px: zoom x dpr)
+    const f = liveFrame(s, ctx);
+    f.style.transform = `translate(${-cx * zoom}px, ${-cy * zoom}px) scale(${zoom * s.dpr})`;
+    node.appendChild(f);
+  } else {
+    node.innerHTML = ok
+      ? `<img src="${s.url}" alt="" style="width:${s.w * zoom}px;left:${-cx * zoom}px;top:${-cy * zoom}px">`
+      : missingHtml({ ...s, name: `${e.screen}${e.box ? ` #${e.box}` : ''}` }, s.missing ? 'missing screen' : 'bad crop');
+  }
   place(node, e, ctx.fr, e.w, (ch * e.w) / cw);
   ctx.cv.el.appendChild(node);
   return node;

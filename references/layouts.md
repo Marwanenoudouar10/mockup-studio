@@ -360,4 +360,4 @@ image).
   brief 10-15 on phones). Devices turn around their bottom centre: past 8 degrees, move `x` against the
   lean by about h x sin(r) / 2.
 - A card's `y` that works on the tall iPhone canvas can hide UI on 9:16: give it a per-store value.
-- Moving things by hand is faster in Store Studio (`workspace.md`); `npm run bake` writes the moves back.
+- Moving things by hand is faster in Mockup Studio (`workspace.md`); `npm run bake` writes the moves back.

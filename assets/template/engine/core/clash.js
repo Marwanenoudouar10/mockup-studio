@@ -5,22 +5,9 @@
 // (--logo-accent, engine/styles/field.css). Under 1.6:1 is an issue.
 import { contrast } from '../../scripts/brand/lib/color.js';
 import { issue } from './issues.js';
+import { hexOf } from '../vector/color.js'; // any CSS colour -> '#rrggbb', or null when (nearly) transparent
 
 const LIMIT = 1.6;
-let probe = null;
-
-// any CSS colour (rgb, color(srgb ...), oklab from color-mix) -> '#rrggbb', or null when (nearly) transparent
-function hexOf(css) {
-  if (!css || !String(css).trim()) return null;
-  probe = probe || document.createElement('canvas').getContext('2d', { willReadFrequently: true });
-  probe.clearRect(0, 0, 1, 1);
-  probe.fillStyle = '#000000';
-  probe.fillStyle = String(css).trim();
-  probe.fillRect(0, 0, 1, 1);
-  const [r, g, b, a] = probe.getImageData(0, 0, 1, 1).data;
-  if (a < 200) return null;
-  return `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
-}
 
 export function accentClash(cv, where = '') {
   const cs = getComputedStyle(cv.el);

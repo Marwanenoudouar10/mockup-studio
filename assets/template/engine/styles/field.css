@@ -4,8 +4,10 @@
    Each preset also sets the text roles: --text (headline), --sub, --em (accent word),
    --ornament (brush / highlight), --shadow (tint of every drop shadow), --watermark, and --logo-accent (the
    logo's accent shapes: set it to var(--paper) or var(--ink) on a field painted in the accent itself, where
-   the accent half of a mark would vanish). Light presets take --glow-1 / --glow-2 (strength of the colour
-   light in the corners) so a brand can turn them down in brand/theme.css without a new preset. */
+   the accent half of a mark would vanish). The light presets set it to --accent-on-paper, the accent deepened
+   to 3:1 on paper when it is too pale to read there (core/theme.js), else the accent itself. Light presets take
+   --glow-1 / --glow-2 (strength of the colour light in the corners) so a brand can turn them down in
+   brand/theme.css without a new preset. */
 
 .canvas {
   --text: var(--onField, #ffffff);
@@ -54,6 +56,7 @@
 /* pale paper, dark text */
 .canvas.field-light {
   --text: var(--ink);
+  --logo-accent: var(--accent-on-paper, var(--accent));
   --sub: color-mix(in srgb, var(--ink) 66%, var(--paper));
   --em: var(--primary);
   --ornament: var(--primary);
@@ -71,6 +74,7 @@
    A hot primary in the light preset's corners turns the field pink; this one stays bone white. */
 .canvas.field-paper {
   --text: var(--ink);
+  --logo-accent: var(--accent-on-paper, var(--accent));
   --sub: color-mix(in srgb, var(--ink) 66%, var(--paper));
   --em: var(--primary);
   --ornament: var(--primary);
@@ -87,6 +91,7 @@
 /* soft multi-colour mesh on paper, dark text */
 .canvas.field-mesh {
   --text: var(--ink);
+  --logo-accent: var(--accent-on-paper, var(--accent));
   --sub: color-mix(in srgb, var(--ink) 68%, var(--paper));
   --em: var(--primary);
   --ornament: var(--primary);

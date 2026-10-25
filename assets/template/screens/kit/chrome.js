@@ -28,7 +28,7 @@ function statusBar(kit) {
 const isLarge = (v, family) => (v !== undefined && (v === '' || v.split(/[\s,]+/).includes(family)) ? '' : undefined);
 
 function avatarHtml(v) {
-  return /^[a-z]+:/.test(v) ? `<div class="avatar"><div class="art" data-art="${esc(v.split(':')[1])}"></div></div>` : `<div class="avatar">${esc(v)}</div>`;
+  return /^[a-z]+:/.test(v) ? `<div class="avatar"><div class="art" data-art="${esc(v.split(':')[1])}"></div></div>` : `<div class="avatar" translate="no">${esc(v)}</div>`; // initials: a name
 }
 
 function navIos(h, d) {

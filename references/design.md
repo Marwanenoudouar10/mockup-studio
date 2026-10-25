@@ -106,7 +106,9 @@ before calling a layout done. Use variants for the few values that differ: `y: {
 
 ## Sharpness
 Store uploads keep their EXACT sizes (the App Store rejects anything else). Sharpness comes from never
-drawing a raster image larger than its pixels, and from separate hi-res copies for portfolios.
+drawing a raster image larger than its pixels, and from separate hi-res copies for portfolios. An
+editable project has no raster screens to upscale (its mock screens are drawn live at the image's size):
+the upscale check only concerns real captures, tile photos and screenshots projects.
 - **The upscale check.** Every render checks every screen it draws. A line such as
   `lift "streak" (insights) is upscaled 1.6x` means that card is soft. The finding goes to
   `final/render-report.json`, and `npm run validate` lists it (`--strict` fails on it).
@@ -114,7 +116,9 @@ drawing a raster image larger than its pixels, and from separate hi-res copies f
   device), or draw the element smaller. A lift of a small card at a big `w` is the usual cause.
 - **Hi-res portfolio copies:** `npm run export -- --scale 2` (or 3) also renders every image at 2x/3x
   into `final/portfolio/<locale>/<target>/`, never mixed with the upload folders. An iPhone image at 3x
-  is 3960x8604. Capture the screens at the same scale first, or the copies will warn.
+  is 3960x8604. A screenshots project captures the screens at the same scale first, or the copies warn.
+- **Vector files** (`npm run vector`, editable projects): SVG and PDF stay sharp at any zoom; real
+  captures inside them are still pixels (`editable.md`).
 - **Overview sheets** come out up to 3840 px wide as JPEG quality 94 (`--png` for lossless), at the
   sharpest pixel ratio that never upscales an image. Single wide images (og, portfolio) make narrower
   sheets unless `--scale 2` copies exist.

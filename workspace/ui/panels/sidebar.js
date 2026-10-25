@@ -1,9 +1,12 @@
 // Left sidebar: the projects (brand colour dot + name), the layers of the selected image (z order, the
-// headline as a text layer), and the project's captures as thumbnails to drag onto an image.
+// headline as a text layer; in screen mode the entered screen's elements, ui/screen/layers.js), and the
+// project's captures as thumbnails to drag onto an image.
 import { state, frames, on, emit, selected } from '../state.js';
 import { panelName } from '../model.js';
 import { select } from '../canvas/pointer.js';
 import { startDrop, screensPlatform } from '../canvas/drop.js';
+import { renderScreenLayers, initScreenLayers } from '../screen/layers.js';
+import { setList, showing, markRows, setText } from './list.js';
 
 let els;
 let openProject = () => {};
@@ -27,28 +30,31 @@ function renderLayers() {
   const { frame } = selected();
   const sel = state.selection;
   const p = state.project;
+  if (state.screen) { renderScreenLayers(els); return; }
   if (!frame || !p) {
-    els.layersTitle.textContent = 'Layers';
-    els.layers.innerHTML = '<div class="hint">Select an image or an element</div>';
+    setText(els.layersTitle, 'Layers');
+    setList(els.layers, '<div class="hint">Select an image or an element</div>', 'none');
     return;
   }
   const panel = sel.panel ?? (frame.panels[0] && frame.panels[0].id);
-  els.layersTitle.textContent = `Layers · ${panelName(p, frame, panel)}`;
+  const key = `image|${sel.frame}|${panel}`;
+  setText(els.layersTitle, `Layers · ${panelName(p, frame, panel)}`);
   if (!frame.boxes) {
-    els.layers.innerHTML = `<div class="hint">${frame.editable ? 'Loading…' : 'Preview only'}</div>`;
+    if (frame.editable && showing(els.layers, key)) return; // the image is reloading after a move: keep the rows
+    setList(els.layers, `<div class="hint">${frame.editable ? 'Loading…' : 'Preview only'}</div>`, key);
     return;
   }
   const items = frame.boxes.elements.filter((e) => e.panel === panel).sort((a, b) => (a.values.z ?? 0) - (b.values.z ?? 0));
   const rows = items.map((e) => {
     const on = sel.id != null && String(sel.id) === String(e.id) ? ' on' : '';
     const moved = e.moved || e.added ? ' moved' : '';
-    return `<button class="layer${on}${moved}" data-id="${esc(e.id)}" data-panel="${e.panel}" title="${esc(e.added ? 'added in Store Studio' : e.moved ? 'moved (layout.json)' : 'from the config')}">
+    return `<button class="layer${on}${moved}" data-id="${esc(e.id)}" data-panel="${e.panel}" title="${esc(e.added ? 'added in Mockup Studio' : e.moved ? 'moved (layout.json)' : 'from the config')}">
       <span>${esc(nameOf(e))}</span><small>z ${esc(e.values.z)}</small></button>`;
   });
   if (frame.boxes.copies.some((c) => c.panel === panel)) {
     rows.push(`<button class="layer text${sel.id === 'copy' ? ' on' : ''}" data-id="copy" data-panel="${panel}"><span>headline</span><small>text</small></button>`);
   }
-  els.layers.innerHTML = rows.join('') || '<div class="hint">No elements</div>';
+  if (setList(els.layers, rows.join('') || '<div class="hint">No elements</div>', key) && rows.length) markRows(els.layers);
 }
 
 let shown = '';
@@ -77,10 +83,11 @@ export function initSidebar(e, opts) {
   });
   els.layers.addEventListener('click', (ev) => {
     const b = ev.target.closest('[data-id]');
-    if (!b || !state.selection) return;
+    if (!b || !state.selection || state.screen) return;
     select({ frame: state.selection.frame, panel: Number(b.dataset.panel), id: b.dataset.id });
   });
   els.layers.addEventListener('mousemove', (ev) => {
+    if (state.screen) return;
     const b = ev.target.closest('[data-id]');
     const next = b && b.dataset.id !== 'copy' && state.selection ? { frame: state.selection.frame, panel: Number(b.dataset.panel), id: b.dataset.id } : null;
     if (JSON.stringify(next) !== JSON.stringify(state.hover)) { state.hover = next; emit('hover', next); }
@@ -94,7 +101,9 @@ export function initSidebar(e, opts) {
   on('projects', renderProjects);
   on('project', () => { renderProjects(); renderLayers(); renderScreens(); });
   on('select', () => { renderLayers(); renderScreens(); });
-  on('boxes', (f) => { if (state.selection && f.key === state.selection.frame) renderLayers(); });
+  on('boxes', (f) => { if (state.selection && f.key === state.selection.frame && !state.screen) renderLayers(); });
+  for (const ev of ['screen', 'screen-layers', 'edits']) on(ev, renderLayers);
+  initScreenLayers(els);
   on('screens', () => renderScreens(true));
   on('rows', () => { if (state.selection && !frames.get(state.selection.frame)) select(null); });
 }

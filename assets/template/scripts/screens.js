@@ -16,77 +16,52 @@
 // exports, so no screen is ever drawn larger than its pixels (the render log warns when one is).
 // Locales: the default locale goes to raw/<platform>/; every other config locale that screens/strings.json
 // translates goes to raw/<platform>/<locale>/. --locale picks some ('all' = every config locale).
-// Warns when a box is cut off by the screen edge or covered by system chrome (tab bar, FAB, toolbar, home
-// indicator, or any element marked data-chrome: a pinned CTA, a banner, a custom bottom bar).
-// Box radius: the element's own corner radius, else (an M3 connected list rounds its rows, not the list) the
-// first child's top corner; data-box-radius="24" (CSS px) sets it by hand.
-// A box in a grid or flex row is measured at its content height (align-self: start), not the height the row
-// stretched it to, so a lifted dashboard card has no blank bottom; data-box-fit="cell" keeps the stretched cell.
+// Box rules (radius, content height in a stretched row, cut-off and covered-by-chrome warnings): screens/kit/boxes.js,
+// shared with the live screens of an editable project (engine/core/live.js), so a lift finds the same card both ways.
+// Page rules (which file a name and platform capture): scripts/lib/pages.js, shared the same way.
+// edits.json next to the config (scripts/lib/edits.js) is applied by the kit before the capture; a skipped edit
+// prints as a warn: line and lands in raw/screens-report.json, which validate lists. --edits 0 captures without them.
+// The same report keeps, per capture in another language than the default one, the strings strings.json does not
+// translate there (screens/kit/i18n.js: kit.untranslated()).
+// An editable project (screens.mode 'live') still captures: brand boards, Mockup Studio thumbnails and screens
+// without a page (real captures) use raw/.
 import fs from 'node:fs';
 import path from 'node:path';
 import { PLATFORMS } from './lib/stores.js';
 import { flattenPng } from './lib/png.js';
 import { ROOT, parseArgs, list, loadConfig, isMain, fail } from './lib/cli.js';
 import { openSession, capture } from './lib/session.js';
+import { screenPages } from './lib/server.js';
+import { pagesFor, sizedPlatforms, hasPages, WEBS, PHONES } from './lib/pages.js';
+import { editsFile } from './lib/edits.js';
+import { untranslatedText } from './lib/locales.js';
 import { printFile } from './render.js';
 
 const SRC = path.join(ROOT, 'screens');
-const PHONES = ['ios', 'android'];
-const WEBS = ['web', 'mac'];
+const REPORT = path.join(ROOT, 'raw', 'screens-report.json');
+const OLD_REPORT = path.join(ROOT, 'raw', 'edits-report.json'); // its name before translations joined it
 
-const htmlNames = (dir) => (fs.existsSync(dir)
-  ? fs.readdirSync(dir).filter((f) => f.endsWith('.html') && !f.startsWith('_')).map((f) => f.slice(0, -5))
-  : []);
-
-// [{ name, page: 'screens/home.html' }] for one platform; a platform folder overrides a shared screen.
-export function screensFor(platform, withShared = true) {
-  const shared = withShared ? htmlNames(SRC) : [];
-  const own = htmlNames(path.join(SRC, platform));
-  const names = [...new Set([...shared, ...own])].sort();
-  return names.map((name) => ({ name, page: own.includes(name) ? `screens/${platform}/${name}.html` : `screens/${name}.html` }));
-}
-
-// web pages that ask for responsive captures: <meta name="kit-sizes" content="web,ipad,ios">
-function sizesOf(file) {
-  const m = fs.readFileSync(file, 'utf8').match(/<meta\s+name="kit-sizes"\s+content="([^"]*)"/);
-  return m ? m[1].split(/[\s,]+/).filter(Boolean) : [];
-}
-
-// the device sizes the pages of one web platform ask for (kit-sizes), e.g. ['ipad', 'ios']
-function sizesFor(w) {
-  const out = [];
-  for (const n of htmlNames(path.join(SRC, w))) for (const sz of sizesOf(path.join(SRC, w, `${n}.html`))) if (!out.includes(sz) && PLATFORMS[sz] && !WEBS.includes(sz)) out.push(sz);
-  return out;
-}
-
-// [{ name, page, query }] for one platform.
+// [{ name, page, query }] for one platform (scripts/lib/pages.js: the same rules as the live screens).
 //   web / mac: screens/<platform>/*.html.  Phones: the shared screens (plus overrides) when `phones` (the platform
 //   was asked for, or is a default phone), and every web page whose kit-sizes lists it (platform=web at that size).
-export function jobsFor(plat, phones) {
-  if (WEBS.includes(plat)) return screensFor(plat, false).map((j) => ({ ...j, query: `platform=${plat}` }));
-  const jobs = phones ? screensFor(plat).map((j) => ({ ...j, query: `platform=${plat}` })) : [];
-  for (const w of WEBS) {
-    for (const name of htmlNames(path.join(SRC, w))) {
-      if (!sizesOf(path.join(SRC, w, `${name}.html`)).includes(plat)) continue;
-      if (jobs.find((j) => j.name === name)) console.warn(`  warn: screens/${w}/${name}.html and a ${plat} screen share the name "${name}"`);
-      jobs.push({ name, page: `screens/${w}/${name}.html`, query: `platform=${w}&size=${plat}` });
-    }
-  }
-  return jobs;
+export function jobsFor(plat, phones, listing = screenPages(ROOT)) {
+  const jobs = pagesFor(listing, plat, { phones });
+  for (const j of jobs.filter((x) => x.clash)) console.warn(`  warn: ${j.page} and a ${plat} screen share the name "${j.name}"`);
+  return jobs.map(({ clash, ...j }) => j);
 }
 
 // -> { plats, phones: Set of platforms that also capture the shared phone screens }
-function platformsFor(asked) {
+function platformsFor(asked, listing) {
   if (asked) {
     const plats = [...asked];
-    for (const w of asked.filter((p) => WEBS.includes(p))) for (const sz of sizesFor(w)) if (!plats.includes(sz)) plats.push(sz);
+    for (const w of asked.filter((p) => WEBS.includes(p))) for (const sz of sizedPlatforms(listing, w)) if (!plats.includes(sz)) plats.push(sz);
     return { plats, phones: new Set(asked) };
   }
   const plats = [...PHONES];
   for (const w of WEBS) {
-    if (!htmlNames(path.join(SRC, w)).length) continue;
+    if (!hasPages(listing, w)) continue;
     plats.push(w);
-    for (const sz of sizesFor(w)) if (!plats.includes(sz)) plats.push(sz);
+    for (const sz of sizedPlatforms(listing, w)) if (!plats.includes(sz)) plats.push(sz);
   }
   return { plats, phones: new Set(PHONES) };
 }
@@ -106,56 +81,40 @@ function localesFor(cfg, flags) {
   return cfg.locales.filter((l) => l === cfg.defaultLocale || dict[l]);
 }
 
-// Box rectangles (capture pixels + corner radius) and what is wrong with them.
+// Box rectangles (capture pixels + corner radius) and what is wrong with them: screens/kit/boxes.js, the same
+// code the live screens use (a page without the kit imports it).
 export function boxesOf(page, dpr) {
-  return page.evaluate((k) => {
-    const out = {};
-    const warnings = [];
-    const chrome = [...document.querySelectorAll('.tabbar, .fab, .toolbar, .indicator, [data-chrome]')].map((n) => [n, n.getBoundingClientRect()]);
-    const radiusOf = (n) => {
-      if (n.dataset.boxRadius !== undefined) return parseFloat(n.dataset.boxRadius) || 0;
-      const own = parseFloat(getComputedStyle(n).borderTopLeftRadius) || 0;
-      const first = n.firstElementChild;
-      return own || (first ? parseFloat(getComputedStyle(first).borderTopLeftRadius) || 0 : 0);
-    };
-    const overlap = (a, b) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
-    // a grid item or flex-row item stretched by its row: its content height (the card as it would stand alone)
-    const fitHeight = (n, r) => {
-      const p = n.parentElement;
-      if (!p || n.dataset.boxFit === 'cell' || n.style.height) return r.height;
-      const ps = getComputedStyle(p);
-      const stretchy = /grid/.test(ps.display) || (/flex/.test(ps.display) && !/column/.test(ps.flexDirection));
-      if (!stretchy || !['auto', 'normal', 'stretch'].includes(getComputedStyle(n).alignSelf)) return r.height;
-      const prev = n.style.alignSelf;
-      n.style.alignSelf = 'start';
-      const h = n.getBoundingClientRect().height;
-      n.style.alignSelf = prev;
-      return Math.min(h, r.height);
-    };
-    for (const n of document.querySelectorAll('[data-box]')) {
-      if (!n.getClientRects().length) continue; // hidden at this size (responsive web captures)
-      const r = n.getBoundingClientRect();
-      const name = n.dataset.box;
-      if (out[name]) warnings.push(`box "${name}" is used twice; the last one wins`);
-      const rad = radiusOf(n);
-      const h = fitHeight(n, r);
-      out[name] = { x: Math.round(r.left * k), y: Math.round(r.top * k), w: Math.round(r.width * k), h: Math.round(h * k), r: Math.round(rad * k) };
-      if (r.width < 1 || r.height < 1) warnings.push(`box "${name}" has no size`);
-      else if (r.left < -0.5 || r.top < -0.5 || r.right > innerWidth + 0.5 || r.bottom > innerHeight + 0.5) warnings.push(`box "${name}" runs off the screen`);
-      for (const [c, cr] of chrome) {
-        if (!n.contains(c) && !c.contains(n) && overlap(r, cr) > 4) {
-          warnings.push(`box "${name}" is covered by ${c.classList[0] ? `.${c.classList[0]}` : `<${c.tagName.toLowerCase()} data-chrome>`}`);
-        }
-      }
-    }
-    return { boxes: out, warnings };
+  return page.evaluate(async (k) => {
+    const m = window.kit && window.kit.boxes ? window.kit : await import('/screens/kit/boxes.js');
+    return m.boxes(k);
   }, dpr);
+}
+
+// what the page just captured says about itself: edits.json findings (screens/kit/edits.js: a skipped or
+// re-anchored edit) and, in another language than the default one, the strings left untranslated
+const pageIssuesOf = (page, name, locale, isDefault) => page.evaluate((other) => {
+  const k = window.kit;
+  if (!k) return { edits: [], left: [] };
+  return { edits: k.editIssues ? k.editIssues() : [], left: other && k.untranslated ? k.untranslated() : [] };
+}, !isDefault).then(({ edits, left }) => [...edits, ...(left.length ? [untranslatedText(name, locale, left)] : [])]).catch(() => []);
+
+// raw/screens-report.json: { "raw/ios/es/home.png": ["edits.json: home > ... skipped", "screen \"home\" (es): ..."] },
+// read by validate
+function writeReport(found) {
+  let all = {};
+  for (const f of [OLD_REPORT, REPORT]) try { Object.assign(all, JSON.parse(fs.readFileSync(f, 'utf8'))); } catch { /* none yet */ }
+  fs.rmSync(OLD_REPORT, { force: true });
+  for (const [k, v] of Object.entries(found)) if (v.length) all[k] = v; else delete all[k];
+  if (!Object.keys(all).length) return fs.rmSync(REPORT, { force: true });
+  fs.mkdirSync(path.dirname(REPORT), { recursive: true });
+  return fs.writeFileSync(REPORT, `${JSON.stringify(all, null, 2)}\n`);
 }
 
 export async function runScreens(session, cfg, flags = {}) {
   if (!fs.existsSync(SRC)) throw new Error('no screens/ folder (mock screens live in screens/<name>.html)');
   const asked = list(flags.platform);
-  const { plats, phones } = platformsFor(asked);
+  const listing = screenPages(ROOT);
+  const { plats, phones } = platformsFor(asked, listing);
   const only = list(flags.screen);
   const scale = flags.scale === undefined || flags.scale === true ? 1 : Number(flags.scale);
   if (!(scale >= 1 && scale <= 4)) throw new Error(`--scale ${flags.scale}: use 1 to 4`);
@@ -165,11 +124,14 @@ export async function runScreens(session, cfg, flags = {}) {
   const fallback = !forced && cfg.screens && cfg.screens.theme ? String(cfg.screens.theme) : null;
   const theme = forced ? `&theme=${encodeURIComponent(forced)}` : fallback ? `&themeDefault=${encodeURIComponent(fallback)}` : '';
   if (forced || fallback) console.log(`  theme ${forced || `${fallback} (screens.theme in the config)`}`);
+  // edits.json next to the config (scripts/lib/edits.js): applied by the kit, so the captures show the edits too
+  const edits = `&edits=${encodeURIComponent(flags.edits === '0' ? 'none' : editsFile(cfg.configRel))}`;
+  const report = {};
   let n = 0;
   for (const plat of plats) {
     const spec = PLATFORMS[plat];
     if (!spec) throw new Error(`unknown platform "${plat}" (known: ${Object.keys(PLATFORMS).join(', ')})`);
-    const all = jobsFor(plat, phones.has(plat));
+    const all = jobsFor(plat, phones.has(plat), listing);
     const pages = all.filter((s) => !only || only.includes(s.name));
     if (only && !pages.length) {
       if (!asked || !asked.includes(plat)) continue;
@@ -182,7 +144,7 @@ export async function runScreens(session, cfg, flags = {}) {
         const t0 = Date.now();
         const [w, h] = spec.css;
         const dpr = spec.dpr * scale;
-        const [b] = await capture(session, `${page}?${query}&locale=${encodeURIComponent(locale)}${theme}`, {
+        const [b] = await capture(session, `${page}?${query}&locale=${encodeURIComponent(locale)}${theme}${edits}`, {
           width: w, height: h, dpr, readyMode: 'auto',
         });
         const png = flattenPng(b);
@@ -192,11 +154,14 @@ export async function runScreens(session, cfg, flags = {}) {
         const bfile = path.join(out, `${name}.boxes.json`);
         if (Object.keys(boxes).length) fs.writeFileSync(bfile, `${JSON.stringify(boxes, null, 2)}\n`);
         else if (fs.existsSync(bfile)) fs.unlinkSync(bfile);
-        printFile(file, png, Date.now() - t0, [...session.drain(), ...warnings]);
+        const own = await pageIssuesOf(session.page, name, locale, locale === cfg.defaultLocale);
+        report[path.relative(ROOT, file).split(path.sep).join('/')] = own;
+        printFile(file, png, Date.now() - t0, [...session.drain(), ...warnings, ...own]);
         n++;
       }
     }
   }
+  writeReport(report);
   return n;
 }
 

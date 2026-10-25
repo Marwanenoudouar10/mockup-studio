@@ -1,7 +1,8 @@
 // Palette options from ONE seed colour, worked out in OKLCH. Each option is a complete brand palette
 // (the engine's six colours + onField, a tint ramp, neutrals, UI tokens for the kit) with its WCAG checks.
 // Three directions, so the client compares three real looks, not three shades of one:
-//   drenched  the seed itself as a full-bleed gradient field (the loudest in search results)
+//   drenched  the seed itself as a full-bleed gradient field (the loudest in search results); a mid-tone seed
+//             that white type cannot read on at 4.5:1 is deepened just enough (the option says so: `deepened`)
 //   night     a near-black field lit by the seed (premium; suits dark screens)
 //   paper     warm paper with soft colour light, the seed darkened into an ink accent (editorial)
 // The mood sets chroma, paper warmth and the hue harmony that gives each option its accent.
@@ -43,11 +44,24 @@ const DIRECTIONS = [
   {
     key: 'drenched', label: 'Drenched', field: 'gradient',
     why: 'Your colour as a full-bleed gradient. The loudest option in a search results page.',
-    build: (s, m, seed) => ({
-      primary: seed,
-      secondary: oklch(s.l - 0.13, s.c * m.chroma, deepen(s.h, 8)),
-      deep: oklch(0.25, s.c * 0.55 * m.chroma, deepen(s.h, 16)),
-    }),
+    build: (s, m, seed) => {
+      // white headline AND sub line on the field: 4.7:1 leaves room for the accent tint in the sub line. A light
+      // seed (white under 3:1) keeps its colour and takes ink type instead (generate: onField)
+      let l = s.l;
+      let primary = seed;
+      if (contrast('#FFFFFF', seed) >= 3) {
+        while (contrast('#FFFFFF', primary) < 4.7 && l > 0.3) {
+          l -= 0.01;
+          primary = oklch(l, s.c, s.h);
+        }
+      }
+      return {
+        primary,
+        secondary: oklch(l - 0.13, s.c * m.chroma, deepen(s.h, 8)),
+        deep: oklch(0.25, s.c * 0.55 * m.chroma, deepen(s.h, 16)),
+        ...(primary !== seed ? { deepened: seed } : {}),
+      };
+    },
   },
   {
     key: 'night', label: 'Night', field: 'dark',
@@ -177,7 +191,9 @@ function fitAccent(colors, field, m, a, s) {
 }
 
 function uiOf(colors, ramp, m, paperH) {
-  const tint = [colors.primary, ramp[500], ramp[600], ramp[700], ramp[800]].find((x) => contrast('#FFFFFF', x) >= 4.5) || ramp[800];
+  // the tint carries white button labels AND tinted text on paper: 4.5:1 both ways
+  const tint = [colors.primary, ramp[500], ramp[600], ramp[700], ramp[800]]
+    .find((x) => contrast('#FFFFFF', x) >= 4.5 && contrast(x, colors.paper) >= 4.5) || ramp[800];
   const d = toOklch(colors.deep);
   const dc = Math.min(0.05, d.c * 0.7);
   return { tint, tint2: ramp[300], onTint: '#FFFFFF', bg: oklch(0.962, m.paperC, paperH),
@@ -202,16 +218,18 @@ export function generate(seedHex, { mood = 'balanced', count = 3, look = null, a
         checks: checks(o.colors, o.ui, o.field) };
     }
     const a = pinned ? acc('your accent', {}) : m.accents[i];
-    const colors = { ...d.build(s, m, seed, paper), accent: null, ink, paper };
+    const { deepened, ...built } = d.build(s, m, seed, paper);
+    const colors = { ...built, accent: null, ink, paper };
     colors.onField = d.field === 'gradient' && contrast('#FFFFFF', colors.primary) < 3 ? ink : '#FFFFFF';
     colors.accent = pinned || fitAccent(colors, d.field, m, a, s);
     const p = toOklch(colors.primary);
     const ramp = scale(p.c, p.h);
     const ui = uiOf(colors, ramp, m, paperH);
     return {
-      id: i + 1, key: d.key, name: `${d.label} · ${a.name}`, field: d.field, why: d.why,
+      id: i + 1, key: d.key, name: `${d.label} · ${a.name}`, field: d.field,
+      why: deepened ? `${d.why} Your ${deepened} is deepened to ${colors.primary} here, so white type reads on it.` : d.why,
       colors, ramp, neutrals: scale(Math.min(0.018, m.paperC + 0.004), paperH, false), ui,
-      checks: checks(colors, ui, d.field),
+      checks: checks(colors, ui, d.field), ...(deepened ? { deepened } : {}),
     };
   });
 }

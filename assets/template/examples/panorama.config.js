@@ -23,7 +23,7 @@ export default {
       headline: 'Your day, <em>one&nbsp;page</em> at a time',
       stage: [
         { type: 'phone', screen: 'home', w: 660, x: 600, y: 60, r: -4, z: 20 },
-        { type: 'lift', screen: 'insights', box: 'streak', w: 480, x: 300, y: 1180, r: -5, z: 30 },
+        { type: 'lift', screen: 'insights', box: 'streak', w: 480, x: 312, y: 1180, r: -5, z: 30 },
         // bridges image 1 and image 2
         { type: 'phone', screen: 'entry', w: 640, x: 1320, y: 420, r: 8, z: 15 },
       ],

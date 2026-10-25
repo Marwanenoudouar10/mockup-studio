@@ -72,8 +72,12 @@ function tops(cv, W, H) {
   }
 }
 
-// the part of the capture a device or tile shows, in capture pixels
+// the part of the capture a device or tile shows, in capture pixels (a live screen says it: data-view)
 function visibleSource(node) {
+  if (node.dataset.view) {
+    const [l, t, r, b] = node.dataset.view.split(',').map(Number);
+    return { l, t, r, b };
+  }
   const img = node.querySelector('img');
   if (!img || !img.naturalWidth) return null;
   if (!node.classList.contains('tile')) return { l: 0, t: 0, r: img.naturalWidth, b: img.naturalHeight };

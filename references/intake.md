@@ -20,7 +20,7 @@ two rounds at most.
     "question": "What are we making store images for?",
     "options": [
       { "label": "An existing app (Recommended)", "description": "Mode A: I capture screens from the Simulator, an emulator or a device, or use screenshots you send." },
-      { "label": "An app that is not built yet", "description": "Mode B: I design the brand and build the app's screens as mock-ups from your description." },
+      { "label": "An app that is not built yet", "description": "Mode B: I design the brand and build the app's screens as mock-ups from your description (editable)." },
       { "label": "A website or web app", "description": "A live URL I capture (Mode A) or pages I mock up (Mode B), in browser and laptop frames." },
       { "label": "App and website", "description": "Both: phone store images plus web and social images in one project." } ] },
   { "header": "Targets", "multiSelect": true,
@@ -47,10 +47,18 @@ two rounds at most.
 ] }
 ```
 
-## Round 2: brand, look, tone, output
+## Round 2: brand, look, tone, and output or type
 
 Put the brand option that fits the mode first: **"Use the existing brand"** for an existing app,
 **"Create a new brand"** for an app that is not built yet. Mark that one "(Recommended)".
+
+The fourth question depends on Round 1:
+- **Real captures** (an existing app, a live URL): ask **Output** (below). The project is a screenshots
+  project (`screens: { mode: 'raster' }`): real captures can only be pictures.
+- **Mock screens** (an app that is not built yet, web pages to design): ask **Type** in place of Output.
+  There is no app repo to build inside, the folder is a new one, and the Type options carry the extra files.
+- **App and website**: real app captures plus designed web pages can still be editable (a screen without a
+  page is drawn from its capture); ask Type when anything will be designed, else Output.
 
 ```json
 { "questions": [
@@ -82,6 +90,21 @@ Put the brand option that fits the mode first: **"Use the existing brand"** for 
 ] }
 ```
 
+**Type** (mock screens only, in place of Output):
+```json
+  { "header": "Type", "multiSelect": false,
+    "question": "Should the project be editable, or made of screenshots?",
+    "options": [
+      { "label": "Editable (Recommended)", "description": "I draw the mock screens live: sharp at any size, and you can change their text and colours yourself in Mockup Studio. PNGs per store and language, sheets, icons, brand board." },
+      { "label": "Editable, plus Figma and hi-res files", "description": "The same, plus every image as layered SVG (drag into Figma) and PDF, and 2x copies for Behance, Dribbble or Upwork." },
+      { "label": "Screenshots", "description": "The mock screens are captured once as PNGs, like real app screenshots: screen content is fixed, and SVG files hold each screen as one picture." } ] }
+```
+When to pick which:
+| type | pick it when | config |
+|---|---|---|
+| editable | the screens are mock screens (Mode B, web pages from the kit): almost always | `screens: { mode: 'live' }` |
+| screenshots | the screens are real captures (Mode A, `npm run capture`): required; or the person asks for plain captures | `screens: { mode: 'raster' }` |
+
 ## Defaults (when a question is skipped or the person says "just do it")
 
 | question | default | note |
@@ -94,12 +117,14 @@ Put the brand option that fits the mode first: **"Use the existing brand"** for 
 | Look | bold and bright | palette mood `bold`, field `gradient` |
 | Tone | short and benefit-led | |
 | Output | `~/store-projects/<app-slug>`, standard delivery | never inside the skill folder |
+| Type | editable for mock screens, screenshots for real captures | `screens.mode`: `'live'` or `'raster'` |
 
 ## The summary (one screen, then start)
 
 Show this and go on to Step 1 without waiting, unless something is unclear:
 ```
 Project   Brimpage, a five-minute journal (Mode B: no build yet, mock screens)
+Type      editable: live screens you can edit in Mockup Studio (Figma files on request)
 Targets   App Store 6.3" + 6.9", Google Play phone + feature graphic, icons
 Languages English, Spanish          Images  5 per store
 Brand     new: palettes, fonts and logo options first, then a brand board to approve
@@ -120,6 +145,7 @@ Next      Step 1, Brand: the brief, then 3 palettes to choose from
 | Look | `briefs/brand-brief.md` | `Mood` and the palette option to recommend (below) |
 | Tone | `briefs/copy.md` | the header comment: tone and two example headlines |
 | Output | the project folder; `CLAUDE.md` | the delivery list in "Project notes" |
+| Type | `studio.config.js` + `CLAUDE.md` | `screens: { mode: 'live' }` or `{ mode: 'raster' }`; the extra files (`--vector`, `--scale 2`) in the delivery list |
 
 Mode B also gets `briefs/app-spec.md`: the description now (name, one-liner, audience, platforms); the
 persona, screens and story map after the brand board is approved.
@@ -131,11 +157,15 @@ The look answer picks the flags and the option to recommend first:
 
 | look | `npm run brand -- palette` | recommend | field |
 |---|---|---|---|
-| Bold and bright | `--mood bold` | 1 Drenched | `gradient` |
+| Bold and bright | `--mood bold` | 1 Drenched (or the option palette's `next:` line names when 1 fails a check) | `gradient` |
 | Bold, on a light field (the brief says off-white, black type, one hot accent: sportswear, food) | `--look light --mood bold` | 2 Bone | `paper` |
 | Dark and premium | `--look dark --mood electric` (vivid accent) or `--mood serious` (muted gold) | 1 Night | `dark` |
 | Calm and soft | `--mood calm` | 3 Paper | `mesh` |
 | Clean and light | `--mood fresh` | 3 Paper, then set `brand.field: 'light'` | `light` |
+
+**When the recommended option fails a check** (palette ends with a `next:` line naming the option that
+passes): recommend that option instead, or keep the look and run palette again with a darker `--seed`
+(`brand.md`, "When the recommended option fails"). Say which one you recommend and why in the summary.
 
 A client accent (Mode A) or an accent the brief names ("electric lime"): `--accent "#hex"` pins it.
 A dark-first app also gets `--theme dark` (dark sample screens) and `screens: { theme: 'dark' }` in

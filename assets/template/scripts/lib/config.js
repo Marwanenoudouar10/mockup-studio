@@ -109,6 +109,13 @@ function normBrand(b = {}) {
   };
 }
 
+const MODES = ['raster', 'live'];
+export function normScreens(v = {}) {
+  const o = { theme: null, mode: 'raster', ...(v || {}) };
+  if (!MODES.includes(o.mode)) throw new Error(`screens.mode "${o.mode}": use 'live' (editable) or 'raster' (screenshots)`);
+  return o;
+}
+
 export function normalize(raw = {}) {
   const locales = (raw.locales && raw.locales.length ? raw.locales : ['en']).map(String);
   const stores = (raw.stores || ['appstore', 'playstore']).map(normStore);
@@ -130,8 +137,10 @@ export function normalize(raw = {}) {
     icon: { src: 'brand/icon.svg', background: brand.colors.primary, ...(raw.icon || {}) },
     // sheet.background: null = the brand's paper a step darker (engine/gallery.js), so light images still separate
     sheet: { height: 1100, wideWidth: 1040, width: 3840, quality: 94, gap: 44, padding: 96, background: null, title: true, ...(raw.sheet || {}) },
-    // mock screens: theme = the default theme of `npm run screens` ('dark' for an all-dark app)
-    screens: { theme: null, ...(raw.screens || {}) },
+    // mock screens: theme = the default theme of `npm run screens` ('dark' for an all-dark app); mode = the
+    // project type: 'raster' (screenshots: raw/ captures, required for real captures) or 'live' (editable: the
+    // mock screen pages drawn live in every device, lift and tile, so edits.json and vector export work)
+    screens: normScreens(raw.screens),
   };
 }
 

@@ -3,7 +3,9 @@
 //     ['en', 'fr'] renders the English line on the French images;
 //   - a plain string headline, sub or badge text in a config with several languages: the same words on
 //     every language's images.
-// The screens are checked by the pages (engine/core/assets.js): a screen borrowed from the default language.
+// The screens are checked by the pages (engine/core/assets.js): a screen borrowed from the default language;
+// and string by string (screens/kit/i18n.js kit.untranslated(), reported by engine/core/live.js and
+// scripts/screens.js with untranslatedText below).
 import { keySet } from './config.js';
 
 const TEXT = new Set(['headline', 'sub', 'text', 'title', 'label']);
@@ -33,6 +35,22 @@ function walk(v, ctx, where, textKey, out) {
   return undefined;
 }
 
+// copy.<panel>.stale in edits.json (Mockup Studio): a language not retyped after another one changed
+function staleFindings(cfg) {
+  const out = [];
+  const copy = cfg.edits && isPlain(cfg.edits.copy) ? cfg.edits.copy : {};
+  for (const [key, c] of Object.entries(copy)) {
+    for (const [field, list] of Object.entries(isPlain(c) && isPlain(c.stale) ? c.stale : {})) {
+      for (const l of Array.isArray(list) ? list : []) {
+        out.push({ locale: String(l), where: key === 'feature' ? 'feature graphic' : `panel ${key}`, text: `${field} was not retyped in "${l}" after `
+          + 'another language changed in Mockup Studio (retype it there, or "Keep as is"; by hand: remove it from copy.'
+          + `${key}.stale in edits.json)` });
+      }
+    }
+  }
+  return out;
+}
+
 // -> [{ locale (null = every language but the default), label, text }]
 export function textFindings(cfg) {
   const keys = keySet(cfg);
@@ -40,6 +58,7 @@ export function textFindings(cfg) {
   const out = [];
   cfg.panels.forEach((p) => walk({ ...p, id: undefined, space: undefined }, ctx, `panel ${p.id}`, null, out));
   if (cfg.feature) walk(cfg.feature, ctx, 'feature graphic', null, out);
+  out.push(...staleFindings(cfg));
   const seen = new Set();
   return out.filter((f) => {
     const k = `${f.locale}|${f.where}|${f.text}`;
@@ -47,4 +66,12 @@ export function textFindings(cfg) {
     seen.add(k);
     return true;
   }).map((f) => ({ locale: f.locale, label: `copy ${f.locale || 'all languages'}`, text: `${f.where}: ${f.text}` }));
+}
+
+// the warning for a mock screen's strings left in the default language (screens/kit/i18n.js untranslated())
+export function untranslatedText(name, locale, list) {
+  const shown = list.slice(0, 6).map((t) => `"${t.length > 40 ? `${t.slice(0, 39)}…` : t}"`).join(', ');
+  const more = list.length > 6 ? ` and ${list.length - 6} more` : '';
+  return `screen "${name}" (${locale}): ${list.length} string${list.length > 1 ? 's' : ''} not translated: ${shown}${more} `
+    + `(add ${list.length > 1 ? 'them' : 'it'} to screens/strings.json "${locale}"; names that never change: translate="no" or "_same")`;
 }

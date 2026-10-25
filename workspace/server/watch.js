@@ -1,12 +1,12 @@
 // Watches the files that change what a project's images look like and reports them, batched:
-//   onChange({ kinds: ['config'|'layout'|'notes'|'brand'|'screens'|'raw'|'briefs'|'engine'], files: [...] })
-// The root folder is watched flat (studio.config.js, layout.json, notes.json); the folders below recursively.
+//   onChange({ kinds: ['config'|'layout'|'notes'|'edits'|'brand'|'screens'|'raw'|'briefs'|'engine'], files: [...] })
+// The root folder is watched flat (studio.config.js, layout.json, notes.json, edits.json); the folders below recursively.
 // Where recursive fs.watch is missing (Linux before Node 20) every subfolder gets its own watcher.
 import fs from 'node:fs';
 import path from 'node:path';
 
 const FOLDERS = ['brand', 'screens', 'raw', 'briefs', 'engine', 'scripts'];
-const ROOT_FILES = { 'studio.config.js': 'config', 'layout.json': 'layout', 'notes.json': 'notes' };
+const ROOT_FILES = { 'studio.config.js': 'config', 'layout.json': 'layout', 'notes.json': 'notes', 'edits.json': 'edits' };
 const IGNORE = /(^|[\\/])(\.|node_modules|out|final)|\.bake-check-|~$|\.tmp$|\.swp$/;
 
 function kindOf(rel) {

@@ -11,6 +11,7 @@ import { buildElements } from '../elements/index.js';
 import { applyOrnament } from '../ornaments/index.js';
 import { applyColors } from '../core/theme.js';
 import { waitImages } from '../core/assets.js';
+import { waitLive } from '../core/live.js';
 import { brandFor } from '../../scripts/lib/config.js';
 
 export async function miniPanel(slot, { W, H, cfg, colors, field, vars = {}, panel, stage = [] }) {
@@ -30,5 +31,6 @@ export async function miniPanel(slot, { W, H, cfg, colors, field, vars = {}, pan
   await buildElements(stage, { cv, fr, brand, device: 'iphone', platform: 'ios', locale: cfg.defaultLocale });
   applyOrnament(ornament, block, cv, {});
   await waitImages(cv.el);
+  await waitLive();
   return cv;
 }

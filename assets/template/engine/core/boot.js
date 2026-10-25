@@ -1,8 +1,13 @@
 // Page plumbing: query params, config import, the ready/error flags the renderer waits on.
-import { normalize } from '../../scripts/lib/config.js';
+// Query: config=studio.config.js, layout=0 (without layout.json), edits=0 (without edits.json),
+// screens=raster|live (one page in the other project type), tokens=<file> (another token file).
+import { normalize, normScreens } from '../../scripts/lib/config.js';
 import { withTokens } from '../../scripts/lib/tokens.js';
 import { layoutFile, parseLayout } from '../../scripts/lib/layout.js';
+import { editsFile, parseEdits } from '../../scripts/lib/edits.js';
+import { applyCopy } from '../../scripts/lib/edit-copy.js';
 import { at } from './root.js';
+import { configureLive } from './live.js';
 
 export const q = new URLSearchParams(location.search);
 
@@ -25,19 +30,24 @@ export async function loadConfig({ draft = false } = {}) {
   const raw = withTokens(mod.default, await loadTokens(mod.default, draft));
   if (draft && !(raw.panels && raw.panels.length)) raw.panels = [{ headline: raw.brand && raw.brand.name, stage: [] }];
   const cfg = normalize(raw);
-  cfg.overrides = await loadLayout(file);
+  cfg.overrides = q.get('layout') === '0' ? null : await loadJson(layoutFile(file), parseLayout);
+  cfg.configRel = file;
+  if (q.get('screens')) cfg.screens.mode = normScreens({ mode: q.get('screens') }).mode;
+  const noEdits = q.get('edits') === '0';
+  cfg.edits = noEdits ? null : await loadJson(editsFile(file), parseEdits);
+  for (const n of applyCopy(cfg, cfg.edits)) console.warn(n);
+  configureLive({ mode: cfg.screens.mode, theme: cfg.screens.theme, edits: noEdits ? 'none' : editsFile(file) });
   return cfg;
 }
 
-// layout.json (scripts/lib/layout.js): the workspace's position overrides. ?layout=0 shows the config alone.
-async function loadLayout(file) {
-  if (q.get('layout') === '0') return null;
-  const r = await fetch(at(layoutFile(file)), { cache: 'no-store' }).catch(() => null);
-  if (!r || !r.ok || r.status === 204) return null; // 204: the servers' answer for "no layout.json yet"
+// layout.json / edits.json (scripts/lib/layout.js, edits.js): Mockup Studio's moves and edits, or null
+async function loadJson(rel, parse) {
+  const r = await fetch(at(rel), { cache: 'no-store' }).catch(() => null);
+  if (!r || !r.ok || r.status === 204) return null; // 204: the servers' answer for "no such file yet"
   try {
-    return parseLayout(await r.text());
+    return parse(await r.text());
   } catch (err) {
-    console.warn(`${layoutFile(file)} is not valid JSON (${err.message}): ignored`);
+    console.warn(`${rel} is not valid JSON (${err.message}): ignored`);
     return null;
   }
 }
@@ -48,7 +58,7 @@ export function setPageSize(w, h) {
   s.setProperty('--page-h', `${h}px`);
 }
 
-// Store Studio (workspace/, ?edit=1) hears about ready pages and errors without polling the frame.
+// Mockup Studio (workspace/, ?edit=1) hears about ready pages and errors without polling the frame.
 function tellParent(msg) {
   if (q.get('edit') === '1' && window.parent !== window) window.parent.postMessage({ ...msg, key: q.get('key') }, '*');
 }

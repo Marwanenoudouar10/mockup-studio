@@ -2,6 +2,8 @@
 //   'project'  a project (re)loaded          'rows'    the board was rebuilt
 //   'view'     pan / zoom changed            'boxes'   a frame reported its element boxes
 //   'select'   the selection changed         'layout'  layout.json changed   'notes'  notes.json changed
+//   'edits'    edits.json changed            'screen'  screen mode entered / left (ui/screen/enter.js)
+//   'screen-layers'  the entered screen's layers arrived   'screen-sel' / 'screen-hover'  its selected / hovered layer
 export const state = {
   projects: [], // [{ slug, folder, name, color, error }]
   slug: null,
@@ -10,6 +12,10 @@ export const state = {
   locale: null,
   view: { x: 40, y: 40, z: 0.4 },
   selection: null, // { frame: key, panel, id }  id 'copy' = the headline block, null = the image itself
+  // screen mode (editable projects): { frame, panel, id, screen, type, items, clip, tokens, issues, sel, hover, typing }
+  screen: null,
+  copyTyping: null, // { frame, panel, field } while a headline or sub line is edited on the canvas
+  moving: false, // the view is easing in or out of screen mode
   hover: null,
   live: false,
 };

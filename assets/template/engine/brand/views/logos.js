@@ -7,6 +7,7 @@ import { applyColors, loadFonts } from '../../core/theme.js';
 import { el, esc, page, iconShape } from '../ui.js';
 import { at } from '../../core/root.js';
 import { brandFor } from '../../../scripts/lib/config.js';
+import { accentOnPaper } from '../../../scripts/brand/lib/color.js';
 
 const LIGHT = ['light', 'paper', 'mesh'];
 
@@ -113,6 +114,8 @@ export async function render(cfg, data) {
       + `<div><h2>${esc(o.title)}</h2><p>${esc(o.desc)}</p></div></div>`;
     const grid = el('div', 'bb-logo-grid');
     const paper = await lockupTile(o.lockup, 'paper', '76%', c, c.ink);
+    const onPaper = accentOnPaper(c); // a pale accent would vanish on paper (brand board: the same)
+    if (onPaper) paper.querySelector('.bb-logo').style.setProperty('--accent', onPaper);
     const ink = await lockupTile(o.lockup, 'ink', '74%', c, '#FFFFFF');
     // a light field (light, paper, mesh) takes the ink lockup even when onField was left white
     const brand = await lockupTile(o.lockup, 'brand', '74%', c, LIGHT.includes(fieldName) ? c.ink : c.onField || '#FFFFFF');

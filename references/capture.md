@@ -5,6 +5,10 @@ device, or the client sends screenshots. The captures go in `raw/<platform>/`, a
 store size from them inside its own frames. Write the plan in `briefs/capture-plan.md` first (the demo
 version shows the shape). Websites and web apps: `npm run capture`, see `web.md`.
 
+**A project of real captures is a screenshots project:** set `screens: { mode: 'raster' }` in
+`studio.config.js` (the demo's `'live'` draws mock screen pages, `editable.md`). The person can still move
+things and retype headlines in Mockup Studio; the screens themselves stay pictures, also in the SVG export.
+
 **In Mode A the captures come before the brand board** (SKILL.md Step 1): collect or capture them first,
 since the brand's colours are sampled from them and the board shows one. The project setup already removed
 the demo's `raw/`, so nothing here deletes the client's files.

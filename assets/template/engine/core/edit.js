@@ -1,13 +1,15 @@
-// Edit bridge for Store Studio (workspace/). Off unless the page is opened with ?edit=1 (&key=<frame key>).
+// Edit bridge for Mockup Studio (workspace/). Off unless the page is opened with ?edit=1 (&key=<frame key>).
 // Then the page:
 //   - tags every stage element (data-el = its id, data-panel = its config panel number; see scripts/lib/layout.js),
 //   - posts { ss:'boxes' } to the parent window: each element's box in page px, its config values and the
 //     config -> page px mapping, so the workspace can draw handles and turn a drag into config units,
 //   - accepts { ss:'set', panel, id, values }, { ss:'add', element }, { ss:'remove', panel, id }, { ss:'ping' }
-//     from the parent and redraws that one element with the same element code as a render (no reload).
-// Nothing is written from here: the workspace saves layout.json, which every render applies too.
+//     from the parent and redraws that one element with the same element code as a render (no reload),
+//   - editable projects: the messages that edit INSIDE a live screen and the headline in place (core/edit-screen.js).
+// Nothing is written from here: the workspace saves layout.json and edits.json, which every render applies too.
 import { q } from './boot.js';
 import { fingerprint } from '../../scripts/lib/layout.js';
+import { SCREEN_MESSAGES, screenMessage, initScreenBridge, redrawn } from './edit-screen.js';
 
 export const editing = q.get('edit') === '1';
 const items = new Map(); // 'panel|id' -> { e, node, scope }
@@ -66,12 +68,25 @@ function snapshot() {
     crop: !!e.crop, text: e.text || null, src: e.src || null, device: e.device || null,
     of: fingerprint(e), added: !!e.added, moved: !!e.moved, values: valuesOf(e, scope), rect: measure(node, k), map: mapOf(scope, k),
   }));
-  const copies = (page.copies || []).filter((c) => c.node).map((c) => ({ panel: c.panel, rect: measure(c.node, k) }));
+  const copies = (page.copies || []).filter((c) => c.node).map((c) => ({ panel: c.panel, rect: measure(c.node, k), parts: partsOf(c.node) }));
   return {
     ss: 'boxes', key: q.get('key'), kind: page.kind, store: page.store, panels: page.panels,
     size: { w: page.cv.W * page.cv.slices, h: page.cv.H, slice: page.cv.W }, reflow: !!page.reflow,
     map: scope0 ? mapOf(scope0, k) : null, elements, copies,
   };
+}
+
+// the headline and sub line of a copy block: page px boxes (the copy block is never rotated) and their words
+function partsOf(copy) {
+  const out = {};
+  for (const [field, sel] of [['headline', '.headline'], ['sub', '.sub']]) {
+    const n = copy.querySelector(sel);
+    if (!n) continue;
+    const r = n.getBoundingClientRect();
+    out[field] = { rect: { cx: round(r.left + r.width / 2), cy: round(r.top + r.height / 2), w: round(r.width), h: round(r.height), rot: 0 },
+      html: field === 'headline' ? n.innerHTML : n.textContent };
+  }
+  return out;
 }
 
 function post() {
@@ -82,11 +97,13 @@ function redraw(it, e) {
   if (it.node) it.node.remove();
   it.e = e;
   it.node = it.scope.draw(e);
+  redrawn(e.$panel ?? null, e.id);
 }
 
 async function onMessage(ev) {
   if (ev.source !== window.parent || !ev.data || typeof ev.data.ss !== 'string') return;
   const m = ev.data;
+  if (SCREEN_MESSAGES.has(m.ss)) return screenMessage(m);
   const it = items.get(keyOf(m.panel, m.id));
   if (m.ss === 'set' && it) {
     const clean = {};
@@ -110,6 +127,12 @@ async function onMessage(ev) {
 export function startBridge(info) {
   if (!editing) return;
   page = info;
+  initScreenBridge({
+    nodeOf: (panel, id) => { const it = items.get(keyOf(panel, id)); return it && it.node && it.node.isConnected ? it.node : null; },
+    copyNode: (panel) => { const c = (page.copies || []).find((x) => x.panel === panel); return c ? c.node : null; },
+    post: (msg) => window.parent.postMessage({ ...msg, key: q.get('key') }, '*'),
+    boxes: () => requestAnimationFrame(post), // a headline typed in place grows: the Studio's box follows
+  });
   window.addEventListener('message', onMessage);
   post();
 }

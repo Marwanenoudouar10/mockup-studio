@@ -1,9 +1,11 @@
 // The copy block: logo (optional), headline with <em> accent, sub line.
 // Long translations never clip: the headline and sub shrink until they fit their max line count.
 // panel.wordmark (brand boards before a logo is chosen): the name as live text in the display face instead
-// of brand.logo, so the colour and font boards never show another brand's lockup.
+// of brand.logo, so the colour and font boards never show another brand's lockup. A brand.logo file that does not
+// load is set the same way, with an issue (a skipped logo step must not silently drop the logo).
 import { el, esc } from '../core/boot.js';
 import { graphic } from '../core/assets.js';
+import { issue } from '../core/issues.js';
 import { lineRects } from '../ornaments/lines.js';
 import { designRect } from './canvas.js';
 
@@ -18,7 +20,13 @@ export async function buildCopy(panel, { cv, slice = 0, brand, layout, ornament,
   copy.style.top = `${sizes.top ?? (tall ? layout.top : layout.topShort)}px`;
   if (panel.logo && (brand.logo || panel.wordmark)) {
     const width = sizes.logo ?? (tall ? layout.logo : layout.logoShort);
-    const logo = panel.wordmark || !brand.logo ? el('div', 'logo wordmark', esc(panel.name || brand.name)) : await graphic(brand.logo, 'logo');
+    const word = () => el('div', 'logo wordmark', esc(panel.name || brand.name));
+    let logo = panel.wordmark || !brand.logo ? word() : await graphic(brand.logo, 'logo');
+    if (!logo.firstElementChild && !logo.classList.contains('wordmark')) {
+      issue(`logo ${brand.logo} not found: the name is set as text instead (draw the logo and npm run brand -- apply --logo <id>, `
+        + 'or a quick one from the name: npm run brand -- apply --logo wordmark)');
+      logo = word();
+    }
     if (logo.classList.contains('wordmark')) logo.style.fontSize = `${Math.round(width * 0.2)}px`;
     else logo.style.width = `${width}px`;
     if (sizes.logoGap != null) logo.style.marginBlockEnd = `${sizes.logoGap}px`;

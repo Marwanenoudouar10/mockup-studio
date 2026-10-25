@@ -1,9 +1,9 @@
-// Store Studio boot: wires the panels and the canvas, opens a project, and keeps it live:
+// Mockup Studio boot: wires the panels and the canvas, opens a project, and keeps it live:
 // a change in a project's files (server SSE) reloads only that project's frames, keeping zoom, pan and the
 // selection. Frames talk to the page through the edit bridge (engine/core/edit.js) with postMessage.
 import { state, frames, on, emit } from './state.js';
 import { api, listen } from './api.js';
-import { loadProject, projectSummary, shape } from './model.js';
+import { loadProject, projectSummary, shape, layoutTargets } from './model.js';
 import { initViewport, fit } from './canvas/viewport.js';
 import { initBoard, build, clearBoard, reloadAll } from './canvas/board.js';
 import { initOverlay } from './canvas/overlay.js';
@@ -15,6 +15,8 @@ import { initSidebar } from './panels/sidebar.js';
 import { initInspector } from './panels/inspector.js';
 import { initNotes } from './panels/notes.js';
 import { toast } from './panels/toast.js';
+import { initScreen } from './screen/enter.js';
+import { initText } from './screen/text.js';
 
 const $ = (id) => document.getElementById(id);
 const els = {
@@ -29,12 +31,14 @@ function banner(text) {
 }
 
 function remember(slug) {
-  try { localStorage.setItem('store-studio.project', slug); } catch { /* private mode */ }
+  try { localStorage.setItem('mockup-studio.project', slug); } catch { /* private mode */ }
 }
 
 async function openProject(slug) {
   state.slug = slug;
   state.selection = null;
+  state.screen = null;
+  state.copyTyping = null;
   clearBoard();
   remember(slug);
   try {
@@ -80,6 +84,7 @@ async function changed({ slug, kinds }) {
   }
   const info = await api.project(slug).catch(() => null);
   if (!info) return;
+  const moved = kinds.includes('layout') ? layoutTargets(p.layout, info.layout || {}) : null;
   if (kinds.includes('layout')) {
     p.layout = info.layout;
     emit('layout', p.layout);
@@ -87,7 +92,14 @@ async function changed({ slug, kinds }) {
   }
   if (kinds.includes('notes')) { p.notes = info.notes; emit('notes', p.notes); }
   if (kinds.some((k) => ['raw', 'screens'].includes(k))) { p.screens = info.screens; emit('screens'); }
-  if (kinds.some((k) => ['layout', 'raw', 'screens'].includes(k))) reloadAll((f) => f.editable);
+  if (kinds.includes('edits')) {
+    p.edits = info.edits || {};
+    emit('edits', p.edits);
+    toast('edits.json changed on disk: refreshed');
+  }
+  // an outside edit of edits.json: every image reloads (copy and screen edits both apply when a page loads)
+  if (kinds.some((k) => ['raw', 'screens', 'edits'].includes(k))) reloadAll((f) => f.editable);
+  else if (moved) reloadAll(moved); // only the images whose layout entries changed
   if (kinds.includes('briefs')) reloadAll((f) => f.store === 'brand');
 }
 
@@ -113,6 +125,8 @@ async function main() {
   initSidebar(els, { openProject });
   initInspector($('insp'));
   initNotes(els);
+  initScreen(els);
+  initText(els);
   on('tab', () => { state.selection = null; build(); fit(state.tab === 'all'); emit('select', null); });
   on('locale', () => reloadAll());
   on('resized', () => build());
@@ -130,7 +144,7 @@ async function main() {
     return;
   }
   let last = null;
-  try { last = localStorage.getItem('store-studio.project'); } catch { /* private mode */ }
+  try { last = localStorage.getItem('mockup-studio.project') || localStorage.getItem('store-studio.project'); } catch { /* private mode */ }
   const want = new URLSearchParams(location.search).get('project');
   const first = [want, last].find((s) => s && state.projects.some((p) => p.slug === s)) || state.projects[0].slug;
   await openProject(first);
@@ -138,4 +152,4 @@ async function main() {
   window.__studio = { state, frames }; // for tests and the curious
 }
 
-main().catch((err) => banner(`Store Studio failed to start: ${err.message}`));
+main().catch((err) => banner(`Mockup Studio failed to start: ${err.message}`));

@@ -47,13 +47,8 @@ async function settle(page, readyMode) {
   if (err) throw new Error(err);
 }
 
-// Load a page, wait until it is ready, screenshot it.
-// clips: optional [{x, y, width, height}] -> one buffer per clip, all from the same layout.
-// sizeFrom: name of a window property {w, h} the page sets; the viewport is resized to it before the shot.
-// dprFrom: name of a window property holding the pixel ratio to shoot at (overview sheets).
-export async function capture(session, pathAndQuery, opts) {
-  const { width, height, clips, type = 'png', quality = 90, omitBackground = false, readyMode = 'flag', sizeFrom, dprFrom } = opts;
-  let { dpr = 1 } = opts;
+// Load a page and wait until it is ready (no screenshot): npm run vector prints and serializes it instead.
+export async function open(session, pathAndQuery, { width, height, dpr = 1, readyMode = 'flag' }) {
   const { page } = session;
   await page.setViewport({ width, height, deviceScaleFactor: dpr });
   await page.goto(`${session.origin}/${pathAndQuery.replace(/^\//, '')}`, { waitUntil: 'load', timeout: 120000 });
@@ -62,6 +57,17 @@ export async function capture(session, pathAndQuery, opts) {
   } catch (err) {
     throw new Error(`${pathAndQuery}: ${err.message}`);
   }
+}
+
+// Load a page, wait until it is ready, screenshot it.
+// clips: optional [{x, y, width, height}] -> one buffer per clip, all from the same layout.
+// sizeFrom: name of a window property {w, h} the page sets; the viewport is resized to it before the shot.
+// dprFrom: name of a window property holding the pixel ratio to shoot at (overview sheets).
+export async function capture(session, pathAndQuery, opts) {
+  const { width, height, clips, type = 'png', quality = 90, omitBackground = false, readyMode = 'flag', sizeFrom, dprFrom } = opts;
+  let { dpr = 1 } = opts;
+  const { page } = session;
+  await open(session, pathAndQuery, { width, height, dpr, readyMode });
   let w = width;
   let h = height;
   if (sizeFrom || dprFrom) {

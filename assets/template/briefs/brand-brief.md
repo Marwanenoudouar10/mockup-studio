@@ -14,7 +14,7 @@
 - **Category:** Health & Fitness (secondary: Lifestyle)
 - **Competitors to stand apart from:** the big blue journaling apps (cool blue, dense screens, stock photos) and the gamified mood trackers (neon, cartoon mascots, badges everywhere).
 - **Seed colour:** #6C5CE7 (a soft violet: evening calm, not the category's usual blue)
-- **Mood:** warm (one of: balanced, calm, bold, warm, fresh, serious)
+- **Mood:** warm (one of: balanced, calm, bold, warm, fresh, serious, electric)
 - **Hero line:** Your day, <em>one&nbsp;page</em> at a time
 - **Must keep:** nothing yet (pre-launch, no existing logo)
 - **Avoid:** blue as the main colour; hearts and brains as symbols; anything clinical.

@@ -1,5 +1,7 @@
-// Everything, with ONE Chrome: render -> feature graphic -> icons -> [portfolio] -> validate -> overview sheets.
+// Everything, with ONE Chrome: render -> feature graphic -> icons -> [portfolio] -> [vector] -> validate -> sheets.
 //   node scripts/export.js [--store ..] [--locale ..] [--out final] [--config file] [--scale 2|3] [--png] [--strict]
+//     [--vector] [--screens raster|live]
+// --vector adds the editable files (scripts/vector.js): final/vector/<locale>/<target>/NN.svg + NN.pdf.
 // --scale N adds the hi-res portfolio pass (every image at N x into final/portfolio/<locale>/<target>/), and the
 // overview sheets use those files, so they come out 3840 px wide and sharp when zoomed.
 // First it removes output the config no longer makes (a dropped locale or target, the demo's renders in a
@@ -13,6 +15,7 @@ import { runIcons } from './icons.js';
 import { runValidate } from './validate.js';
 import { runSheet } from './sheet.js';
 import { pruneStale } from './lib/stale.js';
+import { runVector } from './vector.js';
 
 (async () => {
   const flags = parseArgs();
@@ -21,7 +24,7 @@ import { pruneStale } from './lib/stale.js';
   const base = { ...flags, scale: 1 };
   const { cfg, rel: cfgRel } = await loadConfig(flags);
   const t0 = Date.now();
-  const steps = scale > 1 ? 6 : 5;
+  const steps = 5 + (scale > 1 ? 1 : 0) + (flags.vector ? 1 : 0);
   let n = 0;
   const step = (text) => console.log(`${++n}/${steps} ${text}`);
   const session = await openSession();
@@ -38,6 +41,10 @@ import { pruneStale } from './lib/stale.js';
       step(`portfolio at ${scale}x -> ${rel(outDir(flags))}/portfolio/`);
       await runRender(session, cfg, cfgRel, flags);
       await runFeature(session, cfg, cfgRel, flags);
+    }
+    if (flags.vector) {
+      step(`vector (SVG + PDF) -> ${rel(outDir(flags))}/vector/`);
+      await runVector(session, cfg, cfgRel, base);
     }
     step(`validate ${rel(outDir(flags))}/`);
     const v = runValidate(cfg, flags);

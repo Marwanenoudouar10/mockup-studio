@@ -6,6 +6,6 @@ out/
 # login files for npm run capture (never commit)
 cookies*.json
 headers*.json
-# bake writes a temporary copy of the config next to it while it verifies; Store Studio writes via *.tmp
+# bake writes a temporary copy of the config next to it while it verifies; Mockup Studio writes via *.tmp
 .bake-check-*
 *.tmp

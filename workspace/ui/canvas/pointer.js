@@ -3,12 +3,16 @@
 //   handles      corners = resize (keeps the aspect), round knob = rotate (Shift snaps to 15°)
 //   image        press = select the image (its layers show in the sidebar)
 //   empty space, Space + drag, middle button = pan
+//   double-click a device / lift / tile (editable projects) = screen mode, a headline = type it (ui/screen/pointer.js)
 // On release the change goes to layout.json (ui/edits.js).
 import { state, emit, selected } from '../state.js';
 import { local, setView } from './viewport.js';
 import { hit, screenRect } from './geometry.js';
 import { ui, redraw } from './overlay.js';
 import { commit } from '../edits.js';
+import { screenDown, screenHover, initScreenPointer } from '../screen/pointer.js';
+import { hoverLayer } from '../screen/enter.js';
+import { stopTyping, typingNow } from '../screen/text.js';
 
 let canvas;
 export const keys = { space: false };
@@ -112,10 +116,12 @@ function resize(e, f, el) {
 }
 
 function down(e) {
-  if (e.target.closest('.pin, .zoom, .toast, .banner')) return;
+  if (e.target.closest('.pin, .zoom, .toast, .banner, .scr-bar')) return;
   if (e.button === 1 || (e.button === 0 && keys.space)) { e.preventDefault(); pan(e); return; }
   if (e.button !== 0) return;
   canvas.focus({ preventScroll: true });
+  if (state.screen && screenDown(e, local(e))) return;
+  if (typingNow()) stopTyping(); // a headline typed in place: a click elsewhere saves it
   const handle = e.target.closest('[data-h]');
   const cur = selected();
   if (handle && cur.el && cur.frame) {
@@ -139,6 +145,7 @@ function down(e) {
 function hover(e) {
   if (e.buttons) return;
   const p = local(e);
+  if (state.screen) { canvas.style.cursor = ''; screenHover(p); return; }
   const h = hit(p.x, p.y);
   const next = h.el && h.el.type !== 'text' ? { frame: h.frame.key, panel: h.el.panel, id: h.el.id } : null;
   if (JSON.stringify(next) !== JSON.stringify(state.hover)) {
@@ -152,6 +159,7 @@ export function initPointer(els) {
   ({ canvas } = els);
   canvas.addEventListener('pointerdown', down);
   canvas.addEventListener('pointermove', hover);
-  canvas.addEventListener('pointerleave', () => { state.hover = null; emit('hover', null); });
+  canvas.addEventListener('pointerleave', () => { state.hover = null; emit('hover', null); hoverLayer(null); });
   canvas.addEventListener('auxclick', (e) => e.preventDefault());
+  initScreenPointer(els);
 }

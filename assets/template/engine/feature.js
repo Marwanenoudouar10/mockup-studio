@@ -3,13 +3,16 @@
 // RTL locales mirror the whole composition (copy to the right, devices to the left).
 // Safe zone: Google's cutoff-zone diagram crops about 15% per side, so the logo, name and slogan stay inside
 // x 154-872, y 76-424 (SAFE). The copy starts at x 154 by default and the page warns when the copy or the
-// logo (measured on its own: it may overhang the copy box) leaves the zone.
+// logo (measured on its own: it may overhang the copy box) leaves the zone, and when a lifted card, a badge or a
+// stage text does (bleed: true = cut on purpose). Devices and tiles may bleed past it (a big phone on the edge).
 import { featureTarget } from '../scripts/lib/config.js';
 import { q, loadConfig, ready, fail, plain } from './core/boot.js';
 import { applyColors, loadFonts } from './core/theme.js';
 import { waitImages } from './core/assets.js';
+import { waitLive } from './core/live.js';
 import { upscaleCheck } from './core/quality.js';
 import { layoutCheck } from './core/checks.js';
+import { liftSamples } from './core/edges.js';
 import { accentClash } from './core/clash.js';
 import { issue, issues } from './core/issues.js';
 import { makeCanvas } from './layout/canvas.js';
@@ -33,11 +36,23 @@ function inkBox(copy, o) {
   };
 }
 
+const sidesOut = (box) => ['left', 'top'].filter((k) => box[k] < SAFE[k] - 1).concat(['right', 'bottom'].filter((k) => box[k] > SAFE[k] + 1));
+
 function safeZoneCheck(copy, cv) {
-  const box = inkBox(copy, cv.el.getBoundingClientRect());
-  const out = ['left', 'top'].filter((k) => box[k] < SAFE[k] - 1).concat(['right', 'bottom'].filter((k) => box[k] > SAFE[k] + 1));
+  const o = cv.el.getBoundingClientRect();
+  const out = sidesOut(inkBox(copy, o));
   if (out.length) {
     issue(`feature graphic: the copy or logo crosses the ${out.join(' + ')} cutoff zone (keep it inside x ${SAFE.left}-${SAFE.right}, y ${SAFE.top}-${SAFE.bottom}): set feature.side, copyWidth or size`);
+  }
+  for (const n of cv.el.querySelectorAll('.lift, .badge, .stage-text')) {
+    if (n.dataset.bleed === '1') continue;
+    const r = n.getBoundingClientRect();
+    const sides = sidesOut({ left: r.left - o.left, right: r.right - o.left, top: r.top - o.top, bottom: r.bottom - o.top });
+    if (!sides.length) continue;
+    const name = n.dataset.what || `${n.className.split(' ')[0]} "${n.textContent.trim().slice(0, 24)}"`;
+    issue(`feature graphic: ${name} crosses the ${sides.join(' + ')} cutoff zone at x ${Math.round(r.left - o.left)}-${Math.round(r.right - o.left)}, `
+      + `y ${Math.round(r.top - o.top)}-${Math.round(r.bottom - o.top)} (Google may crop outside x ${SAFE.left}-${SAFE.right}, `
+      + `y ${SAFE.top}-${SAFE.bottom}): move or shrink it, or set bleed: true when the cut is on purpose`);
   }
 }
 
@@ -79,13 +94,17 @@ async function main() {
   });
   applyOrnament(ornament, block, cv, { rtl });
   await waitImages();
+  await waitLive(); // live screens (editable projects): every page in its frame ready
   safeZoneCheck(block.copy, cv);
   accentClash(cv, 'feature graphic');
   const upscale = upscaleCheck(cv);
   const { ui } = layoutCheck(cv);
-  window.__info = { upscale, ui, issues: issues() };
+  window.__info = { upscale, ui, issues: issues(), lifts: liftSamples(cv) };
   startBridge({ cv, kind: 'feature', store: 'feature', panels: [{ id: 1, n: 1 }], copies: [{ panel: 1, node: block.copy }] });
   ready();
 }
+
+// npm run vector (scripts/vector.js): this page as a layered SVG (engine/vector/), loaded only when asked
+window.__vector = (o) => import('./vector/index.js').then((m) => m.toSvg(o));
 
 main().catch(fail);

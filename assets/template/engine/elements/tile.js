@@ -14,6 +14,7 @@ import { place } from '../layout/stage.js';
 import { missingHtml } from './device.js';
 import { platformOf } from './resolve.js';
 import { at } from '../core/root.js';
+import { liveFrame } from '../core/live.js';
 
 // capture pixels from the top of the screen where the window should start, or null
 function cropTopOf(e, s) {
@@ -41,6 +42,34 @@ function positionFor(e, s, top, w, h) {
   return `center ${pct.toFixed(2)}%`;
 }
 
+// object-position ('center 30%', 'top', '20px 0') -> [fx, fy]: a share (0..1) of the free room, or { px } offsets
+const KW = { left: 0, top: 0, center: 0.5, right: 1, bottom: 1 };
+function posOf(pos) {
+  const w = String(pos || 'center').trim().split(/\s+/);
+  const [a, b] = w.length === 1 ? (['top', 'bottom'].includes(w[0]) ? ['center', w[0]] : [w[0], 'center']) : w;
+  const one = (v) => (v in KW ? KW[v] : /px$/.test(v) ? { px: parseFloat(v) } : Number.isFinite(parseFloat(v)) ? parseFloat(v) / 100 : 0.5);
+  return ['top', 'bottom'].includes(a) || ['left', 'right'].includes(b) ? [one(b), one(a)] : [one(a), one(b)];
+}
+
+// a live screen in a tile: object-fit (cover / contain) and object-position, done with the page's transform.
+// data-view = the part of the screen the tile shows, in capture px (core/checks.js: the same card twice)
+function liveTile(node, s, e, ctx, h, pos) {
+  const f = liveFrame(s, ctx);
+  const [W, H] = [e.w * ctx.fr.f, h * ctx.fr.f];
+  const [cw, ch] = s.css;
+  const z = ((e.fit || 'cover') === 'contain' ? Math.min : Math.max)(W / cw, H / ch);
+  const off = (free, v) => (typeof v === 'object' ? v.px : free * v);
+  const [fx, fy] = posOf(pos);
+  const ox = off(W - cw * z, fx);
+  const oy = off(H - ch * z, fy);
+  f.style.transform = `translate(${ox}px, ${oy}px) scale(${z})`;
+  node.appendChild(f);
+  const k = s.dpr;
+  const l = Math.max(0, -ox / z);
+  const t = Math.max(0, -oy / z);
+  node.dataset.view = [l, t, Math.min(cw, l + W / z), Math.min(ch, t + H / z)].map((v) => Math.round(v * k)).join(',');
+}
+
 export function tile(e, ctx) {
   const s = e.screen ? ctx.screen(e.screen, platformOf(e, ctx)) : null;
   const url = s ? s.url : at(e.src || '');
@@ -56,9 +85,12 @@ export function tile(e, ctx) {
   let pos = e.pos || 'center';
   const top = s && !s.missing && (e.fit || 'cover') === 'cover' ? cropTopOf(e, s) : null;
   if (top !== null) pos = positionFor(e, s, top, e.w, h) || pos;
-  node.innerHTML = s && s.missing
-    ? missingHtml(s)
-    : `<img src="${esc(url)}" alt="" style="object-fit:${e.fit || 'cover'};object-position:${pos}">`;
+  if (s && s.live) liveTile(node, s, e, ctx, h, pos);
+  else {
+    node.innerHTML = s && s.missing
+      ? missingHtml(s)
+      : `<img src="${esc(url)}" alt="" style="object-fit:${e.fit || 'cover'};object-position:${pos}">`;
+  }
   place(node, e, ctx.fr, e.w, h);
   ctx.cv.el.appendChild(node);
   return node;

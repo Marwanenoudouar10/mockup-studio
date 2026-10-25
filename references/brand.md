@@ -45,7 +45,9 @@ Audience, Category, Competitors to stand apart from, Must keep, Avoid, Mode. One
 
 ## 2. Colours: three directions from one seed
 `palette` works in OKLCH (even lightness steps across hues) and always makes three directions:
-- **Drenched:** the seed as a gradient field, white headlines, a warm accent. Loud and friendly.
+- **Drenched:** the seed as a gradient field, white headlines, a warm accent. Loud and friendly. A
+  mid-tone seed (a green or an orange that white reads on at 3:1 but not 4.5:1) is deepened just enough
+  for the white sub line; palette prints a note with both colours.
 - **Night:** a near-black field lit by the seed. Premium, focused.
 - **Paper:** warm paper with a soft mesh, the seed darkened into ink. Calm, editorial.
 
@@ -79,9 +81,17 @@ kit uses them in dark mode instead of Apple and M3 greys).
 | Badge text on accent | 4.5:1 | accent badges |
 | Accent / text on dark app surface | 4.5:1 | dark field options only: where a dark app shows them |
 
-The accent is nudged lighter or darker until it reads on the field. A light seed (yellow, mint) gets dark
-text on the field (`onField`). The colour behind the headline is estimated per field preset, so treat
-the ratios as close, not exact, and read the store image itself.
+The accent is nudged lighter (or, on a field with dark type, darker) toward 3:1 on the field, and the
+tint is the first ramp step that reads both ways (white on it, it on paper). A light seed (yellow, mint)
+gets dark text on the field (`onField`). These nudges stop at a limit, so an option can still fail a
+check: read the line palette prints for each option. The colour behind the headline is estimated per
+field preset, so treat the ratios as close, not exact, and read the store image itself.
+
+**When the recommended option fails.** Palette ends with a `next:` line when option 1 fails a check: it
+names the option that passes everything. Then: (1) recommend that option, or (2) keep the look with a
+darker `--seed` (a step or two darker in OKLCH, the same hue) and run palette again, or (3) for a light
+seed whose accent badge fails, keep the option and use no accent badges (`.badge.solid` instead). Never
+ship a failing sub line: validate does not measure contrast on the images.
 
 **Mode A: take the colours from the real app.** The client's captures go in `raw/<platform>/` before
 this step (Step 2's capture, done first in Mode A). Look in the code first: iOS
@@ -135,6 +145,21 @@ families work: a letterform monogram (the name's capital with one idea in its co
 one accent shape, no strokes or transforms, `textLength`, title and desc) and copy-paste recipes are in the
 project's `brand/README.md`; `npm run brand -- logos` checks the wordmark width and the viewBox.
 
+**The quick path** (no logo step: the client has none and wants none drawn, a fast or low-budget job):
+`npm run brand -- apply --logo wordmark` makes `logo-options/wordmark.svg` (the name in the display font,
+its width measured, plus one accent dot) and `wordmark.mark.svg` (the initial as outlines plus the dot),
+then applies them like any option, so the panels, the boards and the store icons have a logo. Run it after
+the fonts are applied (it uses the display face and the headline weight); a hand-made file of that name is
+never overwritten. Say in the delivery note that it is a placeholder lockup, not a designed logo.
+Without any logo, panels with `logo: true` set the name as text and warn, and `npm run icons` skips the
+icons with a warning (validate lists them as missing).
+
+**A pale accent on paper.** An accent under 3:1 on paper (common with Drenched palettes) would vanish in
+the logo's accent shapes there: the brand board's paper lockup, the logo options' "On paper" tile, the dark
+`logo.png` and the light field presets draw those shapes in the accent deepened to 3:1 (same hue; palette
+and board print a note with the colour). A brand that wants another colour there sets `--logo-accent` on
+that field in `brand/theme.css`.
+
 **The icon** is derived from the chosen symbol by `apply --logo <id>` (`--icon-style gradient | solid |
 night | paper | ink`, `--icon-scale 0.56`; a hand-drawn `<id>.icon.svg` is copied and kept). Accent
 shapes the tile's own colour would hide turn paper or ink by themselves. It must work as a full-bleed square that each store masks: keep what
@@ -174,12 +199,15 @@ pair, a UI card, and a store-image thumbnail made by the real engine. It also ex
   another capture (`--phone home`, default: the first other one), so the Interface card is not also in it.
 
 Approval means: the person said yes to this board. Write "approved" in the brief's decision table. A
-later change of colour or font goes through `apply` again, then `npm run screens` (Mode B) and
-`npm run export`.
+later change of colour or font goes through `apply` again, then `npm run screens` (Mode B: an editable
+project's live screens follow the tokens by themselves, but the board and Mockup Studio read the
+captures) and `npm run export`. Edits that name a token (`"color": "accent"` in `edits.json`) follow too;
+a hex colour in an edit does not.
 
 ## How the tokens reach every image
 `brand/tokens.json` -> `studio.config.js` (`brand.tokens`) -> store images, feature graphic, icons;
-and -> `screens/*.html` (`<meta name="kit-tokens">`) -> mock screens. A value set in `studio.config.js`
+and -> `screens/*.html` (`<meta name="kit-tokens">`) -> mock screens (live in an editable project,
+captured in a screenshots one). A value set in `studio.config.js`
 (`brand.colors.accent`, `brand.fonts.display`, `brand.field`) wins over its token, on purpose; `apply`
 lists every such override. Never hard-code brand colours in `screens/app.css` or the config.
 Preview any palette option on a live image: `/engine/panel.html?panel=1&tokens=out/brand/palette/option-2.tokens.json`.

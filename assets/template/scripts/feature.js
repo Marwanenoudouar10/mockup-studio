@@ -6,8 +6,9 @@ import path from 'node:path';
 import { flattenPng } from './lib/png.js';
 import { parseArgs, list, loadConfig, outDir, rel, isMain, fail } from './lib/cli.js';
 import { openSession, capture } from './lib/session.js';
-import { printFile, scaleOf, storeDir } from './render.js';
+import { printFile, scaleOf, storeDir, pageFlags } from './render.js';
 import { recordQuality } from './lib/report.js';
+import { liftEdgeIssues } from './lib/lift-edge.js';
 
 export async function runFeature(session, cfg, cfgRel, flags = {}) {
   if (!cfg.feature) {
@@ -19,16 +20,17 @@ export async function runFeature(session, cfg, cfgRel, flags = {}) {
   const report = {};
   for (const locale of locales) {
     const t0 = Date.now();
-    const [b] = await capture(session, `engine/feature.html?config=${encodeURIComponent(cfgRel)}&locale=${locale}`, { width: 1024, height: 500, dpr: scale });
+    const [b] = await capture(session, `engine/feature.html?config=${encodeURIComponent(cfgRel)}&locale=${locale}${pageFlags(flags)}`, { width: 1024, height: 500, dpr: scale });
     const info = await session.info();
     const dir = storeDir(flags, locale, 'playstore');
     fs.mkdirSync(dir, { recursive: true });
     const file = path.join(dir, 'feature-graphic.png');
     const png = flattenPng(b);
     fs.writeFileSync(file, png);
-    printFile(file, png, Date.now() - t0, session.drain());
+    const edges = liftEdgeIssues(png, info && info.lifts, { scale }); // a card that dissolves into its field
+    printFile(file, png, Date.now() - t0, [...session.drain(), ...edges]);
     report[rel(file)] = { scale, upscale: (info && info.upscale) || [], ui: info && info.ui ? !!info.ui[0] : null,
-      issues: ((info && info.issues) || []).map((x) => x.text) };
+      issues: [...((info && info.issues) || []).map((x) => x.text), ...edges] };
   }
   recordQuality(outDir(flags), report);
   return locales.length;

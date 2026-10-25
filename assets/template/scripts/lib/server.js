@@ -2,8 +2,11 @@
 // Pages are always opened over http so they can use ES modules, fetch() and node_modules fonts.
 // Guards: the Host header must name this server (no DNS rebinding while `npm run preview` runs), and the
 // login files of `npm run capture` (cookies*.json, headers*.json) are never served.
-// GET /raw/index.json is virtual: every file under raw/, so the pages find screens without probing; a
-// missing layout.json (no Store Studio moves yet) answers 204, so the browser console stays free of 404s.
+// GET /raw/index.json is virtual: every file under raw/, so the pages find screens without probing;
+// GET /screens/index.json too: the mock screen pages and their kit-sizes (scripts/lib/pages.js), for the live
+// screens of an editable project. A missing layout.json or edits.json (no Mockup Studio moves or edits yet)
+// answers 204, so the browser console stays free of 404s. node_modules/ (fonts) may be cached for an hour:
+// every live screen is its own page, and a set loads the same font files many times.
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -40,6 +43,29 @@ export function rawFiles(root, dir = 'raw', depth = 3) {
     ? rawFiles(root, `${dir}/${d.name}`, depth - 1) : [`${dir}/${d.name}`]));
 }
 
+// the mock screen pages: { files: ['screens/home.html', 'screens/web/journal.html' ...], sizes: { page: [..] } }
+export function screenPages(root) {
+  const dir = path.join(root, 'screens');
+  const files = [];
+  const sizes = {};
+  if (!fs.existsSync(dir)) return { files, sizes };
+  for (const d of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (d.name.startsWith('.') || d.name === 'kit') continue;
+    if (d.isFile() && d.name.endsWith('.html')) files.push(`screens/${d.name}`);
+    if (!d.isDirectory()) continue;
+    for (const f of fs.readdirSync(path.join(dir, d.name))) {
+      if (!f.endsWith('.html') || f.startsWith('.')) continue;
+      const rel = `screens/${d.name}/${f}`;
+      files.push(rel);
+      const m = fs.readFileSync(path.join(root, rel), 'utf8').match(/<meta\s+name="kit-sizes"\s+content="([^"]*)"/);
+      if (m) sizes[rel] = m[1].split(/[\s,]+/).filter(Boolean);
+    }
+  }
+  return { files: files.sort(), sizes };
+}
+
+const OPTIONAL = /(^|[/.])(layout|edits)\.json$/; // Mockup Studio files: none yet = an empty answer
+
 export function serve(root, { port = 0, host = '127.0.0.1', home = '/engine/gallery.html' } = {}) {
   const base = path.resolve(root);
   let bound = 0;
@@ -55,8 +81,8 @@ export function serve(root, { port = 0, host = '127.0.0.1', home = '/engine/gall
       res.writeHead(302, { Location: home });
       return res.end();
     }
-    if (rel === '/raw/index.json') {
-      const body = JSON.stringify({ files: rawFiles(base) });
+    if (rel === '/raw/index.json' || rel === '/screens/index.json') {
+      const body = JSON.stringify(rel === '/raw/index.json' ? { files: rawFiles(base) } : screenPages(base));
       res.writeHead(200, { 'Content-Type': TYPES['.json'], 'Cache-Control': 'no-store' });
       return res.end(req.method === 'HEAD' ? undefined : body);
     }
@@ -65,7 +91,7 @@ export function serve(root, { port = 0, host = '127.0.0.1', home = '/engine/gall
     if (inside.startsWith('..') || path.isAbsolute(inside)) return send(res, 403, 'forbidden');
     if (SECRET.test(path.basename(file))) return send(res, 403, 'forbidden: login file');
     fs.stat(file, (err, st) => {
-      if ((err || !st.isFile()) && /(^|[/.])layout\.json$/.test(rel)) { // no moves yet: an empty answer, not a 404
+      if ((err || !st.isFile()) && OPTIONAL.test(rel)) { // no moves or edits yet: an empty answer, not a 404
         res.writeHead(204, { 'Cache-Control': 'no-store' });
         return res.end();
       }
@@ -73,7 +99,7 @@ export function serve(root, { port = 0, host = '127.0.0.1', home = '/engine/gall
       res.writeHead(200, {
         'Content-Type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream',
         'Content-Length': st.size,
-        'Cache-Control': 'no-store',
+        'Cache-Control': /^\/node_modules\//.test(rel) ? 'max-age=3600' : 'no-store',
       });
       if (req.method === 'HEAD') return res.end();
       fs.createReadStream(file).pipe(res);

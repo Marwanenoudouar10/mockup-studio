@@ -1,26 +1,24 @@
-// Store Studio: every store-screenshots project, live, on one canvas. Preview and drag only.
+// Mockup Studio: every mockup-studio project, live, on one canvas. Preview, drag and (editable projects) edit.
 //   npm start -- [projects folder | project path ...] [--port 4400] [--forget <slug>] [--reset] [--state file]
 // Paths are remembered in a per-user file (never in the skill folder, which may be shared or published):
-//   ~/.config/store-studio/workspace.json ($XDG_CONFIG_HOME, or %APPDATA% on Windows), or --state <file>.
+//   ~/.config/mockup-studio/workspace.json ($XDG_CONFIG_HOME, or %APPDATA% on Windows), or --state <file>
+//   (server/state.js; a list from the old ~/.config/store-studio/ is copied over once).
 // A plain `npm start` then opens the same projects next time.
 import path from 'node:path';
-import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { Registry, discover } from './registry.js';
 import { createApp } from './app.js';
+import { defaultState, migrateState } from './state.js';
 
-export function defaultState(env = process.env) {
-  const base = env.XDG_CONFIG_HOME || (process.platform === 'win32' && env.APPDATA) || path.join(os.homedir(), '.config');
-  return path.join(base, 'store-studio', 'workspace.json');
-}
+export { defaultState };
 
 function parseArgs(argv) {
-  const out = { paths: [], port: 4400, state: defaultState() };
+  const out = { paths: [], port: 4400, state: defaultState(), ownState: false };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--port') out.port = Number(argv[++i]);
     else if (a.startsWith('--port=')) out.port = Number(a.slice(7));
-    else if (a === '--state') out.state = path.resolve(argv[++i]);
+    else if (a === '--state') { out.state = path.resolve(argv[++i]); out.ownState = true; }
     else if (a === '--forget') out.forget = argv[++i];
     else if (a === '--reset') out.reset = true;
     else if (a === '--help' || a === '-h') out.help = true;
@@ -37,6 +35,7 @@ export async function start(argv, { log = console.log } = {}) {
     return null;
   }
   if (!Number.isInteger(args.port) || args.port < 0 || args.port > 65535) throw new Error(`--port ${args.port}: not a port`);
+  if (!args.ownState) migrateState(args.state, { log });
   const registry = new Registry(args.state);
   if (args.reset) { registry.projects = []; registry.folders = []; }
   if (args.forget && !registry.forget(args.forget)) log(`  note: no project "${args.forget}" to forget`);
@@ -59,7 +58,7 @@ export async function start(argv, { log = console.log } = {}) {
     port = await app.listen(0);
   }
   const url = `http://127.0.0.1:${port}/`;
-  log(`\n  Store Studio  ->  ${url}\n`);
+  log(`\n  Mockup Studio  ->  ${url}\n`);
   if (!live.length) log('  no projects yet: npm start -- <folder with studio.config.js, or a folder of projects>\n');
   for (const p of live) log(`  ${p.slug.padEnd(22)} ${path.relative(process.cwd(), p.root) || '.'}`);
   log('\n  Watching their files. Ctrl+C to stop.\n');

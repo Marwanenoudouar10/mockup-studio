@@ -1,4 +1,9 @@
 {
+  "_same": [
+    "Brimpage",
+    "Plus",
+    "min"
+  ],
   "es": {
     "Good morning, Sam": "Buenos días, Sam",
     "Tuesday, May 14": "Martes, 14 de mayo",
@@ -130,7 +135,8 @@
     "Export everything": "Exportar todo",
     "PDF or plain text, any time": "PDF o texto, cuando quieras",
     "Works offline": "Funciona sin conexión",
-    "No account needed. Your pages stay on this phone until you turn sync on.": "Sin cuenta. Tus páginas se quedan en este móvil hasta que activas la sincronización."
+    "No account needed. Your pages stay on this phone until you turn sync on.": "Sin cuenta. Tus páginas se quedan en este móvil hasta que activas la sincronización.",
+    "+1.2k": "+1,2k"
   },
   "ar": {
     "Good morning, Sam": "صباح الخير يا سام",
@@ -214,6 +220,7 @@
     "PDF or plain text, any time": "PDF أو نص عادي، متى شئت",
     "Works offline": "يعمل دون اتصال",
     "No account needed. Your pages stay on this phone until you turn sync on.": "لا حاجة إلى حساب. تبقى صفحاتك على هذا الهاتف حتى تفعّل المزامنة.",
-    "2 min": "دقيقتان"
+    "2 min": "دقيقتان",
+    "6.4k": "6.4k"
   }
 }

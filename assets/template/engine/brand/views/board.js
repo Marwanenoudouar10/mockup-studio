@@ -4,7 +4,7 @@
 // Everything is read from the files the engine will use (tokens, logo, mark, icon), not redrawn.
 import { graphic } from '../../core/assets.js';
 import { applyColors, loadFonts } from '../../core/theme.js';
-import { contrast, onColor, level } from '../../../scripts/brand/lib/color.js';
+import { contrast, onColor, level, accentOnPaper } from '../../../scripts/brand/lib/color.js';
 import { el, esc, page, swatch, swatchKeys, label, iconShape, today } from '../ui.js';
 import { miniPanel } from '../thumb.js';
 import { at } from '../../core/root.js';
@@ -109,7 +109,10 @@ export async function render(cfg, data) {
   const hero = tile('hero', 'Primary lockup');
   hero.style.background = c.paper;
   const logo = s.logo ? b.logo : null;
-  hero.append(await logoTile(logo, 'hero', c.ink, '62%', s.name || b.name));
+  const heroLogo = await logoTile(logo, 'hero', c.ink, '62%', s.name || b.name);
+  const onPaper = accentOnPaper(c); // a pale accent would vanish on paper: its shapes take a colour that reads
+  if (onPaper) heroLogo.style.setProperty('--accent', onPaper);
+  hero.append(heroLogo);
   if (s.personality && s.personality.length) hero.append(el('div', 'bb-words', s.personality.map(esc).join('<i></i>')));
   const rev = reversedOf(data.reversed, field, c);
   const reversed = tile('reversed', rev.title);

@@ -1,6 +1,7 @@
-// Test helpers on the project side: keep its layout.json / notes.json safe, run its renders, compare PNGs.
-// Uses the project's own node_modules (puppeteer-core, pngjs), so Store Studio itself needs no dependency.
+// Test helpers on the project side: keep its layout.json / notes.json / edits.json safe, run its scripts, compare PNGs.
+// Uses the project's own node_modules (puppeteer-core, pngjs), so Mockup Studio itself needs no dependency.
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
@@ -14,7 +15,7 @@ export function projectTools(root) {
   } catch {
     throw new Error(`run npm install in ${root} first (the test uses its puppeteer-core and pngjs)`);
   }
-  const files = ['layout.json', 'notes.json'];
+  const files = ['layout.json', 'notes.json', 'edits.json'];
   const saved = {};
 
   return {
@@ -49,21 +50,26 @@ export function projectTools(root) {
       return true;
     },
 
-    // npm run render in the project, sequential (its own single Chrome)
-    render(out, args = []) {
-      const r = spawnSync(process.execPath, ['scripts/render.js', '--out', out, ...args], { cwd: root, encoding: 'utf8' });
-      if (r.status !== 0) throw new Error(`render failed:\n${r.stdout}\n${r.stderr}`);
+    // npm run <name> in the project, sequential (each its own single Chrome)
+    script(name, args = []) {
+      const r = spawnSync(process.execPath, [`scripts/${name}.js`, ...args], { cwd: root, encoding: 'utf8', maxBuffer: 64 << 20 });
+      if (r.status !== 0) throw new Error(`${name} failed:\n${r.stdout}\n${r.stderr}`);
       return r.stdout;
     },
+    render(out, args = []) {
+      return this.script('render', ['--out', out, ...args]);
+    },
 
-    // pixels that differ between two PNGs, and their bounding box
-    diff(a, b) {
+    // pixels that differ between two PNGs, and their bounding box; rect (image px { cx, cy, w, h }): only there
+    diff(a, b, rect = null) {
       const A = PNG.sync.read(fs.readFileSync(path.join(root, a)));
       const B = PNG.sync.read(fs.readFileSync(path.join(root, b)));
       if (A.width !== B.width || A.height !== B.height) throw new Error(`${a} and ${b} differ in size`);
       let n = 0;
       const box = { x0: Infinity, y0: Infinity, x1: -1, y1: -1 };
+      const inRect = (x, y) => !rect || (Math.abs(x - rect.cx) <= rect.w / 2 && Math.abs(y - rect.cy) <= rect.h / 2);
       for (let i = 0; i < A.data.length; i += 4) {
+        if (rect && !inRect((i / 4) % A.width, Math.floor(i / 4 / A.width))) continue;
         const d = Math.abs(A.data[i] - B.data[i]) + Math.abs(A.data[i + 1] - B.data[i + 1]) + Math.abs(A.data[i + 2] - B.data[i + 2]);
         if (d <= 24) continue;
         n++;
@@ -87,4 +93,18 @@ export async function until(fn, what, timeout = 8000) {
     if (Date.now() - t0 > timeout) throw new Error(`timed out waiting for ${what}`);
     await new Promise((r) => setTimeout(r, 50));
   }
+}
+
+// a temporary copy of a project (the template's demo by default in test/e2e.js), so a test never writes into the
+// original: its node_modules is a symlink to the original's, its out/, final/ and Studio files are left out.
+// KEEP=1 keeps the copy (its path is printed).
+export function tempCopy(src) {
+  if (!fs.existsSync(path.join(src, 'node_modules'))) throw new Error(`run npm install in ${src} first`);
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'mockup-studio-e2e-'));
+  for (const e of fs.readdirSync(src)) {
+    if (['node_modules', 'final', 'out', '.git'].includes(e) || /^(layout|edits|notes)\.json$/.test(e)) continue;
+    fs.cpSync(path.join(src, e), path.join(root, e), { recursive: true });
+  }
+  fs.symlinkSync(path.join(src, 'node_modules'), path.join(root, 'node_modules'), 'dir');
+  return { root, rm: () => (process.env.KEEP ? console.log(`  kept ${root}`) : fs.rmSync(root, { recursive: true, force: true })) };
 }
